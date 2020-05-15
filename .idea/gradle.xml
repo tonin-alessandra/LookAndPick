@@ -10,6 +10,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/sdk-audio-1.190.0" />
+            <option value="$PROJECT_DIR$/sdk-base-1.200.0" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

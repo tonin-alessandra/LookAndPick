@@ -1,2 +1,2 @@
 rootProject.name='LookAndPick'
-include ':app'
+include ':app', ':sdk-base-1.200.0', ':sdk-audio-1.190.0'
