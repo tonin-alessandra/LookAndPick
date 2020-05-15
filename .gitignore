@@ -165,3 +165,6 @@ fabric.properties
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
+.idea/gradle.xml
+.idea/misc.xml
+.idea/misc.xml
