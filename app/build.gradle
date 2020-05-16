@@ -20,6 +20,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    ndkVersion "21.1.6352462"
 
 }
 
@@ -34,7 +35,5 @@ dependencies {
 
     // Required for all Google VR apps
     implementation project(path: ':sdk-base-1.200.0')
-    // Adds Google VR spatial audio support
-    implementation project(path: ':sdk-audio-1.190.0')
 
 }
