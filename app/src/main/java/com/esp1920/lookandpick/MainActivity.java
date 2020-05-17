@@ -130,6 +130,20 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        camera = new float[16];
+        view = new float[16];
+        modelViewProjection = new float[16];
+        modelView = new float[16];
+        headView = new float[16];
+
+        // Target object first appears directly in front of user.
+        targetPosition = new float[] {0.0f, 0.0f, -MIN_TARGET_DISTANCE};
+        tempPosition = new float[4];
+        headRotation = new float[4];
+        modelTarget = new float[16];
+        modelRoom = new float[16];
+
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
 
@@ -137,6 +151,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         setContentView(R.layout.activity_main);
         GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
 
+        // Chose the EGL config to set element size for RGB, Alpha (opacity), depth and stencil
         gvrView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
         gvrView.setRenderer(this);
@@ -166,6 +181,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onRendererShutdown() {
+        floorHeight.close();
     }
 
     @Override
@@ -175,17 +191,71 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Creates the buffers we use to store information about the 3D world.
      *
-     * <p>OpenGL doesn't use Java arrays, but rather needs data in a format it can understand.
+     * OpenGL doesn't use Java arrays, but rather needs data in a format it can understand.
      * Hence we use ByteBuffers.
      *
      * @param config The EGL configuration used when creating the surface.
      */
     @Override
     public void onSurfaceCreated(EGLConfig config) {
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+        objectProgram = Util.compileProgram(OBJECT_VERTEX_SHADER_CODE, OBJECT_FRAGMENT_SHADER_CODE);
+
+        objectPositionParam = GLES20.glGetAttribLocation(objectProgram, "a_Position");
+        objectUvParam = GLES20.glGetAttribLocation(objectProgram, "a_UV");
+        objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
+
+        // (per una spiegazione di queste due operazioni ho anche aggiunto un file nel drive)
+        // modelRoom is a matrix that contains the coordinates of the room based on user's location
+        Matrix.setIdentityM(modelRoom, 0);
+        Matrix.translateM(modelRoom, 0, 0, DEFAULT_FLOOR_HEIGHT, 0);
+
+        // Avoid any delays during start-up due to decoding of sound files.
+        new Thread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        // Start spatial audio playback of OBJECT_SOUND_FILE at the model position. The
+                        // returned sourceId handle is stored and allows for repositioning the sound object
+                        // whenever the target position changes.
+                        gvrAudioEngine.preloadSoundFile(OBJECT_SOUND_FILE);
+                        sourceId = gvrAudioEngine.createSoundObject(OBJECT_SOUND_FILE);
+                        gvrAudioEngine.setSoundObjectPosition(
+                                sourceId, targetPosition[0], targetPosition[1], targetPosition[2]);
+                        gvrAudioEngine.playSound(sourceId, true /* looped playback */);
+                        // Preload an unspatialized sound to be played on a successful trigger on the
+                        // target.
+                        gvrAudioEngine.preloadSoundFile(SUCCESS_SOUND_FILE);
+                    }
+                })
+                .start();
+
+        updateTargetPosition();
+
+        try {
+            room = new TexturedMesh(this, "graphics/CubeRoom.obj", objectPositionParam, objectUvParam);
+            roomTex = new Texture(this, "graphics/CubeRoom_BakedDiffuse.png");
+            addTargets(objectPositionParam, objectUvParam);
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to initialize objects", e);
+        }
+
+        // Chose randomly the first object to show
+        curTargetObject = random.nextInt(TARGET_MESH_COUNT);
     }
 
     /** Updates the target object position. */
     private void updateTargetPosition() {
+        Matrix.setIdentityM(modelTarget, 0);
+        Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
+
+        // Update the sound location to match it with the new target position.
+        if (sourceId != GvrAudioEngine.INVALID_ID) {
+            gvrAudioEngine.setSoundObjectPosition(
+                    sourceId, targetPosition[0], targetPosition[1], targetPosition[2]);
+        }
+        Util.checkGlError("updateTargetPosition");
     }
 
     /**
@@ -236,5 +306,24 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     private boolean isLookingAtTarget() {
         return false;
+    }
+
+    private void addTargets(int objectPositionParam, int objectUvParam) throws java.io.IOException{
+        targetObjectMeshes = new ArrayList<>();
+        targetObjectNotSelectedTextures = new ArrayList<>();
+        targetObjectSelectedTextures = new ArrayList<>();
+        //NB: aggiornare variabile TARGET_MESH_COUNT
+        targetObjectMeshes.add(
+                new TexturedMesh(this, "graphics/Icosahedron.obj.obj", objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/Icosahedron_Blue_BakedDiffuse.png.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/.png"));
+        targetObjectMeshes.add(
+                new TexturedMesh(this, "graphics/QuadSphere.obj", objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Blue_BakedDiffuse.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Pink_BakedDiffuse.png"));
+        targetObjectMeshes.add(
+                new TexturedMesh(this, "graphics/TriSphere.obj.obj", objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/TriSphere_Blue_BakedDiffuse.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/TriSphere_Blue_BakedDiffuse.png"));
     }
 }
