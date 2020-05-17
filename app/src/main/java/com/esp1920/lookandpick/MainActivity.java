@@ -47,8 +47,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float MIN_TARGET_DISTANCE = 3.0f;
     private static final float MAX_TARGET_DISTANCE = 3.5f;
 
-    //private static final String OBJECT_SOUND_FILE = "audio/HelloVR_Loop.ogg";
-    //private static final String SUCCESS_SOUND_FILE = "audio/HelloVR_Activation.ogg";
+    private static final String OBJECT_SOUND_FILE = "audio/HelloVR_Loop.ogg";
+    private static final String SUCCESS_SOUND_FILE = "audio/HelloVR_Activation.ogg";
 
     private static final float DEFAULT_FLOOR_HEIGHT = -1.6f;
 
@@ -130,19 +130,38 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
 
     public void initializeGvrView() {
+        setContentView(R.layout.activity_main);
+        GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
+
+        gvrView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
+
+        gvrView.setRenderer(this);
+        gvrView.setTransitionViewEnabled(true);
+        gvrView.enableCardboardTriggerEmulation();
+        if (gvrView.setAsyncReprojectionEnabled(true)) {
+            // Async reprojection decouples the app framerate from the display framerate,
+            // allowing immersive interaction even at the throttled clockrates set by
+            // sustained performance mode.
+            AndroidCompat.setSustainedPerformanceMode(this, true);
+        }
+        setGvrView(gvrView);
+        gvrProperties = gvrView.getGvrApi().getCurrentProperties();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        gvrAudioEngine.pause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        gvrAudioEngine.resume();
     }
 
     @Override
@@ -216,5 +235,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @return true if the user is looking at the target object.
      */
     private boolean isLookingAtTarget() {
+        return false;
     }
 }
