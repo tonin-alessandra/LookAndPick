@@ -315,8 +315,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         //NB: aggiornare variabile TARGET_MESH_COUNT
         targetObjectMeshes.add(
                 new TexturedMesh(this, "graphics/Icosahedron.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/Icosahedron_Blue_BakedDiffuse.png.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/.png"));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/Icosahedron_Blue_BakedDiffuse.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Pink_BakedDiffuse.png"));
         targetObjectMeshes.add(
                 new TexturedMesh(this, "graphics/QuadSphere.obj", objectPositionParam, objectUvParam));
         targetObjectNotSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Blue_BakedDiffuse.png"));
