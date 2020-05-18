@@ -314,7 +314,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectSelectedTextures = new ArrayList<>();
         //NB: aggiornare variabile TARGET_MESH_COUNT
         targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/Icosahedron.obj.obj", objectPositionParam, objectUvParam));
+                new TexturedMesh(this, "graphics/Icosahedron.obj", objectPositionParam, objectUvParam));
         targetObjectNotSelectedTextures.add(new Texture(this, "graphics/Icosahedron_Blue_BakedDiffuse.png.png"));
         targetObjectSelectedTextures.add(new Texture(this, "graphics/.png"));
         targetObjectMeshes.add(
@@ -322,7 +322,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectNotSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Blue_BakedDiffuse.png"));
         targetObjectSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Pink_BakedDiffuse.png"));
         targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/TriSphere.obj.obj", objectPositionParam, objectUvParam));
+                new TexturedMesh(this, "graphics/TriSphere.obj", objectPositionParam, objectUvParam));
         targetObjectNotSelectedTextures.add(new Texture(this, "graphics/TriSphere_Blue_BakedDiffuse.png"));
         targetObjectSelectedTextures.add(new Texture(this, "graphics/TriSphere_Blue_BakedDiffuse.png"));
     }
