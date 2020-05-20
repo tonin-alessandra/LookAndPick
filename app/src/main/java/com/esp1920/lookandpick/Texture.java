@@ -34,6 +34,15 @@ import java.io.IOException;
         GLES20.glTexParameteri(
                 GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+        //creates a bitmap from the texture given
+        Bitmap textureBitmap = BitmapFactory.decodeStream(context.getAssets().open(texturePath));
+
+        //specifies the texture for the current texture unit and generates a MIP map
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
+        textureBitmap.recycle();
+        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+
     }
 
     /** Binds the texture to GL_TEXTURE0. */
