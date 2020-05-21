@@ -151,7 +151,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         setContentView(R.layout.activity_main);
         GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
 
-        // Chose the EGL config to set element size for RGB, Alpha (opacity), depth and stencil
+        // Chose the EGL config to set element size for RGB, Alpha (opacity), depth and stencil.
         gvrView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
         gvrView.setRenderer(this);
@@ -206,8 +206,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         objectUvParam = GLES20.glGetAttribLocation(objectProgram, "a_UV");
         objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
 
-        // (per una spiegazione di queste due operazioni ho anche aggiunto un file nel drive)
-        // modelRoom is a matrix that contains the coordinates of the room based on user's location
+        // TODO: (per una spiegazione di queste due operazioni ho anche aggiunto un file nel drive)
+        // modelRoom is a matrix that contains the coordinates of the room based on user's location.
         Matrix.setIdentityM(modelRoom, 0);
         Matrix.translateM(modelRoom, 0, 0, DEFAULT_FLOOR_HEIGHT, 0);
 
@@ -234,8 +234,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         updateTargetPosition();
 
         try {
-            room = new TexturedMesh(this, "graphics/CubeRoom.obj", objectPositionParam, objectUvParam);
-            roomTex = new Texture(this, "graphics/CubeRoom_BakedDiffuse.png");
+            room = new TexturedMesh(this, "graphics/room/CubeRoom.obj", objectPositionParam, objectUvParam);
+            roomTex = new Texture(this, "graphics/room/CubeRoom_BakedDiffuse.png");
             addTargets(objectPositionParam, objectUvParam);
         } catch (IOException e) {
             Log.e(TAG, "Unable to initialize objects", e);
@@ -312,18 +312,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectMeshes = new ArrayList<>();
         targetObjectNotSelectedTextures = new ArrayList<>();
         targetObjectSelectedTextures = new ArrayList<>();
-        //NB: aggiornare variabile TARGET_MESH_COUNT
+        // TODO: aggiornare variabile TARGET_MESH_COUNT
         targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/Icosahedron.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/Icosahedron_Blue_BakedDiffuse.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Pink_BakedDiffuse.png"));
+                new TexturedMesh(this, "graphics/obj_models/Icosahedron.obj", objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/Icosahedron_Blue_BakedDiffuse.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/obj_selected_textures/QuadSphere_Pink_BakedDiffuse.png"));
         targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/QuadSphere.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Blue_BakedDiffuse.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/QuadSphere_Pink_BakedDiffuse.png"));
+                new TexturedMesh(this, "graphics/obj_models/QuadSphere.obj", objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/QuadSphere_Blue_BakedDiffuse.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/obj_selected_textures/QuadSphere_Pink_BakedDiffuse.png"));
         targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/TriSphere.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/TriSphere_Blue_BakedDiffuse.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/TriSphere_Blue_BakedDiffuse.png"));
+                new TexturedMesh(this, "graphics/obj_models/TriSphere.obj", objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/TriSphere_Blue_BakedDiffuse.png"));
+        targetObjectSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/TriSphere_Blue_BakedDiffuse.png"));
     }
 }
