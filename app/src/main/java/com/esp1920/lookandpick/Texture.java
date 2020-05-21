@@ -20,25 +20,25 @@ import java.io.IOException;
      */
     public Texture(Context context, String texturePath) throws IOException {
 
-        //generates a name for the texture and stores it in textureId
+        // Generate a name for the texture and stores it in textureId
         GLES20.glGenTextures(1, textureId, 0);
 
-        //binds texture to active texture unit and target
+        // Bind texture to active texture unit and target
         bind();
 
-        //sets wrap parameters for texture coordinates s and t
+        // Set wrap parameters for texture coordinates s and t
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
-        //sets texture minifying and magnifying functions
+        // Set texture minifying and magnifying functions
         GLES20.glTexParameteri(
                 GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 
-        //creates a bitmap from the texture given
+        // Create a bitmap from the texture given
         Bitmap textureBitmap = BitmapFactory.decodeStream(context.getAssets().open(texturePath));
 
-        //specifies the texture for the current texture unit and generates a MIP map
+        // Specify the texture for the current texture unit and generates a MIP map
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
         textureBitmap.recycle();
         GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
@@ -48,10 +48,10 @@ import java.io.IOException;
     /** Binds the texture to GL_TEXTURE0. */
     public void bind() {
 
-        //activates texture unit
+        // Activate texture unit
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-        //binds texture to two-dimensional target (face of polygon)
+        // Bind texture to two-dimensional target (face of polygon)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId[0]);
     }
 }
