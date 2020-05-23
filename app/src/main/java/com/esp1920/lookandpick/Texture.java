@@ -7,8 +7,10 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import java.io.IOException;
-
-/** A texture, meant for use with TexturedMesh. */
+/**
+ * This class has been written by Google and represents a texture, meant for use with TexturedMesh.
+ * It is taken from gvr-android-sdk-1.200 project, more precisely from sdk-hellovr sample.
+ */
 /* package */ class Texture {
     private final int[] textureId = new int[1];
 

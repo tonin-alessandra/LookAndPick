@@ -14,7 +14,10 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-/** Renders an object loaded from an OBJ file. */
+/**
+ * This class has been written by Google and renders an object loaded from an OBJ file.
+ * It is taken from gvr-android-sdk-1.200 project, more precisely from sdk-hellovr sample.
+ */
 /* package */ class TexturedMesh {
     private static final String TAG = "TexturedMesh";
 
