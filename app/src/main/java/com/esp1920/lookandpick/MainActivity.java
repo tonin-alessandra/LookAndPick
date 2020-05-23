@@ -406,7 +406,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         float yawDegrees = (random.nextFloat() - 0.5f) * 2.0f * MAX_YAW;
         float pitchRadians = (float) Math.toRadians((random.nextFloat() - 0.5f) * 2.0f * MAX_PITCH);
 
-        // Create a matrix for rotation by angle yawDegrees around the axis.
+        // Create a matrix for rotation by angle yawDegrees around the y axis.
         Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
 
         // Calculate a new random position
