@@ -15,6 +15,8 @@ import com.google.vr.sdk.base.GvrView;
 import com.google.vr.sdk.base.HeadTransform;
 import com.google.vr.sdk.base.Viewport;
 
+import com.google.vr.ndk.base.Properties.PropertyType;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -37,6 +39,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 6;
 
+    // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
     private static final float Z_FAR = 10.0f;
 
@@ -110,6 +113,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] modelView;
 
     private float[] modelTarget;
+    // modelRoom is a matrix that contains the coordinates of the room based on user's location.
     private float[] modelRoom;
 
     private float[] tempPosition;
@@ -222,7 +226,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
 
         // TODO: (per una spiegazione di queste due operazioni ho anche aggiunto un file nel drive)
-        // modelRoom is a matrix that contains the coordinates of the room based on user's location.
         Matrix.setIdentityM(modelRoom, 0);
         Matrix.translateM(modelRoom, 0, 0, DEFAULT_FLOOR_HEIGHT, 0);
 
@@ -246,6 +249,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 })
                 .start();
 
+        // Update the target position for the first time
         updateTargetPosition();
 
         Util.checkGlError("onSurfaceCreated");
@@ -266,6 +270,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Updates the target object position.
      */
     private void updateTargetPosition() {
+        // Prepare the target's matrix
         Matrix.setIdentityM(modelTarget, 0);
         Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
 
@@ -284,6 +289,26 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
+        // Build the camera matrix and apply it to the ModelView.
+        Matrix.setLookAtM(camera, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+
+        // Control if the floor height is available.
+        // If true the modelRoom matrix is prepared to be used on onDrawEye method.
+        if (gvrProperties.get(PropertyType.TRACKING_FLOOR_HEIGHT, floorHeight)) {
+            // The floor height can change each frame when tracking system detects a new floor position.
+            Matrix.setIdentityM(modelRoom, 0);
+            Matrix.translateM(modelRoom, 0, 0, floorHeight.asFloat(), 0);
+        } // else the device doesn't support floor height detection so DEFAULT_FLOOR_HEIGHT is used.
+
+        // Write into headView the transform from the camera space to the head space
+        headTransform.getHeadView(headView, 0);
+
+        // Update the 3d audio engine with the most recent head rotation.
+        headTransform.getQuaternion(headRotation, 0);
+        gvrAudioEngine.setHeadRotation(
+                headRotation[0], headRotation[1], headRotation[2], headRotation[3]);
+        // Regular update call to GVR audio engine.
+        gvrAudioEngine.update();
     }
 
     /**
@@ -293,6 +318,30 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onDrawEye(Eye eye) {
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        // The clear color doesn't matter here because it's completely obscured by
+        // the room. However, the color buffer is still cleared because it may
+        // improve performance.
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        // Apply the eye transformation to the camera.
+        Matrix.multiplyMM(view, 0, eye.getEyeView(), 0, camera, 0);
+
+        // Build the ModelView and ModelViewProjection matrices
+        // for calculating the position of the target object.
+        float[] perspective = eye.getPerspective(Z_NEAR, Z_FAR);
+
+        // Set modelViewProjection to draw the target correctly
+        // TODO: I think it is used to show the target with the same view of the user.
+        //  We should try to change in some ways these values to see if a target can be rotated.
+        Matrix.multiplyMM(modelView, 0, view, 0, modelTarget, 0);
+        Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
+        drawTarget();
+
+        // Set modelView for the room, so it's drawn in the correct location
+        Matrix.multiplyMM(modelView, 0, view, 0, modelRoom, 0);
+        Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
+        drawRoom();
     }
 
     @Override
@@ -303,6 +352,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Draw the target object.
      */
     public void drawTarget() {
+        GLES20.glUseProgram(objectProgram);
+        GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
+        if (isLookingAtTarget()) {
+            targetObjectSelectedTextures.get(curTargetObject).bind();
+        } else {
+            targetObjectNotSelectedTextures.get(curTargetObject).bind();
+        }
+        targetObjectMeshes.get(curTargetObject).draw();
     }
 
     /**
@@ -328,12 +385,51 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
+        // TODO: add a message if the user doesn't hit the target (?) (like the other project)
+
+        if (isLookingAtTarget()) {
+            successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
+            gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
+            hideTarget();
+        }
     }
 
     /**
      * Find a new random position for the target object.
      */
     private void hideTarget() {
+        float[] rotationMatrix = new float[16];
+        float[] posVec = new float[4];
+
+        // Matrix.setRotateM takes the angle in degrees, but Math.tan takes the angle in radians, so
+        // yaw is in degrees and pitch is in radians.
+        float yawDegrees = (random.nextFloat() - 0.5f) * 2.0f * MAX_YAW;
+        float pitchRadians = (float) Math.toRadians((random.nextFloat() - 0.5f) * 2.0f * MAX_PITCH);
+
+        // Create a matrix for rotation by angle yawDegrees around the axis.
+        Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
+
+        // Calculate a new random position
+        targetDistance =
+                random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
+        targetPosition = new float[] {0.0f, 0.0f, -targetDistance};
+
+        Matrix.setIdentityM(modelTarget, 0);
+        Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
+
+        //TODO: I think that the vector is [1,1,1,1] because the modelTarget matrix has the last column composed of 1. (see GDrive doc)
+        // so posVec will contain the new position after this operation
+
+        // Multiply the rotation matrix by a vector taken from modelTarget.
+        // The vector is [1,1,1,1]
+        Matrix.multiplyMV(posVec, 0, rotationMatrix, 0, modelTarget, 12);
+
+        targetPosition[0] = posVec[0];
+        targetPosition[1] = (float) Math.tan(pitchRadians) * targetDistance;
+        targetPosition[2] = posVec[2];
+
+        updateTargetPosition();
+        curTargetObject = random.nextInt(TARGET_MESH_COUNT);
     }
 
     /**
@@ -342,7 +438,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @return true if the user is looking at the target object.
      */
     private boolean isLookingAtTarget() {
-        return false;
+        // Convert object space to camera space. Use the headView from onNewFrame.
+        Matrix.multiplyMM(modelView, 0, headView, 0, modelTarget, 0);
+        Matrix.multiplyMV(tempPosition, 0, modelView, 0, POS_MATRIX_MULTIPLY_VEC, 0);
+
+        float angle = Util.angleBetweenVectors(tempPosition, FORWARD_VEC);
+        return angle < ANGLE_LIMIT;
     }
 
     /**
