@@ -7,7 +7,10 @@ import android.util.Log;
 
 import static android.opengl.GLU.gluErrorString;
 
-/** Utility functions. */
+/**
+ * This class has been written by Google and provides utility functions.
+ * It is taken from gvr-android-sdk-1.200 project, more precisely from sdk-hellovr sample.
+ */
 /* package */ class Util {
     private static final String TAG = "Util";
 
