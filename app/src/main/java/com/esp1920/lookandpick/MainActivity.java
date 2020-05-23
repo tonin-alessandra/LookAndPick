@@ -27,14 +27,14 @@ import javax.microedition.khronos.egl.EGLConfig;
  * <p>This app presents a scene consisting of a room and several floating objects. The user has to pick
  * up objects in order to earn points and get to the next level. This app is meant to be used with a
  * Cardboard viewer: to pick up objects the user must look at them and push the Cardboard trigger button.
- * COMMENTO DA MODIFICARE
+ * TODO: COMMENTO DA MODIFICARE
  * </p>
  */
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private static final String TAG = "MainActivity";
 
-    //number of objects that can be rendered
+    // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 6;
 
     private static final float Z_NEAR = 0.01f;
@@ -60,7 +60,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float MAX_PITCH = 25.0f;
 
     private static final String[] OBJECT_VERTEX_SHADER_CODE =
-            new String[] {
+            new String[]{
                     "uniform mat4 u_MVP;",
                     "attribute vec4 a_Position;",
                     "attribute vec2 a_UV;",
@@ -72,7 +72,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     "}",
             };
     private static final String[] OBJECT_FRAGMENT_SHADER_CODE =
-            new String[] {
+            new String[]{
                     "precision mediump float;",
                     "varying vec2 v_UV;",
                     "uniform sampler2D u_Texture;",
@@ -101,6 +101,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private Random random;
 
+    // Transformation matrices used to render the scene.
     private float[] targetPosition;
     private float[] camera;
     private float[] view;
@@ -114,6 +115,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] tempPosition;
     private float[] headRotation;
 
+    // Used to initialize Google VR Audio Engine.
     private GvrAudioEngine gvrAudioEngine;
     private volatile int sourceId = GvrAudioEngine.INVALID_ID;
     private volatile int successSourceId = GvrAudioEngine.INVALID_ID;
@@ -131,6 +133,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        initializeGvrView();
+
         camera = new float[16];
         view = new float[16];
         modelViewProjection = new float[16];
@@ -138,39 +142,47 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         headView = new float[16];
 
         // Target object first appears directly in front of user.
-        targetPosition = new float[] {0.0f, 0.0f, -MIN_TARGET_DISTANCE};
+        targetPosition = new float[]{0.0f, 0.0f, -MIN_TARGET_DISTANCE};
         tempPosition = new float[4];
         headRotation = new float[4];
         modelTarget = new float[16];
         modelRoom = new float[16];
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
+
+        // Makes objects appear randomly.
+        random = new Random();
     }
 
     public void initializeGvrView() {
         setContentView(R.layout.activity_main);
         GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
 
-        // Chose the EGL config to set element size for RGB, Alpha (opacity), depth and stencil.
+        // Chooses the EGL config to set element size for RGB, Alpha (opacity), depth and stencil.
         gvrView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
         gvrView.setRenderer(this);
         gvrView.setTransitionViewEnabled(true);
-        gvrView.enableCardboardTriggerEmulation();
+
+        // TODO: check -->This is not needed as it is for supporting daydream controller using the Cardboard trigger API.
+        //gvrView.enableCardboardTriggerEmulation();
+
+        // TODO: can we cancel this, since AsyncReprojection is not supported by Cardboard?
         if (gvrView.setAsyncReprojectionEnabled(true)) {
             // Async reprojection decouples the app framerate from the display framerate,
             // allowing immersive interaction even at the throttled clockrates set by
             // sustained performance mode.
             AndroidCompat.setSustainedPerformanceMode(this, true);
         }
+
         setGvrView(gvrView);
         gvrProperties = gvrView.getGvrApi().getCurrentProperties();
     }
 
     @Override
     public void onPause() {
-        super.onPause();
         gvrAudioEngine.pause();
+        super.onPause();
     }
 
     @Override
@@ -190,7 +202,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     /**
      * Creates the buffers we use to store information about the 3D world.
-     *
+     * <p>
      * OpenGL doesn't use Java arrays, but rather needs data in a format it can understand.
      * Hence we use ByteBuffers.
      *
@@ -200,10 +212,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onSurfaceCreated(EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+        // Builds a GL shader program using vertex and fragment shaders as arrays of strings
         objectProgram = Util.compileProgram(OBJECT_VERTEX_SHADER_CODE, OBJECT_FRAGMENT_SHADER_CODE);
 
         objectPositionParam = GLES20.glGetAttribLocation(objectProgram, "a_Position");
         objectUvParam = GLES20.glGetAttribLocation(objectProgram, "a_UV");
+
+        // Returns the location of the uniform variable u_MVP within the program 'objectProgram'.
         objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
 
         // TODO: (per una spiegazione di queste due operazioni ho anche aggiunto un file nel drive)
@@ -233,6 +248,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         updateTargetPosition();
 
+        Util.checkGlError("onSurfaceCreated");
+
         try {
             room = new TexturedMesh(this, "graphics/room/CubeRoom.obj", objectPositionParam, objectUvParam);
             roomTex = new Texture(this, "graphics/room/CubeRoom_BakedDiffuse.png");
@@ -241,11 +258,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.e(TAG, "Unable to initialize objects", e);
         }
 
-        // Chose randomly the first object to show
+        // Chooses randomly the first object to show.
         curTargetObject = random.nextInt(TARGET_MESH_COUNT);
     }
 
-    /** Updates the target object position. */
+    /**
+     * Updates the target object position.
+     */
     private void updateTargetPosition() {
         Matrix.setIdentityM(modelTarget, 0);
         Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
@@ -280,12 +299,28 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onFinishFrame(Viewport viewport) {
     }
 
-    /** Draw the target object. */
+    /**
+     * Draw the target object.
+     */
     public void drawTarget() {
     }
 
-    /** Draw the room. */
+    /**
+     * Draws the room using the GL shader program created before.
+     */
     public void drawRoom() {
+        GLES20.glUseProgram(objectProgram);
+        // TODO: write better this explanation!
+        /*
+          Specifies the value of a uniform matrix for the program object.
+          Uses values contained in float[16] modelViewProjection to fill a 4x4 matrix.
+          The first parameter is the location of the uniform variable to be modified (u_MVP).
+          The other is the value used to update the variable.
+        */
+        GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
+        roomTex.bind();
+        room.draw();
+        Util.checkGlError("drawRoom");
     }
 
     /**
@@ -295,7 +330,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onCardboardTrigger() {
     }
 
-    /** Find a new random position for the target object. */
+    /**
+     * Find a new random position for the target object.
+     */
     private void hideTarget() {
     }
 
@@ -308,22 +345,37 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return false;
     }
 
-    private void addTargets(int objectPositionParam, int objectUvParam) throws java.io.IOException{
+    /**
+     * Adds 3D objects to the scene.
+     *
+     * @param objectPositionParam The position attribute in the shader.
+     * @param objectUvParam       The UV attribute in the shader.
+     * @throws IOException if unable to initialize objects.
+     */
+    private void addTargets(int objectPositionParam, int objectUvParam) throws IOException {
         targetObjectMeshes = new ArrayList<>();
         targetObjectNotSelectedTextures = new ArrayList<>();
         targetObjectSelectedTextures = new ArrayList<>();
         // TODO: aggiornare variabile TARGET_MESH_COUNT
-        targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/obj_models/Icosahedron.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/Icosahedron_Blue_BakedDiffuse.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/obj_selected_textures/QuadSphere_Pink_BakedDiffuse.png"));
-        targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/obj_models/QuadSphere.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/QuadSphere_Blue_BakedDiffuse.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/obj_selected_textures/QuadSphere_Pink_BakedDiffuse.png"));
-        targetObjectMeshes.add(
-                new TexturedMesh(this, "graphics/obj_models/TriSphere.obj", objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/TriSphere_Blue_BakedDiffuse.png"));
-        targetObjectSelectedTextures.add(new Texture(this, "graphics/obj_not_selected_textures/TriSphere_Blue_BakedDiffuse.png"));
+        // TODO: check if files paths are needed
+        addObject("Icosahedron.obj", "Icosahedron_Blue_BakedDiffuse.png", "Icosahedron_Pink_BakedDiffuse.png", objectPositionParam, objectUvParam);
+        addObject("QuadSphere.obj", "QuadSphere_Blue_BakedDiffuse.png", "QuadSphere_Pink_BakedDiffuse.png", objectPositionParam, objectUvParam);
+        addObject("TriSphere.obj", "TriSphere_Blue_BakedDiffuse.png", "TriSphere_Pink_BakedDiffuse.png", objectPositionParam, objectUvParam);
+    }
+
+    /**
+     * Inizializes a 3D object with the correct texture, according to the given params.
+     *
+     * @param obj                 The obj model file path.
+     * @param notSelTexture       The path of the object's texture when the user is not looking at it.
+     * @param selTexture          The path of the object's texture when the user is looking at it.
+     * @param objectPositionParam The position attribute in the shader.
+     * @param objectUvParam       The UV attribute in the shader.
+     * @throws IOException if unable to initialize objects.
+     */
+    private void addObject(String obj, String notSelTexture, String selTexture, int objectPositionParam, int objectUvParam) throws IOException {
+        targetObjectMeshes.add(new TexturedMesh(this, obj, objectPositionParam, objectUvParam));
+        targetObjectNotSelectedTextures.add(new Texture(this, notSelTexture));
+        targetObjectSelectedTextures.add(new Texture(this, selTexture));
     }
 }
