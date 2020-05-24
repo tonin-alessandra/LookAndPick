@@ -37,19 +37,18 @@ import java.nio.ShortBuffer;
      */
     public TexturedMesh(Context context, String objFilePath, int positionAttrib, int uvAttrib)
             throws IOException {
-
-        // Get renderable obj from .obj file
+        // Gets renderable obj from .obj file
         InputStream objInputStream = context.getAssets().open(objFilePath);
         Obj obj = ObjUtils.convertToRenderable(ObjReader.read(objInputStream));
         objInputStream.close();
 
-        // Get vertex indices of the faces of the obj (3 vertices for each face: triangles)
+        // Gets vertex indices of the faces of the obj (3 vertices for each face: triangles)
         IntBuffer intIndices = ObjData.getFaceVertexIndices(obj, 3);
 
         vertices = ObjData.getVertices(obj);
         uv = ObjData.getTexCoords(obj, 2);
 
-        // Convert int indices to shorts (GLES doesn't support int indices)
+        // Converts int indices to shorts (GLES doesn't support int indices)
         indices =
                 ByteBuffer.allocateDirect(2 * intIndices.limit())
                         .order(ByteOrder.nativeOrder())
@@ -58,7 +57,7 @@ import java.nio.ShortBuffer;
             indices.put((short) intIndices.get());
         }
 
-        // Make buffer ready for reading the data it contains, sets the position to zero
+        // Makes buffer ready for reading the data it contains, sets the position to zero
         indices.rewind();
 
         this.positionAttrib = positionAttrib;
@@ -70,20 +69,19 @@ import java.nio.ShortBuffer;
      * texture should be bound to GL_TEXTURE0.
      */
     public void draw() {
-
         GLES20.glEnableVertexAttribArray(positionAttrib);
 
-        // Specify from where and how to read vertex attributes
+        // Specifies source and format of vertex attributes
         // positionAttrib is the source buffer
         // vertices is the offset of the first attribute in positionAttrib
         GLES20.glVertexAttribPointer(positionAttrib, 3, GLES20.GL_FLOAT, false, 0, vertices);
 
         GLES20.glEnableVertexAttribArray(uvAttrib);
 
-        // Specify from where and how to read attributes regarding UV coordinates
+        // Specifies source and format of attributes regarding UV coordinates
         GLES20.glVertexAttribPointer(uvAttrib, 2, GLES20.GL_FLOAT, false, 0, uv);
 
-        // Draw the triangle mesh
+        // Draws the triangle mesh
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.limit(), GLES20.GL_UNSIGNED_SHORT, indices);
     }
 }

@@ -51,22 +51,25 @@ import static android.opengl.GLU.gluErrorString;
      */
     public static int compileProgram(String[] vertexCode, String[] fragmentCode) {
         checkGlError("Start of compileProgram");
-        // prepare shaders and OpenGL program
+
+        // Prepares vertex shader
         int vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vertexShader, TextUtils.join("\n", vertexCode));
         GLES20.glCompileShader(vertexShader);
         checkGlError("Compile vertex shader");
 
+        // Prepares fragment shader
         int fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fragmentShader, TextUtils.join("\n", fragmentCode));
         GLES20.glCompileShader(fragmentShader);
         checkGlError("Compile fragment shader");
 
+        // Prepares program
         int program = GLES20.glCreateProgram();
         GLES20.glAttachShader(program, vertexShader);
         GLES20.glAttachShader(program, fragmentShader);
 
-        // Link and check for errors.
+        // Links program and checks for errors
         GLES20.glLinkProgram(program);
         int[] linkStatus = new int[1];
         GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0);
@@ -85,16 +88,33 @@ import static android.opengl.GLU.gluErrorString;
     /**
      * Computes the angle between two vectors; see
      * https://en.wikipedia.org/wiki/Vector_projection#Definitions_in_terms_of_a_and_b.
+     *
+     * @param vec1 first vector
+     * @param vec2 second vector
+     * @return angle between vec1 and vec2 expressed in radiants
      */
     public static float angleBetweenVectors(float[] vec1, float[] vec2) {
         float cosOfAngle = dotProduct(vec1, vec2) / (vectorNorm(vec1) * vectorNorm(vec2));
         return (float) Math.acos(Math.max(-1.0f, Math.min(1.0f, cosOfAngle)));
     }
 
+    /**
+     * Computes the dot product between vectors
+     *
+     * @param vec1 vector with 3 entries
+     * @param vec2 vector with 3 entries
+     * @return dot product between vec1 and vec2
+     */
     private static float dotProduct(float[] vec1, float[] vec2) {
         return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
     }
 
+    /**
+     * Computes the norm of a vector
+     *
+     * @param vec vector with 3 entries
+     * @return norm of vec
+     */
     private static float vectorNorm(float[] vec) {
         return Matrix.length(vec[0], vec[1], vec[2]);
     }
