@@ -37,11 +37,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final String TAG = "MainActivity";
 
     // Number of objects that can be rendered.
-    private static final int TARGET_MESH_COUNT = 6;
+    private static final int TARGET_MESH_COUNT = 3;
 
     // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
-    private static final float Z_FAR = 10.0f;
+    private static final float Z_FAR = 20.0f;
 
     // Convenience vector for extracting the position from a matrix via multiplication.
     private static final float[] POS_MATRIX_MULTIPLY_VEC = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -255,8 +255,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Util.checkGlError("onSurfaceCreated");
 
         try {
-            room = new TexturedMesh(this, "graphics/room/CubeRoom.obj", objectPositionParam, objectUvParam);
-            roomTex = new Texture(this, "graphics/room/CubeRoom_BakedDiffuse.png");
+            room = new TexturedMesh(this, "graphics/room/BigCubeRoom.obj", objectPositionParam, objectUvParam);
+            roomTex = new Texture(this, "graphics/room/BigCubeRoom.png");
             addTargets(objectPositionParam, objectUvParam);
         } catch (IOException e) {
             Log.e(TAG, "Unable to initialize objects", e);
@@ -459,9 +459,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectSelectedTextures = new ArrayList<>();
         // TODO: aggiornare variabile TARGET_MESH_COUNT
         // TODO: check if files paths are needed
-        addObject("Icosahedron.obj", "Icosahedron_Blue_BakedDiffuse.png", "Icosahedron_Pink_BakedDiffuse.png", objectPositionParam, objectUvParam);
-        addObject("QuadSphere.obj", "QuadSphere_Blue_BakedDiffuse.png", "QuadSphere_Pink_BakedDiffuse.png", objectPositionParam, objectUvParam);
-        addObject("TriSphere.obj", "TriSphere_Blue_BakedDiffuse.png", "TriSphere_Pink_BakedDiffuse.png", objectPositionParam, objectUvParam);
+        addObject("graphics/cat/cat.obj", "graphics/cat/cat.png", "graphics/cat/dark_cat.png", objectPositionParam, objectUvParam);
+        addObject("graphics/pikachu/pikachu.obj", "graphics/pikachu/pikachu.png", "graphics/pikachu/dark_pikachu.png", objectPositionParam, objectUvParam);
+        addObject("graphics/penguin/penguin.obj", "graphics/penguin/penguin.png", "graphics/penguin/dark_penguin.png", objectPositionParam, objectUvParam);
     }
 
     /**
