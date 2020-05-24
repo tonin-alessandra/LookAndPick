@@ -91,7 +91,7 @@ import static android.opengl.GLU.gluErrorString;
      *
      * @param vec1 first vector
      * @param vec2 second vector
-     * @return angle between vec1 and vec2 expressed in radiants
+     * @return angle between vec1 and vec2 expressed in radians
      */
     public static float angleBetweenVectors(float[] vec1, float[] vec2) {
         float cosOfAngle = dotProduct(vec1, vec2) / (vectorNorm(vec1) * vectorNorm(vec2));
