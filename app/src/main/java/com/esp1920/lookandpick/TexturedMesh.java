@@ -34,6 +34,7 @@ import java.nio.ShortBuffer;
      * @param objFilePath Path to the .obj file.
      * @param positionAttrib The position attribute in the shader.
      * @param uvAttrib The UV attribute in the shader.
+     * @throws IOException if unable to find file path.
      */
     public TexturedMesh(Context context, String objFilePath, int positionAttrib, int uvAttrib)
             throws IOException {

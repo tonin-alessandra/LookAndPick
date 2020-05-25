@@ -89,9 +89,9 @@ import static android.opengl.GLU.gluErrorString;
      * Computes the angle between two vectors; see
      * https://en.wikipedia.org/wiki/Vector_projection#Definitions_in_terms_of_a_and_b.
      *
-     * @param vec1 first vector
-     * @param vec2 second vector
-     * @return angle between vec1 and vec2 expressed in radians
+     * @param vec1 first vector.
+     * @param vec2 second vector.
+     * @return angle between vec1 and vec2 expressed in radians.
      */
     public static float angleBetweenVectors(float[] vec1, float[] vec2) {
         float cosOfAngle = dotProduct(vec1, vec2) / (vectorNorm(vec1) * vectorNorm(vec2));
@@ -99,21 +99,21 @@ import static android.opengl.GLU.gluErrorString;
     }
 
     /**
-     * Computes the dot product between vectors
+     * Computes the dot product between vectors.
      *
-     * @param vec1 vector with 3 entries
-     * @param vec2 vector with 3 entries
-     * @return dot product between vec1 and vec2
+     * @param vec1 vector with 3 entries.
+     * @param vec2 vector with 3 entries.
+     * @return dot product between vec1 and vec2.
      */
     private static float dotProduct(float[] vec1, float[] vec2) {
         return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
     }
 
     /**
-     * Computes the norm of a vector
+     * Computes the norm of a vector.
      *
-     * @param vec vector with 3 entries
-     * @return norm of vec
+     * @param vec vector with 3 entries.
+     * @return norm of vec.
      */
     private static float vectorNorm(float[] vec) {
         return Matrix.length(vec[0], vec[1], vec[2]);
