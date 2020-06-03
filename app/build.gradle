@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.esp1920.lookandpick"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -20,6 +20,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    ndkVersion "21.1.6352462"
 
 }
 
@@ -32,9 +33,12 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+
+    // Obj - a simple Wavefront OBJ file loader
+    // https://github.com/javagl/Obj
+    implementation 'de.javagl:obj:0.2.1'
+
     // Required for all Google VR apps
     implementation project(path: ':sdk-base-1.200.0')
-    // Adds Google VR spatial audio support
-    implementation project(path: ':sdk-audio-1.190.0')
 
 }
