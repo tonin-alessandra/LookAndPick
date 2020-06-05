@@ -129,6 +129,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
+    // Used to manage all target-related operations
+    // TODO: manage this as a Singleton?
+    private TargetManager mTargetManager = new TargetManager();
+
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
      * to render our scene.
@@ -412,7 +416,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Calculate a new random position
         targetDistance =
                 random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
-        targetPosition = new float[] {0.0f, 0.0f, -targetDistance};
+        targetPosition = new float[]{0.0f, 0.0f, -targetDistance};
 
         Matrix.setIdentityM(modelTarget, 0);
         Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
@@ -459,24 +463,25 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectSelectedTextures = new ArrayList<>();
         // TODO: aggiornare variabile TARGET_MESH_COUNT
         // TODO: check if files paths are needed
-        addObject("graphics/cat/cat.obj", "graphics/cat/cat.png", "graphics/cat/dark_cat.png", objectPositionParam, objectUvParam);
-        addObject("graphics/pikachu/pikachu.obj", "graphics/pikachu/pikachu.png", "graphics/pikachu/dark_pikachu.png", objectPositionParam, objectUvParam);
-        addObject("graphics/penguin/penguin.obj", "graphics/penguin/penguin.png", "graphics/penguin/dark_penguin.png", objectPositionParam, objectUvParam);
+        Target tarPenguin = new Target(ObjName.PENGUIN, "graphics/penguin/penguin.obj", "graphics/penguin/dark_penguin.png", "graphics/penguin/penguin.png");
+        Target tarCat = new Target(ObjName.CAT, "graphics/cat/cat.obj", "graphics/cat/dark_cat.png", "graphics/cat/cat.png");
+        Target tarPikachu = new Target(ObjName.PIKACHU, "graphics/pikachu/pikachu.obj", "graphics/pikachu/dark_pikachu.png", "graphics/pikachu/pikachu.png");
+        addObject(tarCat, objectPositionParam, objectUvParam);
+        addObject(tarPikachu, objectPositionParam, objectUvParam);
+        addObject(tarPenguin, objectPositionParam, objectUvParam);
     }
 
     /**
      * Inizializes a 3D object with the correct texture, according to the given params.
      *
-     * @param obj                 The obj model file path.
-     * @param notSelTexture       The path of the object's texture when the user is not looking at it.
-     * @param selTexture          The path of the object's texture when the user is looking at it.
+     * @param target              The target object to initialize.
      * @param objectPositionParam The position attribute in the shader.
      * @param objectUvParam       The UV attribute in the shader.
-     * @throws IOException if unable to initialize objects.
      */
-    private void addObject(String obj, String notSelTexture, String selTexture, int objectPositionParam, int objectUvParam) throws IOException {
-        targetObjectMeshes.add(new TexturedMesh(this, obj, objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, notSelTexture));
-        targetObjectSelectedTextures.add(new Texture(this, selTexture));
+    private void addObject(Target target, int objectPositionParam, int objectUvParam) {
+        mTargetManager.applyTexture(this, target, objectPositionParam, objectUvParam);
+        targetObjectMeshes.add(mTargetManager.getTexturedMesh());
+        targetObjectNotSelectedTextures.add(mTargetManager.getNotSelectedTexture());
+        targetObjectSelectedTextures.add(mTargetManager.getSelectedTexture());
     }
 }
