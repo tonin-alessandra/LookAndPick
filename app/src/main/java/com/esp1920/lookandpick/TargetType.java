@@ -8,7 +8,8 @@ enum ObjCategory {
     PLANT,
     ANDROID_BOT,
     //This can be useful to identify particular or special objects, such as Pikachu.
-    BONUS
+    BONUS,
+    ROOM
 }
 
 /**
@@ -25,5 +26,6 @@ enum ObjName {
     GREEN_ANDROID,
     WHITE_ANDROID,
     PLANE,
-    PIKACHU
+    PIKACHU,
+    ROOM
 }

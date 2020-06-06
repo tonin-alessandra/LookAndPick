@@ -103,6 +103,9 @@ public class Target {
             case PLANE:
                 mCategory = BONUS;
                 break;
+            case ROOM:
+                mCategory = ObjCategory.ROOM;
+                break;
         }
     }
 
