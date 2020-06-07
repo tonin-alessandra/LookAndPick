@@ -12,9 +12,8 @@ public class Movement {
 
     private boolean isWalking = false;
 
-    //TODO: speed private?
-    //public field so changes are more convenient (in my opinion)
-    public float speed;
+    //walking speed
+    private float speed;
 
     private Movement() {}
 
