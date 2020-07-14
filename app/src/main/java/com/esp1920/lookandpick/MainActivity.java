@@ -129,6 +129,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
+    private PlayerMovement player = new PlayerMovement();
+
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
      * to render our scene.
@@ -391,6 +393,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
             gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
             hideTarget();
+        }
+
+        // Checks if player wants to walk
+        if(player.isWalking()){
+            player.walk();
         }
     }
 
