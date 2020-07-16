@@ -14,7 +14,7 @@ public class Position {
     private float[] mPosition;
     private float[] mModel;
 
-    // TODO: vedere se
+    // TODO: vedere se ????
 
     /**
      * Constructor.
