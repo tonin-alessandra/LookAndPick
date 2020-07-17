@@ -5,6 +5,9 @@ import android.util.Log;
 
 import java.io.IOException;
 
+/**
+ * This class provides all necessary methods to manage a {@link Target} object behaviour.
+ */
 public class TargetManager {
     private final String TAG = "TargetManager";
     private TexturedMesh mTexturedMesh;
