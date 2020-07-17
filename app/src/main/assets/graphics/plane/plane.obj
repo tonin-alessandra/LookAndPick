@@ -1,3 +1,7 @@
+# This model has been created by "Poly by Google" and the original name is "Airplane".
+# It has been published on "poly.google.com" under the CC-BY license.
+# The only changes we made are resizing and renaming.
+
 mtllib plane.mtl
 g node-0_primitive
 v 0.481572 0.581910 0.000001
