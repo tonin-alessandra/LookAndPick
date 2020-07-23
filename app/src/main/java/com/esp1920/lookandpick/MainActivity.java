@@ -4,6 +4,7 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.vr.ndk.base.Properties;
 import com.google.vr.ndk.base.Value;
@@ -129,7 +130,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
-    private PlayerMovement player = new PlayerMovement();
+    ////////////////////////////////////////////////////
+    private PlayerMovement player;
+    private float[] eyePosition;
+
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -158,6 +162,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Makes objects appear randomly.
         random = new Random();
+
+        player = new PlayerMovement();
+        eyePosition = new float[]{0.0f, 0.0f, 0.0f};
     }
 
     public void initializeGvrView() {
@@ -205,6 +212,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onSurfaceChanged(int width, int height) {
     }
+
 
     /**
      * Creates the buffers we use to store information about the 3D world.
@@ -291,8 +299,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
+        if(player.isWalking(headTransform)){
+            player.walk(eyePosition); // X Y Z
+        }
         // Build the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(camera, 0, 0, 0, eyePosition[2], 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
 
         // Control if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
@@ -395,10 +406,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             hideTarget();
         }
 
-        // Checks if player wants to walk
-        if(player.isWalking()){
-            player.walk();
-        }
     }
 
     /**
