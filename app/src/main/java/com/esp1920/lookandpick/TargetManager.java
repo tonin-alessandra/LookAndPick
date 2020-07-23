@@ -13,6 +13,25 @@ public class TargetManager {
     private TexturedMesh mTexturedMesh;
     private Texture mNotSelectedTexture;
     private Texture mSelectedTexture;
+    //TODO: check this
+    private Target mTarget;
+//    private static TargetManager instance;
+
+//    /**
+//     * Constructor. It is private due to singleton.
+//     *
+//     */
+//    private TargetManager(){
+//    }
+//
+//    /**
+//     *
+//     */
+//    synchronized public static TargetManager getInstance() {
+//        if (instance == null)
+//            instance = new TargetManager();
+//        return instance;
+//    }
 
     /**
      * Applies the textures of a generic target object.
@@ -30,6 +49,15 @@ public class TargetManager {
         } catch (IOException e) {
             Log.e(TAG, "Unable to initialize objects", e);
         }
+    }
+    //TODO
+
+    /**
+     * Hides an object from the scene.
+     * It is called when the timer of the specified object ends.
+     */
+    public void hideTarget() {
+        Log.d(TAG, "Timer finito **************************");
     }
 
     /**

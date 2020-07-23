@@ -1,8 +1,11 @@
 package com.esp1920.lookandpick;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.vr.ndk.base.Properties;
@@ -132,6 +135,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // Used to manage all target-related operations
     // TODO: manage this as a Singleton?
     private TargetManager mTargetManager = new TargetManager();
+
+    //Time before an object disappears
+    private final static long TIMER = 10000;
+
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -268,6 +275,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Chooses randomly the first object to show.
         curTargetObject = random.nextInt(TARGET_MESH_COUNT);
+        startTimer();
     }
 
     /**
@@ -434,6 +442,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         updateTargetPosition();
         curTargetObject = random.nextInt(TARGET_MESH_COUNT);
+        startTimer();
     }
 
     /**
@@ -483,5 +492,19 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectMeshes.add(mTargetManager.getTexturedMesh());
         targetObjectNotSelectedTextures.add(mTargetManager.getNotSelectedTexture());
         targetObjectSelectedTextures.add(mTargetManager.getSelectedTexture());
+    }
+
+    /**
+     * Makes a target object change its position in the scene after TIMER millis.
+     */
+    private void startTimer() {
+        //After the timer, the object will be hidden
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //mTargetManager.hideTarget();
+                hideTarget();
+            }
+        }, TIMER);
     }
 }
