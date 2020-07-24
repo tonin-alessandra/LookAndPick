@@ -1,5 +1,6 @@
 package com.esp1920.lookandpick;
 
+import android.opengl.Matrix;
 import android.widget.Toast;
 
 import com.google.vr.sdk.base.HeadTransform;
@@ -14,20 +15,21 @@ import com.google.vr.sdk.base.HeadTransform;
  */
  public class PlayerMovement {
 
-    private final double THRESHOLD_ANGLE = 40; // degrees
+    private final double THRESHOLD_ANGLE = 30; // degrees
 
     private float[] eulerAngles;
+    private float[] forwardVec;
 
     private double pitch, yaw, roll;
 
     //walking speed
     private float speed;
 
-    private float inc;
 
     public PlayerMovement() {
         eulerAngles = new float[4];
-        speed = 0.03f;
+        forwardVec = new float[3];
+        speed = 1.0f;
     }
 
     /**
@@ -52,40 +54,14 @@ import com.google.vr.sdk.base.HeadTransform;
      * Calculates eyes's coordinates in order to achieve movement
      *
      */
-    public void walk(float[] eyePosition) {
-        inc = -.020f;
-        if (yaw >= -90 && yaw <= 90) {  // 180 degrees swivel
-            //eyePosition[1] = (float)(Math.PI * 2 * yaw * inc);
-        }
-        eyePosition[2] -= speed;
-    }
-}
+    public void walk(HeadTransform headTransform, float[] eyePosition) {
+        headTransform.getForwardVector(forwardVec, 0);
+        headTransform.getEulerAngles(eulerAngles, 0);
 
-   /* @Override
-    public void headTransform(HeadTransform headTransform) {
-        headTransform.getQuaternion(quat, 0);
-        headTransform.getEulerAngles(euler, 0);
-        bank = degrees(euler[0]);
-        heading = degrees(euler[1]);
-        attitude = degrees(euler[2]);
-        float zoomSpeedMax = .01f;  //.01f;
-        float TILT_FOR_ZOOM = 7.5f; // degrees
-        float inc = -.020f;
-        // X
-        if (heading >= -90 && heading <= 90) {  // 180 degrees swivel
-            cameraPositionX = PI * 2 * heading * inc;
-        }
-        // Y
-        inc = .04f;
-        if (bank >= -90 && bank <= 90) {  // 180 degrees swivel
-            cameraPositionY = -2 * bank * inc;
-        }
-        // Z
-        inc = 0.0f;
-        if (attitude > TILT_FOR_ZOOM) {
-            inc = zoomSpeedMax;
-        } else if (attitude < -TILT_FOR_ZOOM) {
-            inc = -zoomSpeedMax;
-        }
-        cameraPositionZ += inc;
-    }*/
+        eyePosition[0] = forwardVec[0]*speed;
+        eyePosition[1] = 0;
+        eyePosition[2] = forwardVec[2]*speed;
+    }
+
+
+}

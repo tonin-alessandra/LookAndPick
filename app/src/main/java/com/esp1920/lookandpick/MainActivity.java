@@ -133,6 +133,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     ////////////////////////////////////////////////////
     private PlayerMovement player;
     private float[] eyePosition;
+    private float[] forwardVec;
 
 
     /**
@@ -300,7 +301,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
         if(player.isWalking(headTransform)){
-            player.walk(eyePosition); // X Y Z
+            player.walk(headTransform, eyePosition); // X Y Z
         }
         // Build the camera matrix and apply it to the ModelView.
         Matrix.setLookAtM(camera, 0, 0, 0, eyePosition[2], 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
