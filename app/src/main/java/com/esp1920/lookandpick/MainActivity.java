@@ -138,6 +138,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     //Time before an object disappears
     private final static long TIMER = 10000;
+    private boolean hidden = false;
+    private Runnable myRunnable;
+    public static Handler myHandler = new Handler();
 
 
     /**
@@ -350,6 +353,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
         drawTarget();
 
+
         // Set modelView for the room, so it's drawn in the correct location
         Matrix.multiplyMM(modelView, 0, view, 0, modelRoom, 0);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
@@ -371,7 +375,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         } else {
             targetObjectNotSelectedTextures.get(curTargetObject).bind();
         }
-        targetObjectMeshes.get(curTargetObject).draw();
+        if (!hidden) {
+            targetObjectMeshes.get(curTargetObject).draw();
+        }
     }
 
     /**
@@ -442,7 +448,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         updateTargetPosition();
         curTargetObject = random.nextInt(TARGET_MESH_COUNT);
-        startTimer();
+        restart();
     }
 
     /**
@@ -499,12 +505,35 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     private void startTimer() {
         //After the timer, the object will be hidden
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+//        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                //mTargetManager.hideTarget();
+//                hidden = true;
+//                //hideTarget();
+//            }
+//        }, TIMER);
+        myRunnable = new Runnable() {
             @Override
             public void run() {
-                //mTargetManager.hideTarget();
-                hideTarget();
+                hidden = true;
             }
-        }, TIMER);
+        };
+        start();
+    }
+
+
+
+    public void start() {
+        myHandler.postDelayed(myRunnable, TIMER);
+    }
+
+    public void stop() {
+        myHandler.removeCallbacks(myRunnable);
+    }
+
+    public void restart() {
+        myHandler.removeCallbacks(myRunnable);
+        myHandler.postDelayed(myRunnable, TIMER);
     }
 }
