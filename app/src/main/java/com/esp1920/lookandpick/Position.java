@@ -14,8 +14,6 @@ public class Position {
     private float[] mPosition;
     private float[] mModel;
 
-    // TODO: vedere se ????
-
     /**
      * Constructor.
      */
@@ -51,6 +49,16 @@ public class Position {
         mPosition[0] = x;
         mPosition[1] = y;
         mPosition[2] = z;
+    }
+
+    /**
+     * Sets the target position from a Position object.
+     * @param position The Position object.
+     */
+    public void setPosition(Position position) {
+        mPosition[0] = position.getXCoordinate();
+        mPosition[1] = position.getYCoordinate();
+        mPosition[2] = position.getYCoordinate();
     }
 
     /**
