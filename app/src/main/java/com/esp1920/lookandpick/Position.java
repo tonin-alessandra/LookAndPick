@@ -16,7 +16,7 @@ public class Position {
     private static final float MAX_PITCH = 25.0f;
 
     private static final float MIN_TARGET_DISTANCE = 3.0f;
-    private static final float MAX_TARGET_DISTANCE = 3.5f;
+    private static final float MAX_TARGET_DISTANCE = 7.0f;
 
     private float[] mPosition;
     private float[] mModel;

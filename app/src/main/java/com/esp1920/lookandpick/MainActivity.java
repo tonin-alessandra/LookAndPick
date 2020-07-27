@@ -38,6 +38,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 7;
+    private static final int TARGET_NUMBER = 4;
 
     // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
@@ -135,7 +136,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         random = new Random();
 
-        curTarget = new int[TARGET_MESH_COUNT];
+        curTarget = new int[TARGET_NUMBER];
 
         camera = new float[16];
         view = new float[16];
@@ -143,8 +144,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelView = new float[16];
         headView = new float[16];
 
-        targetsPosition = new Position[TARGET_MESH_COUNT];
-        for(int i = 0; i < TARGET_MESH_COUNT; i++){
+        targetsPosition = new Position[TARGET_NUMBER];
+        for(int i = 0; i < TARGET_NUMBER; i++){
             targetsPosition[i] = new Position();
             targetsPosition[i].generateRandomPosition();
         }
@@ -246,7 +247,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 .start();
 
         // Update targets position for the first time
-        for(int i = 0; i < TARGET_MESH_COUNT; i++)
+        for(int i = 0; i < TARGET_NUMBER; i++)
             updateTargetPosition(targetsPosition[i]);
 
 
@@ -264,7 +265,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         }
 
         // Chooses randomly the first object to show for each target.
-        for(int i = 0; i < TARGET_MESH_COUNT; i++)
+        for(int i = 0; i < TARGET_NUMBER; i++)
             curTarget[i] = random.nextInt(TARGET_MESH_COUNT);
     }
 
@@ -331,7 +332,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Build the ModelView and ModelViewProjection matrices
         // for calculating the position of the target object.
-        for(int i = 0; i < TARGET_MESH_COUNT; i++){
+        for(int i = 0; i < TARGET_NUMBER; i++){
             Matrix.multiplyMM(modelView, 0, view, 0, targetsPosition[i].getModel(), 0);
             Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
             drawTarget(targetsPosition[i], curTarget[i]);
@@ -387,7 +388,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Check all the targets and hide the one the user is looking at
 
         //TODO: modo più efficiente per gestire più oggetti?
-        for(int i = 0; i < TARGET_MESH_COUNT; i++)
+        for(int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(targetsPosition[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
