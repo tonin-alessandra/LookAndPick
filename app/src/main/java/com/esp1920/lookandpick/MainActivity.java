@@ -47,20 +47,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float[] POS_MATRIX_MULTIPLY_VEC = {0.0f, 0.0f, 0.0f, 1.0f};
     private static final float[] FORWARD_VEC = {0.0f, 0.0f, -1.0f, 1.f};
 
-    private static final float MIN_TARGET_DISTANCE = 3.0f;
-    private static final float MAX_TARGET_DISTANCE = 7.0f;
-
     private static final String OBJECT_SOUND_FILE = "audio/HelloVR_Loop.ogg";
     private static final String SUCCESS_SOUND_FILE = "audio/HelloVR_Activation.ogg";
 
     private static final float DEFAULT_FLOOR_HEIGHT = -1.6f;
 
     private static final float ANGLE_LIMIT = 0.2f;
-
-    // The maximum yaw and pitch of the target object, in degrees. After hiding the target, its
-    // yaw will be within [-MAX_YAW, MAX_YAW] and pitch will be within [-MAX_PITCH, MAX_PITCH].
-    private static final float MAX_YAW = 100.0f;
-    private static final float MAX_PITCH = 25.0f;
 
     private static final String[] OBJECT_VERTEX_SHADER_CODE =
             new String[]{
@@ -93,24 +85,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private int objectUvParam;
     private int objectModelViewProjectionParam;
 
-    private float targetDistance = MAX_TARGET_DISTANCE;
-
     private Target room;
     private TexturedMesh roomTextureMesh;
     private Texture roomTexture;
     private ArrayList<TexturedMesh> targetObjectMeshes;
     private ArrayList<Texture> targetObjectNotSelectedTextures;
     private ArrayList<Texture> targetObjectSelectedTextures;
-    private int curTargetObject;
-    private int curTargetObject2;
-
-    // Store indexes
-    private int[] curTarget;
 
     private Random random;
-
-    // Array where are stored positions
-    private Position[] targetsPosition;
 
     private float[] camera;
     private float[] view;
@@ -118,9 +100,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] modelViewProjection;
     private float[] modelView;
 
-    // private float[] modelTarget;
-    // modelRoom is a matrix that contains the coordinates of the room based on user's location.
-    // private float[] modelRoom;
+    // Array where are stored positions and indexes
+    private Position[] targetsPosition;
+    private int[] curTarget;
+
     private Position roomPosition;
 
     private float[] tempPosition;
@@ -163,7 +146,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetsPosition = new Position[TARGET_MESH_COUNT];
         for(int i = 0; i < TARGET_MESH_COUNT; i++){
             targetsPosition[i] = new Position();
-            generateRandomPosition(targetsPosition[i]);
+            targetsPosition[i].generateRandomPosition();
         }
 
         tempPosition = new float[4];
@@ -346,9 +329,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         float[] perspective = eye.getPerspective(Z_NEAR, Z_FAR);
 
-        // TODO: I think it is used to show the target with the same view of the user.
-        //  We should try to change in some ways these values to see if a target can be rotated.
-
         // Build the ModelView and ModelViewProjection matrices
         // for calculating the position of the target object.
         for(int i = 0; i < TARGET_MESH_COUNT; i++){
@@ -364,8 +344,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public void onFinishFrame(Viewport viewport) {
-    }
+    public void onFinishFrame(Viewport viewport) {}
 
     /**
      * Draw the target object.
@@ -421,43 +400,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Find a new random position for the target object.
      */
     private int hideTarget(Position target) {
-        generateRandomPosition(target);
+        target.generateRandomPosition();
         updateTargetPosition(target);
         return random.nextInt(TARGET_MESH_COUNT);
-    }
-
-    //TODO: Spostare questo metodo in Position.java?
-    /**
-     *  Generates random position.
-     *
-     * @param target A Position object.
-     */
-    public void generateRandomPosition(Position target){
-        float[] rotationMatrix = new float[16];
-        float[] posVec = new float[4];
-
-        // Matrix.setRotateM takes the angle in degrees, but Math.tan takes the angle in radians, so
-        // yaw is in degrees and pitch is in radians.
-        float yawDegrees = (random.nextFloat() - 0.5f) * 2.0f * MAX_YAW;
-        float pitchRadians = (float) Math.toRadians((random.nextFloat() - 0.5f) * 2.0f * MAX_PITCH);
-
-        // Create a matrix for rotation by angle yawDegrees around the y axis.
-        Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
-
-        // Calculates a new random position
-        targetDistance =
-                random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
-
-        Position temp = null;
-        // Allows to generate objects with negative z coordinate randomly.
-        if(random.nextBoolean())
-            temp = new Position(0,0, -targetDistance);
-        else
-            temp = new Position(0,0, targetDistance);
-
-        Matrix.multiplyMV(posVec, 0, rotationMatrix, 0, temp.getModel(), 12);
-
-        target.setPosition(posVec[0], (float) Math.tan(pitchRadians) * temp.getZCoordinate(), posVec[2]);
     }
 
     /**
