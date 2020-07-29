@@ -161,14 +161,27 @@ public class Target {
 //        mPosition[2] = z;
 //    }
 
+    /**
+     * Gets the path to the .obj model file used to create this target object.
+     *
+     * @return The .obj file.
+     */
     public String getFilePath() {
         return mFilePath;
     }
 
-    public void setFilePath(String filePath) {
+    /**
+     * Sets the path to the .obj model file used to create this target object.
+     *
+     * @param filePath The path to the .obj file.
+     */
+    private void setFilePath(String filePath) {
         this.mFilePath = filePath;
     }
 
+    /**
+     * @return The tag which identifies an object of this class.
+     */
     public String getTAG() {
         return TAG;
     }

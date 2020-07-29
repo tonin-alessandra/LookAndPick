@@ -1,11 +1,8 @@
 package com.esp1920.lookandpick;
 
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import com.google.vr.ndk.base.Properties;
@@ -133,14 +130,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final Value floorHeight = new Value();
 
     // Used to manage all target-related operations
-    // TODO: manage this as a Singleton?
-    private TargetManager mTargetManager = new TargetManager();
+    // TODO: this is managed as a singleton, is it correct?
+    private TargetManager mTargetManager = TargetManager.getInstance();
 
-    //Time before an object disappears
-    private final static long TIMER = 10000;
-    private boolean hidden = false;
-    private Runnable myRunnable;
-    public static Handler myHandler = new Handler();
+    //This indicates the time an object can remain in the scene before disappearing.
+    private long timer = 10000;
 
 
     /**
@@ -278,7 +272,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Chooses randomly the first object to show.
         curTargetObject = random.nextInt(TARGET_MESH_COUNT);
-        startTimer();
+        targetObjectMeshes.get(curTargetObject).startTimer(timer);
     }
 
     /**
@@ -375,7 +369,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         } else {
             targetObjectNotSelectedTextures.get(curTargetObject).bind();
         }
-        if (!hidden) {
+
+        if (!(targetObjectMeshes.get(curTargetObject).isHidden())) {
             targetObjectMeshes.get(curTargetObject).draw();
         }
     }
@@ -408,6 +403,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         if (isLookingAtTarget()) {
             successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
             gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
+            targetObjectMeshes.get(curTargetObject).stopTimer();
             hideTarget();
         }
     }
@@ -428,8 +424,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
 
         // Calculate a new random position
-        targetDistance =
-                random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
+        targetDistance = random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
         targetPosition = new float[]{0.0f, 0.0f, -targetDistance};
 
         Matrix.setIdentityM(modelTarget, 0);
@@ -448,7 +443,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         updateTargetPosition();
         curTargetObject = random.nextInt(TARGET_MESH_COUNT);
-        restart();
+        targetObjectMeshes.get(curTargetObject).restartTimer(timer);
     }
 
     /**
@@ -498,42 +493,5 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectMeshes.add(mTargetManager.getTexturedMesh());
         targetObjectNotSelectedTextures.add(mTargetManager.getNotSelectedTexture());
         targetObjectSelectedTextures.add(mTargetManager.getSelectedTexture());
-    }
-
-    /**
-     * Makes a target object change its position in the scene after TIMER millis.
-     */
-    private void startTimer() {
-        //After the timer, the object will be hidden
-//        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                //mTargetManager.hideTarget();
-//                hidden = true;
-//                //hideTarget();
-//            }
-//        }, TIMER);
-        myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                hidden = true;
-            }
-        };
-        start();
-    }
-
-
-
-    public void start() {
-        myHandler.postDelayed(myRunnable, TIMER);
-    }
-
-    public void stop() {
-        myHandler.removeCallbacks(myRunnable);
-    }
-
-    public void restart() {
-        myHandler.removeCallbacks(myRunnable);
-        myHandler.postDelayed(myRunnable, TIMER);
     }
 }

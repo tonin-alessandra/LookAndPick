@@ -2,6 +2,8 @@ package com.esp1920.lookandpick;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.os.CountDownTimer;
+import android.util.Log;
 
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
@@ -19,8 +21,15 @@ import java.nio.ShortBuffer;
 /**
  * This class has been written by Google and renders an object loaded from an OBJ file.
  * It is taken from gvr-android-sdk-1.200 project, more precisely from sdk-hellovr sample.
+ * <p>
+ * We added some methods to manage an object disappearing after a fixed amount of time.
  */
 /* package */ class TexturedMesh {
+    //*******************************************
+    private final static long INTERVAL = 1000;
+    private CountDownTimer mDisappearingTimer;
+    private boolean mHidden = false;
+    //*******************************************
     private static final String TAG = "TexturedMesh";
 
     private final FloatBuffer vertices;
@@ -87,4 +96,60 @@ import java.nio.ShortBuffer;
         // Draws the triangle mesh
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.limit(), GLES20.GL_UNSIGNED_SHORT, indices);
     }
+
+    //*******************************************
+
+    /**
+     * Starts the timer to make this object disappear after the specified time.
+     */
+    public void startTimer(Long time) {
+        mDisappearingTimer = new CountDownTimer(time, INTERVAL) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                //This does nothing for us
+                Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
+
+            }
+
+            @Override
+            public void onFinish() {
+                // When the timer reaches the end, the object must disappear from the scene
+                mHidden = true;
+                Log.d(TAG, "*******timer finito**********");
+            }
+        };
+        mDisappearingTimer.start();
+        Log.d(TAG, "*******timer partito**********");
+
+    }
+
+    /**
+     * Restarts the timer for this object.
+     */
+    public void restartTimer(Long time) {
+        Log.d(TAG, "*******restart timer***********");
+
+        mHidden = false;
+        stopTimer();
+        startTimer(time);
+    }
+
+    /**
+     * Stops the timer for this object.
+     */
+    public void stopTimer() {
+        mHidden = false;
+        if (mDisappearingTimer != null) {
+            mDisappearingTimer.cancel();
+            Log.d(TAG, "*******stop timer***********");
+        }
+    }
+
+    /**
+     * Checks if this object must be hidden or not.
+     */
+    public boolean isHidden() {
+        return mHidden;
+    }
+    //*************************************************************
 }
