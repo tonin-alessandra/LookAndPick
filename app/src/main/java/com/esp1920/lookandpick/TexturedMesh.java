@@ -25,11 +25,11 @@ import java.nio.ShortBuffer;
  * We added some methods to manage an object disappearing after a fixed amount of time.
  */
 /* package */ class TexturedMesh {
-    //*******************************************
+    //********************************************
     private final static long INTERVAL = 1000;
     private CountDownTimer mDisappearingTimer;
     private boolean mHidden = false;
-    //*******************************************
+    //********************************************
     private static final String TAG = "TexturedMesh";
 
     private final FloatBuffer vertices;
