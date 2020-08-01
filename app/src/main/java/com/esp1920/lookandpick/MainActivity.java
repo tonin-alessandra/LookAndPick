@@ -156,7 +156,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         tempPosition = new float[4];
         headRotation = new float[4];
-        roomPosition = new Position();
+        roomPosition = new Position(0, DEFAULT_FLOOR_HEIGHT, 0);
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
@@ -250,11 +250,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 })
                 .start();
 
-        // Update targets position for the first time
+        // Update sound position for the first time
         for(int i = 0; i < TARGET_NUMBER; i++)
-            updateTargetPosition(targetsPosition[i]);
-
-
+            updateSoundPosition(targetsPosition[i]);
 
         Util.checkGlError("onSurfaceCreated");
 
@@ -268,20 +266,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.e(TAG, "Unable to initialize objects", e);
         }
 
-        //multiple-objects
+        //TODO: multiple-objects
         // Chooses randomly the first object to show for each target.
         for(int i = 0; i < TARGET_NUMBER; i++){
             curTarget[i] = random.nextInt(TARGET_MESH_COUNT);
             targetObjectMeshes.get(curTarget[i]).startTimer(timer);
+            Log.d(TAG, "*******primi oggetti "+i +" ********");
         }
 
 
     }
 
     /**
-     * Updates the target object position.
+     * Updates the sounds' positions.
      */
-    private void updateTargetPosition(Position target) {
+    private void updateSoundPosition(Position target) {
         // Update the sound location to match it with the new target position.
         if (sourceId != GvrAudioEngine.INVALID_ID) {
             gvrAudioEngine.setSoundObjectPosition(
@@ -359,6 +358,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     /**
      * Draw the target object.
+     *
+     * //TODO
+     * @param target
+     * @param curTarget
      */
     public void drawTarget(Position target, int curTarget) {
         GLES20.glUseProgram(objectProgram);
@@ -409,8 +412,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(targetsPosition[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-              targetObjectMeshes.get(curTarget[i]).stopTimer();  
-              curTarget[i] = hideTarget(targetsPosition[i]);
+                targetObjectMeshes.get(curTarget[i]).stopTimer();
+                curTarget[i] = hideTarget(targetsPosition[i]);
                 break;
             }
     }
@@ -421,7 +424,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 //TODO: codice unito 
     private int hideTarget(Position target) {
         target.generateRandomPosition();
-        updateTargetPosition(target);
+        updateSoundPosition(target);
         int temp = random.nextInt(TARGET_MESH_COUNT);      
         targetObjectMeshes.get(temp).restartTimer(timer);
       return temp;

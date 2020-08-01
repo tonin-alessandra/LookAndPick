@@ -117,8 +117,7 @@ import java.nio.ShortBuffer;
                 mHidden = true;
                 Log.d(TAG, "*******timer finito**********");
             }
-        };
-        mDisappearingTimer.start();
+        }.start();
         Log.d(TAG, "*******timer partito**********");
 
     }
