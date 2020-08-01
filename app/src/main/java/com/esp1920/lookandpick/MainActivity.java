@@ -145,6 +145,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelView = new float[16];
         headView = new float[16];
 
+        // Creates TARGET_NUMBER pickable objects on the scene without any associated mesh
         mPickableTargets = new PickableTarget[TARGET_NUMBER];
         for(int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i] = new PickableTarget();
@@ -268,7 +269,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         }
 
         //TODO: multiple-objects
-        // Chooses randomly the first object to show for each target.
+
+        // Chooses randomly the first object to show for each pickable object.
         for(int i = 0; i < TARGET_NUMBER; i++){
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
         }
@@ -304,7 +306,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
         if (gvrProperties.get(PropertyType.TRACKING_FLOOR_HEIGHT, floorHeight)) {
             // The floor height can change each frame when tracking system detects a new floor position.
-            // TODO: aggiornare questo se la stanza è trattata come un target
             roomPosition.setPosition(0, floorHeight.asFloat(), 0);
         } // else the device doesn't support floor height detection so DEFAULT_FLOOR_HEIGHT is used.
 
@@ -326,8 +327,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onDrawEye(Eye eye) {
-        // TODO: aggiornamento posizione oggetti qui perché è qui che viene usato il getModel (?)
-
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         // The clear color doesn't matter here because it's completely obscured by
         // the room. However, the color buffer is still cleared because it may
@@ -360,7 +359,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Draw the target object.
      *
-     * @param pickableTarget The PickableTarget to draw.
+     * @param pickableTarget The PickableTarget object to draw.
      */
     public void drawTarget(PickableTarget pickableTarget) {
         GLES20.glUseProgram(objectProgram);
@@ -371,10 +370,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         }
 
-
         targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
-
-
     }
 
     /**

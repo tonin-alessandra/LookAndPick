@@ -1,5 +1,10 @@
 package com.esp1920.lookandpick;
 
+/**
+ * This class represents a visible object that appears on the screen.
+ * Every object is represented using its position and an index, which indicates the associated mesh.
+ */
+
 public class PickableTarget {
     private Position mPosition;
     private int mMeshIndex;
@@ -35,14 +40,6 @@ public class PickableTarget {
      */
     public Position getPosition() {
         return mPosition;
-    }
-
-    /**
-     * Sets the Position.
-     * @param position A Position Object.
-     */
-    public void setPosition(Position position) {
-        mPosition = position;
     }
 
     /**
