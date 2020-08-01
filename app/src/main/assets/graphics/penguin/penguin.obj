@@ -1,3 +1,7 @@
+# This model has been created by "Poly by Google" and the original name is "Penguin".
+# It has been published on "poly.google.com" under the CC-BY license.
+# The only changes we made are resizing and renaming.
+
 mtllib penguin1.mtl
 g node-0_primitive
 v -0.000002 1.656079 0.488741

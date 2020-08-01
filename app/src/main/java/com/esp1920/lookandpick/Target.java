@@ -4,7 +4,7 @@ import static com.esp1920.lookandpick.ObjName.*;
 import static com.esp1920.lookandpick.ObjCategory.*;
 
 /**
- * This class represents a generic target object that will appear on the scene.
+ * This class represents a generic target object that will rendered to appear on the scene.
  * All operations to manage a {@link Target} behaviour can be found in {@link TargetManager}.
  */
 public class Target {
@@ -164,14 +164,27 @@ public class Target {
 //        mPosition[2] = z;
 //    }
 
+    /**
+     * Gets the path to the .obj model file used to create this target object.
+     *
+     * @return The .obj file.
+     */
     public String getFilePath() {
         return mFilePath;
     }
 
-    public void setFilePath(String filePath) {
+    /**
+     * Sets the path to the .obj model file used to create this target object.
+     *
+     * @param filePath The path to the .obj file.
+     */
+    private void setFilePath(String filePath) {
         this.mFilePath = filePath;
     }
 
+    /**
+     * @return The tag which identifies an object of this class.
+     */
     public String getTAG() {
         return TAG;
     }

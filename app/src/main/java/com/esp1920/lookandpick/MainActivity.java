@@ -121,8 +121,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final Value floorHeight = new Value();
 
     // Used to manage all target-related operations
-    // TODO: manage this as a Singleton?
-    private TargetManager mTargetManager = new TargetManager();
+    // TODO: this is managed as a singleton, is it correct?
+    private TargetManager mTargetManager = TargetManager.getInstance();
+
+    //This indicates the time an object can remain in the scene before disappearing.
+    private long timer = 10000;
+
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -264,9 +268,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.e(TAG, "Unable to initialize objects", e);
         }
 
+        //multiple-objects
         // Chooses randomly the first object to show for each target.
-        for(int i = 0; i < TARGET_NUMBER; i++)
+        for(int i = 0; i < TARGET_NUMBER; i++){
             curTarget[i] = random.nextInt(TARGET_MESH_COUNT);
+            targetObjectMeshes.get(curTarget[i]).startTimer(timer);
+        }
+
+
     }
 
     /**
@@ -338,6 +347,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             drawTarget(targetsPosition[i], curTarget[i]);
         }
 
+
         // Set modelView for the room, so it's drawn in the correct location
         Matrix.multiplyMM(modelView, 0, view, 0, roomPosition.getModel(), 0);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
@@ -358,7 +368,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         } else {
             targetObjectNotSelectedTextures.get(curTarget).bind();
         }
-        targetObjectMeshes.get(curTarget).draw();
+
+      //TODO: codice unito
+        if (!(targetObjectMeshes.get(curTarget).isHidden())) {
+            targetObjectMeshes.get(curTarget).draw();
+        }
+
     }
 
     /**
@@ -385,6 +400,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onCardboardTrigger() {
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
+        
+      //TODO: codice unito
         // Check all the targets and hide the one the user is looking at
 
         //TODO: modo più efficiente per gestire più oggetti?
@@ -392,7 +409,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(targetsPosition[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                curTarget[i] = hideTarget(targetsPosition[i]);
+              targetObjectMeshes.get(curTarget[i]).stopTimer();  
+              curTarget[i] = hideTarget(targetsPosition[i]);
                 break;
             }
     }
@@ -400,10 +418,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Find a new random position for the target object.
      */
+//TODO: codice unito 
     private int hideTarget(Position target) {
         target.generateRandomPosition();
         updateTargetPosition(target);
-        return random.nextInt(TARGET_MESH_COUNT);
+        int temp = random.nextInt(TARGET_MESH_COUNT);      
+        targetObjectMeshes.get(temp).restartTimer(timer);
+      return temp;
     }
 
     /**
