@@ -37,7 +37,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final String TAG = "MainActivity";
 
     // Number of objects that can be rendered.
-    private static final int TARGET_MESH_COUNT = 7;
+    private static final int TARGET_MESH_COUNT = 6;
     private static final int TARGET_NUMBER = 4;
 
     // TODO: change these values to change how far user can see
@@ -240,9 +240,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         // whenever the target position changes.
                         gvrAudioEngine.preloadSoundFile(OBJECT_SOUND_FILE);
                         sourceId = gvrAudioEngine.createSoundObject(OBJECT_SOUND_FILE);
-                        // gvrAudioEngine.setSoundObjectPosition(
-                        //        sourceId, targetPosition.getXCoordinate(), targetPosition.getYCoordinate(), targetPosition.getZCoordinate());
-                         gvrAudioEngine.playSound(sourceId, true /* looped playback */);
+                        for(int i = 0; i < TARGET_NUMBER; i++)
+                            gvrAudioEngine.setSoundObjectPosition(
+                                    sourceId, targetsPosition[i].getXCoordinate(), targetsPosition[i].getYCoordinate(), targetsPosition[i].getZCoordinate());
+                        gvrAudioEngine.playSound(sourceId, true /* looped playback */);
                         // Preload an unspatialized sound to be played on a successful trigger on the
                         // target.
                          gvrAudioEngine.preloadSoundFile(SUCCESS_SOUND_FILE);
@@ -270,8 +271,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Chooses randomly the first object to show for each target.
         for(int i = 0; i < TARGET_NUMBER; i++){
             curTarget[i] = random.nextInt(TARGET_MESH_COUNT);
-            targetObjectMeshes.get(curTarget[i]).startTimer(timer);
-            Log.d(TAG, "*******primi oggetti "+i +" ********");
         }
 
 
@@ -372,10 +371,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             targetObjectNotSelectedTextures.get(curTarget).bind();
         }
 
-      //TODO: codice unito
-        if (!(targetObjectMeshes.get(curTarget).isHidden())) {
-            targetObjectMeshes.get(curTarget).draw();
-        }
+
+        targetObjectMeshes.get(curTarget).draw();
+
 
     }
 
@@ -412,7 +410,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(targetsPosition[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                targetObjectMeshes.get(curTarget[i]).stopTimer();
                 curTarget[i] = hideTarget(targetsPosition[i]);
                 break;
             }
@@ -426,7 +423,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         target.generateRandomPosition();
         updateSoundPosition(target);
         int temp = random.nextInt(TARGET_MESH_COUNT);      
-        targetObjectMeshes.get(temp).restartTimer(timer);
+
       return temp;
     }
 
@@ -462,7 +459,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Target tarAndroid = new Target(ObjName.GREEN_ANDROID, "graphics/android/green_android.obj", "graphics/android/dark_green_android.png", "graphics/android/green_android.png");
         Target tarCactus = new Target(ObjName.CACTUS, "graphics/cactus/cactus.obj", "graphics/cactus/dark_cactus.png", "graphics/cactus/cactus.png");
         Target tarMouse = new Target(ObjName.MOUSE, "graphics/mouse/mouse.obj", "graphics/mouse/dark_mouse.png", "graphics/mouse/mouse.png");
-        Target tarRose = new Target(ObjName.ROSE, "graphics/rose/rose.obj", "graphics/rose/dark_rose.png", "graphics/rose/rose.png");
 
         addObject(tarCat, objectPositionParam, objectUvParam);
         addObject(tarPikachu, objectPositionParam, objectUvParam);
@@ -470,7 +466,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         addObject(tarAndroid, objectPositionParam, objectUvParam);
         addObject(tarCactus, objectPositionParam, objectUvParam);
         addObject(tarMouse, objectPositionParam, objectUvParam);
-        addObject(tarRose, objectPositionParam, objectUvParam);
     }
 
     /**
