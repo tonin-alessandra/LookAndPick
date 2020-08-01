@@ -153,7 +153,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         tempPosition = new float[4];
         headRotation = new float[4];
-        roomPosition = new Position(0, DEFAULT_FLOOR_HEIGHT, 0);
+        roomPosition = new Position();
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
@@ -225,7 +225,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Returns the location of the uniform variable u_MVP within the program 'objectProgram'.
         objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
 
-        roomPosition = new Position(0, DEFAULT_FLOOR_HEIGHT, 0);
+        roomPosition.setPosition(0, DEFAULT_FLOOR_HEIGHT, 0);
 
         // Avoid any delays during start-up due to decoding of sound files.
         new Thread(
