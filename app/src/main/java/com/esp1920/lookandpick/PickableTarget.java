@@ -28,6 +28,8 @@ public class PickableTarget {
         mPosition = new Position();
         mPosition.generateRandomPosition();
         setMeshIndex(index);
+        mTimer = new DisappearanceTimer();
+
     }
 
     /**
