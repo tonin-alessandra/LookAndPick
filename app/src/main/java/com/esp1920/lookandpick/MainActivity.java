@@ -133,7 +133,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     ////////////////////////////////////////////////////
     private PlayerMovement player;
     private float[] eyePosition;
-    private float[] forwardVec;
+    String s;
 
 
     /**
@@ -300,11 +300,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        if(player.isWalking(headTransform)){
-            player.walk(headTransform, eyePosition); // X Y Z
-        }
+        s = player.updateEyePosition(headTransform, eyePosition);
         // Build the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0, 0, 0, eyePosition[2], 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(camera, 0,0, 0 , eyePosition[2], 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Control if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
@@ -407,6 +405,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             hideTarget();
         }
 
+        Toast.makeText(this, s , Toast.LENGTH_LONG).show();
     }
 
     /**
