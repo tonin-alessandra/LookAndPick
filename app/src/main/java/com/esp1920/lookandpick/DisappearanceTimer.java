@@ -52,7 +52,8 @@ public class DisappearanceTimer {
         Log.d(TAG, "*******restart timer***********");
         stopTimer();
         DisappearanceTimer tempTimer = new DisappearanceTimer();
-        tempTimer.getCDTimer().start();
+        mCDTimer = tempTimer.getCDTimer();
+        startTimer();
     }
 
     /**

@@ -147,7 +147,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Creates TARGET_NUMBER pickable objects on the scene without any associated mesh
         mPickableTargets = new PickableTarget[TARGET_NUMBER];
-        for(int i = 0; i < TARGET_NUMBER; i++) {
+        for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i] = new PickableTarget();
             mPickableTargets[i].randomPosition();
         }
@@ -238,7 +238,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         // whenever the target position changes.
                         gvrAudioEngine.preloadSoundFile(OBJECT_SOUND_FILE);
                         sourceId = gvrAudioEngine.createSoundObject(OBJECT_SOUND_FILE);
-                        for(int i = 0; i < TARGET_NUMBER; i++)
+                        for (int i = 0; i < TARGET_NUMBER; i++)
                             gvrAudioEngine.setSoundObjectPosition(
                                     sourceId,
                                     mPickableTargets[i].getPosition().getXCoordinate(),
@@ -247,13 +247,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         gvrAudioEngine.playSound(sourceId, true /* looped playback */);
                         // Preload an unspatialized sound to be played on a successful trigger on the
                         // target.
-                         gvrAudioEngine.preloadSoundFile(SUCCESS_SOUND_FILE);
+                        gvrAudioEngine.preloadSoundFile(SUCCESS_SOUND_FILE);
                     }
                 })
                 .start();
 
         // Update sound position for the first time
-        for(int i = 0; i < TARGET_NUMBER; i++)
+        for (int i = 0; i < TARGET_NUMBER; i++)
             updateSoundPosition(mPickableTargets[i]);
 
         Util.checkGlError("onSurfaceCreated");
@@ -271,10 +271,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         //TODO: multiple-objects
 
         // Chooses randomly the first object to show for each pickable object.
-        for(int i = 0; i < TARGET_NUMBER; i++){
+        for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
             mPickableTargets[i].getTimer().startTimer();
-            Log.d(TAG, "*******primi oggetti " +i +" ********");
+            Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
 
 
@@ -342,7 +342,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Build the ModelView and ModelViewProjection matrices
         // for calculating the position of the target object.
-        for(int i = 0; i < TARGET_NUMBER; i++){
+        for (int i = 0; i < TARGET_NUMBER; i++) {
             Matrix.multiplyMM(modelView, 0, view, 0, mPickableTargets[i].getPosition().getModel(), 0);
             Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
             drawTarget(mPickableTargets[i]);
@@ -356,7 +356,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public void onFinishFrame(Viewport viewport) {}
+    public void onFinishFrame(Viewport viewport) {
+    }
 
     /**
      * Draw the target object.
@@ -401,16 +402,16 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onCardboardTrigger() {
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
-        
-      //TODO: codice unito
+
+        //TODO: codice unito
         // Check all the targets and hide the one the user is looking at
 
         //TODO: modo più efficiente per gestire più oggetti?
-        for(int i = 0; i < TARGET_NUMBER; i++)
+        for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                mPickableTargets[i].getTimer().stopTimer();
+                mPickableTargets[i].getTimer().restartTimer();
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 break;
             }
@@ -426,7 +427,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         int temp = random.nextInt(TARGET_MESH_COUNT);
 
         //TODO:Maybe this is wrong, check
-        pickableTarget.getTimer().restartTimer();
+        //pickableTarget.getTimer().restartTimer();
 
         return temp;
     }

@@ -13,7 +13,7 @@ public class PickableTarget {
     /**
      * Constructor.
      */
-    PickableTarget(){
+    PickableTarget() {
         mPosition = new Position();
         mPosition.generateRandomPosition();
         mTimer = new DisappearanceTimer();
@@ -21,9 +21,10 @@ public class PickableTarget {
 
     /**
      * Constructor.
+     *
      * @param index Initial index of the mesh.
      */
-    PickableTarget(int index){
+    PickableTarget(int index) {
         mPosition = new Position();
         mPosition.generateRandomPosition();
         setMeshIndex(index);
@@ -32,12 +33,13 @@ public class PickableTarget {
     /**
      * Changes the position with a random new one.
      */
-    public void randomPosition(){
+    public void randomPosition() {
         mPosition.generateRandomPosition();
     }
 
     /**
      * Gets the position.
+     *
      * @return A {@link Position} object.
      */
     public Position getPosition() {
@@ -46,6 +48,7 @@ public class PickableTarget {
 
     /**
      * Gets the index of the current mesh.
+     *
      * @return the current value of the index.
      */
     public int getMeshIndex() {
@@ -54,6 +57,7 @@ public class PickableTarget {
 
     /**
      * Sets a new index.
+     *
      * @param meshIndex
      */
     public void setMeshIndex(int meshIndex) {
@@ -62,6 +66,7 @@ public class PickableTarget {
 
     /**
      * Gets the timer.
+     *
      * @return A {@link DisappearanceTimer} object.
      */
     public DisappearanceTimer getTimer() {
@@ -71,7 +76,7 @@ public class PickableTarget {
     /**
      * Checks if an object must be hidden.
      */
-    public boolean isHidden(){
+    public boolean isHidden() {
         return mTimer.timeFinished();
     }
 }
