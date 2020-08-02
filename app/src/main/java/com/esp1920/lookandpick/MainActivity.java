@@ -124,7 +124,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private TargetManager mTargetManager = TargetManager.getInstance();
 
     //This indicates the time an object can remain in the scene before disappearing.
-    private long timer = 10000;
+    //private long timer = 10000;
 
 
     /**
@@ -273,6 +273,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Chooses randomly the first object to show for each pickable object.
         for(int i = 0; i < TARGET_NUMBER; i++){
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
+            mPickableTargets[i].getTimer().startTimer();
+            Log.d(TAG, "*******primi oggetti " +i +" ********");
         }
 
 
@@ -369,8 +371,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         } else {
             targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         }
-
-        targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
+        //TODO mettere hidden
+        if (!(pickableTarget.isHidden())) {
+            targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
+        }
     }
 
     /**
@@ -406,6 +410,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(mPickableTargets[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
+                mPickableTargets[i].getTimer().stopTimer();
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 break;
             }
@@ -418,7 +423,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private int hideTarget(PickableTarget pickableTarget) {
         pickableTarget.randomPosition();
         updateSoundPosition(pickableTarget);
-        int temp = random.nextInt(TARGET_MESH_COUNT);      
+        int temp = random.nextInt(TARGET_MESH_COUNT);
+
+        //TODO:Maybe this is wrong, check
+        pickableTarget.getTimer().restartTimer();
 
         return temp;
     }

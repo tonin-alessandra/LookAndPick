@@ -8,6 +8,7 @@ package com.esp1920.lookandpick;
 public class PickableTarget {
     private Position mPosition;
     private int mMeshIndex;
+    private DisappearanceTimer mTimer;
 
     /**
      * Constructor.
@@ -15,6 +16,7 @@ public class PickableTarget {
     PickableTarget(){
         mPosition = new Position();
         mPosition.generateRandomPosition();
+        mTimer = new DisappearanceTimer();
     }
 
     /**
@@ -56,5 +58,20 @@ public class PickableTarget {
      */
     public void setMeshIndex(int meshIndex) {
         mMeshIndex = meshIndex;
+    }
+
+    /**
+     * Gets the timer.
+     * @return A {@link DisappearanceTimer} object.
+     */
+    public DisappearanceTimer getTimer() {
+        return mTimer;
+    }
+
+    /**
+     * Checks if an object must be hidden.
+     */
+    public boolean isHidden(){
+        return mTimer.timeFinished();
     }
 }
