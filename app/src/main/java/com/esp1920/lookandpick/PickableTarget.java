@@ -38,7 +38,7 @@ public class PickableTarget {
 
     /**
      * Gets the position.
-     * @return a Position object.
+     * @return A {@link Position} object.
      */
     public Position getPosition() {
         return mPosition;
