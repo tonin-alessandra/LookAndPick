@@ -268,8 +268,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.e(TAG, "Unable to initialize objects", e);
         }
 
-        //TODO: multiple-objects
-
         // Chooses randomly the first object to show for each pickable object.
         for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
@@ -372,7 +370,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         } else {
             targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         }
-        //TODO mettere hidden
         if (!(pickableTarget.isHidden())) {
             targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
         }
@@ -403,7 +400,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onCardboardTrigger() {
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
-        //TODO: codice unito
         // Check all the targets and hide the one the user is looking at
 
         //TODO: modo più efficiente per gestire più oggetti?
@@ -411,7 +407,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(mPickableTargets[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                mPickableTargets[i].getTimer().restartTimer();
+                mPickableTargets[i].getTimer().stopTimer();
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 break;
             }
@@ -420,14 +416,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Find a new random position for the target object.
      */
-//TODO: codice unito 
     private int hideTarget(PickableTarget pickableTarget) {
         pickableTarget.randomPosition();
         updateSoundPosition(pickableTarget);
         int temp = random.nextInt(TARGET_MESH_COUNT);
-
-        //TODO:Maybe this is wrong, check
-        //pickableTarget.getTimer().restartTimer();
+        pickableTarget.getTimer().restartTimer();
 
         return temp;
     }
