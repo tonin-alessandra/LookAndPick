@@ -49,6 +49,15 @@ public class PickableTarget {
     }
 
     /**
+     * Sets the position.
+     *
+     * @param position A new Position.
+     */
+    public void setPosition(Position position) {
+        mPosition = position;
+    }
+
+    /**
      * Gets the index of the current mesh.
      *
      * @return the current value of the index.

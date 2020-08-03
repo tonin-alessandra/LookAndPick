@@ -147,10 +147,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Creates TARGET_NUMBER pickable objects on the scene without any associated mesh
         mPickableTargets = new PickableTarget[TARGET_NUMBER];
-        for (int i = 0; i < TARGET_NUMBER; i++) {
+        for (int i = 0; i < TARGET_NUMBER; i++)
             mPickableTargets[i] = new PickableTarget();
-            mPickableTargets[i].randomPosition();
-        }
+
+        // Changes the position of each pickable target in order to avoid overlapping
+        for(int i = 0; i < TARGET_NUMBER; i++)
+            mPickableTargets[i].setPosition(newPosition());
 
         tempPosition = new float[4];
         headRotation = new float[4];
@@ -417,12 +419,52 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Find a new random position for the target object.
      */
     private int hideTarget(PickableTarget pickableTarget) {
-        pickableTarget.randomPosition();
+        Position tempPosition = newPosition();
+        pickableTarget.setPosition(tempPosition);
+
         updateSoundPosition(pickableTarget);
+
         int temp = random.nextInt(TARGET_MESH_COUNT);
         pickableTarget.getTimer().restartTimer();
 
         return temp;
+    }
+
+    /**
+     * Creates a new Position with a distance of at least 2.0 from the other objects.
+     *
+     * @return The new {@link Position}.
+     */
+    private Position newPosition(){
+        float distance;
+
+        Position tempPosition = new Position();
+        tempPosition.generateRandomPosition();
+
+        float x1 = tempPosition.getXCoordinate();
+        float y1 = tempPosition.getYCoordinate();
+        float z1 = tempPosition.getZCoordinate();
+
+        // TODO: Create an equals() method?
+        for(int i = 0; i < TARGET_NUMBER; i++) {
+            float x2 = mPickableTargets[i].getPosition().getXCoordinate();
+            float y2 = mPickableTargets[i].getPosition().getYCoordinate();
+            float z2 = mPickableTargets[i].getPosition().getZCoordinate();
+
+            // Calculates the distances between the new position and a pickableTarget object.
+            distance = (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2) + Math.pow((z1 - z2), 2));
+
+            // If the distance is <2.0 then calculate a new random position
+            if (distance < 2.0) {
+                tempPosition.generateRandomPosition();
+                x1 = tempPosition.getXCoordinate();
+                y1 = tempPosition.getYCoordinate();
+                z1 = tempPosition.getZCoordinate();
+                i = 0;
+            }
+        }
+
+        return tempPosition;
     }
 
     /**
