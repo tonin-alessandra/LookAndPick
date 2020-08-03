@@ -51,7 +51,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final String OBJECT_SOUND_FILE = "audio/HelloVR_Loop.ogg";
     private static final String SUCCESS_SOUND_FILE = "audio/HelloVR_Activation.ogg";
 
-    private static final float DEFAULT_FLOOR_HEIGHT = -1.6f;
+    private static final float DEFAULT_FLOOR_HEIGHT = -3.0f;
 
     private static final float ANGLE_LIMIT = 0.2f;
 
