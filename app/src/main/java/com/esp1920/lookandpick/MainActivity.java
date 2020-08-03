@@ -37,8 +37,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final String TAG = "MainActivity";
 
     // Number of objects that can be rendered.
-    private static final int TARGET_MESH_COUNT = 7;
-    private static final int TARGET_NUMBER = 4;
+    private static final int TARGET_MESH_COUNT = 6;
+    private static final int TARGET_NUMBER = 8;
 
     // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
@@ -101,9 +101,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] modelViewProjection;
     private float[] modelView;
 
-    // Array where are stored positions and indexes
-    private Position[] targetsPosition;
-    private int[] curTarget;
+    // Array where are stored position and index of each pickable object.
+    private PickableTarget[] mPickableTargets;
 
     private Position roomPosition;
 
@@ -125,7 +124,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private TargetManager mTargetManager = TargetManager.getInstance();
 
     //This indicates the time an object can remain in the scene before disappearing.
-    private long timer = 10000;
+    //private long timer = 10000;
 
 
     /**
@@ -140,23 +139,22 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         random = new Random();
 
-        curTarget = new int[TARGET_NUMBER];
-
         camera = new float[16];
         view = new float[16];
         modelViewProjection = new float[16];
         modelView = new float[16];
         headView = new float[16];
 
-        targetsPosition = new Position[TARGET_NUMBER];
-        for(int i = 0; i < TARGET_NUMBER; i++){
-            targetsPosition[i] = new Position();
-            targetsPosition[i].generateRandomPosition();
+        // Creates TARGET_NUMBER pickable objects on the scene without any associated mesh
+        mPickableTargets = new PickableTarget[TARGET_NUMBER];
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            mPickableTargets[i] = new PickableTarget();
+            mPickableTargets[i].randomPosition();
         }
 
         tempPosition = new float[4];
         headRotation = new float[4];
-        roomPosition = new Position(0, DEFAULT_FLOOR_HEIGHT, 0);
+        roomPosition = new Position();
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
@@ -228,7 +226,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Returns the location of the uniform variable u_MVP within the program 'objectProgram'.
         objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
 
-        roomPosition = new Position(0, DEFAULT_FLOOR_HEIGHT, 0);
+        roomPosition.setPosition(0, DEFAULT_FLOOR_HEIGHT, 0);
 
         // Avoid any delays during start-up due to decoding of sound files.
         new Thread(
@@ -240,19 +238,23 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         // whenever the target position changes.
                         gvrAudioEngine.preloadSoundFile(OBJECT_SOUND_FILE);
                         sourceId = gvrAudioEngine.createSoundObject(OBJECT_SOUND_FILE);
-                        // gvrAudioEngine.setSoundObjectPosition(
-                        //        sourceId, targetPosition.getXCoordinate(), targetPosition.getYCoordinate(), targetPosition.getZCoordinate());
-                         gvrAudioEngine.playSound(sourceId, true /* looped playback */);
+                        for (int i = 0; i < TARGET_NUMBER; i++)
+                            gvrAudioEngine.setSoundObjectPosition(
+                                    sourceId,
+                                    mPickableTargets[i].getPosition().getXCoordinate(),
+                                    mPickableTargets[i].getPosition().getYCoordinate(),
+                                    mPickableTargets[i].getPosition().getZCoordinate());
+                        gvrAudioEngine.playSound(sourceId, true /* looped playback */);
                         // Preload an unspatialized sound to be played on a successful trigger on the
                         // target.
-                         gvrAudioEngine.preloadSoundFile(SUCCESS_SOUND_FILE);
+                        gvrAudioEngine.preloadSoundFile(SUCCESS_SOUND_FILE);
                     }
                 })
                 .start();
 
         // Update sound position for the first time
-        for(int i = 0; i < TARGET_NUMBER; i++)
-            updateSoundPosition(targetsPosition[i]);
+        for (int i = 0; i < TARGET_NUMBER; i++)
+            updateSoundPosition(mPickableTargets[i]);
 
         Util.checkGlError("onSurfaceCreated");
 
@@ -266,12 +268,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.e(TAG, "Unable to initialize objects", e);
         }
 
-        //TODO: multiple-objects
-        // Chooses randomly the first object to show for each target.
-        for(int i = 0; i < TARGET_NUMBER; i++){
-            curTarget[i] = random.nextInt(TARGET_MESH_COUNT);
-            targetObjectMeshes.get(curTarget[i]).startTimer(timer);
-            Log.d(TAG, "*******primi oggetti "+i +" ********");
+        // Chooses randomly the first object to show for each pickable object.
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
+            mPickableTargets[i].getTimer().startTimer();
+            Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
 
 
@@ -280,11 +281,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Updates the sounds' positions.
      */
-    private void updateSoundPosition(Position target) {
+    private void updateSoundPosition(PickableTarget pickableTarget) {
         // Update the sound location to match it with the new target position.
         if (sourceId != GvrAudioEngine.INVALID_ID) {
             gvrAudioEngine.setSoundObjectPosition(
-                    sourceId, target.getXCoordinate(), target.getYCoordinate(), target.getZCoordinate());
+                    sourceId, pickableTarget.getPosition().getXCoordinate(),
+                    pickableTarget.getPosition().getYCoordinate(),
+                    pickableTarget.getPosition().getZCoordinate());
         }
         Util.checkGlError("updateTargetPosition");
     }
@@ -303,7 +306,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
         if (gvrProperties.get(PropertyType.TRACKING_FLOOR_HEIGHT, floorHeight)) {
             // The floor height can change each frame when tracking system detects a new floor position.
-            // TODO: aggiornare questo se la stanza è trattata come un target
             roomPosition.setPosition(0, floorHeight.asFloat(), 0);
         } // else the device doesn't support floor height detection so DEFAULT_FLOOR_HEIGHT is used.
 
@@ -325,8 +327,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onDrawEye(Eye eye) {
-        // TODO: aggiornamento posizione oggetti qui perché è qui che viene usato il getModel (?)
-
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         // The clear color doesn't matter here because it's completely obscured by
         // the room. However, the color buffer is still cleared because it may
@@ -340,10 +340,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Build the ModelView and ModelViewProjection matrices
         // for calculating the position of the target object.
-        for(int i = 0; i < TARGET_NUMBER; i++){
-            Matrix.multiplyMM(modelView, 0, view, 0, targetsPosition[i].getModel(), 0);
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            Matrix.multiplyMM(modelView, 0, view, 0, mPickableTargets[i].getPosition().getModel(), 0);
             Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
-            drawTarget(targetsPosition[i], curTarget[i]);
+            drawTarget(mPickableTargets[i]);
         }
 
 
@@ -354,29 +354,25 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public void onFinishFrame(Viewport viewport) {}
+    public void onFinishFrame(Viewport viewport) {
+    }
 
     /**
      * Draw the target object.
      *
-     * //TODO
-     * @param target
-     * @param curTarget
+     * @param pickableTarget The PickableTarget object to draw.
      */
-    public void drawTarget(Position target, int curTarget) {
+    public void drawTarget(PickableTarget pickableTarget) {
         GLES20.glUseProgram(objectProgram);
         GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
-        if (isLookingAtTarget(target)) {
-            targetObjectSelectedTextures.get(curTarget).bind();
+        if (isLookingAtTarget(pickableTarget)) {
+            targetObjectSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         } else {
-            targetObjectNotSelectedTextures.get(curTarget).bind();
+            targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         }
-
-      //TODO: codice unito
-        if (!(targetObjectMeshes.get(curTarget).isHidden())) {
-            targetObjectMeshes.get(curTarget).draw();
+        if (!(pickableTarget.isHidden())) {
+            targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
         }
-
     }
 
     /**
@@ -403,17 +399,16 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onCardboardTrigger() {
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
-        
-      //TODO: codice unito
+
         // Check all the targets and hide the one the user is looking at
 
         //TODO: modo più efficiente per gestire più oggetti?
-        for(int i = 0; i < TARGET_NUMBER; i++)
-            if (isLookingAtTarget(targetsPosition[i])) {
+        for (int i = 0; i < TARGET_NUMBER; i++)
+            if (isLookingAtTarget(mPickableTargets[i])) {
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                targetObjectMeshes.get(curTarget[i]).stopTimer();
-                curTarget[i] = hideTarget(targetsPosition[i]);
+                mPickableTargets[i].getTimer().stopTimer();
+                mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 break;
             }
     }
@@ -421,13 +416,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Find a new random position for the target object.
      */
-//TODO: codice unito 
-    private int hideTarget(Position target) {
-        target.generateRandomPosition();
-        updateSoundPosition(target);
-        int temp = random.nextInt(TARGET_MESH_COUNT);      
-        targetObjectMeshes.get(temp).restartTimer(timer);
-      return temp;
+    private int hideTarget(PickableTarget pickableTarget) {
+        pickableTarget.randomPosition();
+        updateSoundPosition(pickableTarget);
+        int temp = random.nextInt(TARGET_MESH_COUNT);
+        pickableTarget.getTimer().restartTimer();
+
+        return temp;
     }
 
     /**
@@ -435,9 +430,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      *
      * @return true if the user is looking at the target object.
      */
-    private boolean isLookingAtTarget(Position target) {
+    private boolean isLookingAtTarget(PickableTarget pickableTarget) {
         // Convert object space to camera space. Use the headView from onNewFrame.
-        Matrix.multiplyMM(modelView, 0, headView, 0, target.getModel(), 0);
+        Matrix.multiplyMM(modelView, 0, headView, 0, pickableTarget.getPosition().getModel(), 0);
         Matrix.multiplyMV(tempPosition, 0, modelView, 0, POS_MATRIX_MULTIPLY_VEC, 0);
 
         float angle = Util.angleBetweenVectors(tempPosition, FORWARD_VEC);
@@ -462,7 +457,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Target tarAndroid = new Target(ObjName.GREEN_ANDROID, "graphics/android/green_android.obj", "graphics/android/dark_green_android.png", "graphics/android/green_android.png");
         Target tarCactus = new Target(ObjName.CACTUS, "graphics/cactus/cactus.obj", "graphics/cactus/dark_cactus.png", "graphics/cactus/cactus.png");
         Target tarMouse = new Target(ObjName.MOUSE, "graphics/mouse/mouse.obj", "graphics/mouse/dark_mouse.png", "graphics/mouse/mouse.png");
-        Target tarRose = new Target(ObjName.ROSE, "graphics/rose/rose.obj", "graphics/rose/dark_rose.png", "graphics/rose/rose.png");
 
         addObject(tarCat, objectPositionParam, objectUvParam);
         addObject(tarPikachu, objectPositionParam, objectUvParam);
@@ -470,7 +464,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         addObject(tarAndroid, objectPositionParam, objectUvParam);
         addObject(tarCactus, objectPositionParam, objectUvParam);
         addObject(tarMouse, objectPositionParam, objectUvParam);
-        addObject(tarRose, objectPositionParam, objectUvParam);
     }
 
     /**
