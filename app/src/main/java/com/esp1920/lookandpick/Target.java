@@ -4,14 +4,11 @@ import static com.esp1920.lookandpick.ObjName.*;
 import static com.esp1920.lookandpick.ObjCategory.*;
 
 /**
- * This class represents a generic target object that will rendered to appear on the scene.
+ * This class represents a generic {@link PickableTarget} object that will rendered to appear on the scene.
  * All operations to manage a {@link Target} behaviour can be found in {@link TargetManager}.
  */
 public class Target {
     private final String TAG = "Target";
-
-//    private float[] mPosition;
-//    private float[] mModelTarget;
 
     private ObjName mName;
     private ObjCategory mCategory;
@@ -43,13 +40,6 @@ public class Target {
 //        setScore(score);
 //    }
 
-//    public float[] getModelTarget() {
-//        return mModelTarget;
-//    }
-//
-//    public void setModelTarget(float[] modelTarget) {
-//        mModelTarget = modelTarget;
-//    }
 
     /**
      * Gets the name of this target object.
@@ -153,16 +143,6 @@ public class Target {
     private void setSelectedTexturePath(String selectedTexturePath) {
         mSelectedTexturePath = selectedTexturePath;
     }
-
-//    public float[] getPosition() {
-//        return mPosition;
-//    }
-//
-//    public void setPosition(float x, float y, float z) {
-//        mPosition[0] = x;
-//        mPosition[1] = y;
-//        mPosition[2] = z;
-//    }
 
     /**
      * Gets the path to the .obj model file used to create this target object.
