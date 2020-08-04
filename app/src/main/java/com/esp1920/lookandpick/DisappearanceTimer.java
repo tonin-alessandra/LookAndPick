@@ -8,8 +8,11 @@ import android.util.Log;
  */
 public class DisappearanceTimer {
     private static final String TAG = "DisappearanceTimer";
-    private final static long INTERVAL = 1000;
+
+    //This indicates the time an object can remain in the scene before disappearing.
     private final static long TIMER = 20000;
+    private final static long INTERVAL = 1000;
+
     private CountDownTimer mCDTimer;
     private boolean mHidden;
 

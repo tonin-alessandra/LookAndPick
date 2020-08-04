@@ -2,7 +2,8 @@ package com.esp1920.lookandpick;
 
 /**
  * This class represents a visible object that appears on the screen.
- * Every object is represented using its position and an index, which indicates the associated mesh.
+ * Every object is represented using its {@link Position} and an index, which indicates the associated mesh.
+ * Also, each object has a {@link DisappearanceTimer}.
  */
 
 public class PickableTarget {
@@ -11,7 +12,7 @@ public class PickableTarget {
     private DisappearanceTimer mTimer;
 
     /**
-     * Constructor.
+     * Constructor. It does not initialize the mesh index.
      */
     PickableTarget() {
         mPosition = new Position();
@@ -40,12 +41,21 @@ public class PickableTarget {
     }
 
     /**
-     * Gets the position.
+     * Gets the position of the {@link PickableTarget} object.
      *
-     * @return A {@link Position} object.
+     * @return The {@link Position} object.
      */
     public Position getPosition() {
         return mPosition;
+    }
+
+    /**
+     * Sets the position.
+     *
+     * @param position A new Position.
+     */
+    public void setPosition(Position position) {
+        mPosition = position;
     }
 
     /**

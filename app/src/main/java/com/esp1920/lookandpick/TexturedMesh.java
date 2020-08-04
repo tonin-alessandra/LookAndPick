@@ -19,7 +19,6 @@ import java.nio.ShortBuffer;
 /**
  * This class has been written by Google and renders an object loaded from an OBJ file.
  * It is taken from gvr-android-sdk-1.200 project, more precisely from sdk-hellovr sample.
- * <p>
  */
 /* package */ class TexturedMesh {
     private static final String TAG = "TexturedMesh";
