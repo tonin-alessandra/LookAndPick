@@ -4,7 +4,6 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.vr.ndk.base.Properties;
 import com.google.vr.ndk.base.Value;
@@ -131,9 +130,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final Value floorHeight = new Value();
 
     ////////////////////////////////////////////////////
-    private PlayerMovement player;
-    private float[] eyePosition;
-    String s;
+    private PlayerMovement player = new PlayerMovement();
+    private float eyeZ = 0.0f;
 
 
     /**
@@ -163,9 +161,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Makes objects appear randomly.
         random = new Random();
-
-        player = new PlayerMovement();
-        eyePosition = new float[]{0.0f, 0.0f, 0.0f};
     }
 
     public void initializeGvrView() {
@@ -300,9 +295,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        s = player.updateEyePosition(headTransform, eyePosition);
+        eyeZ = player.updateEyePosition(headTransform, eyeZ);
         // Build the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0,0, 0 , eyePosition[2], 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Control if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
@@ -404,8 +399,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
             hideTarget();
         }
-
-        Toast.makeText(this, s , Toast.LENGTH_LONG).show();
     }
 
     /**
