@@ -49,7 +49,7 @@ import com.google.vr.sdk.base.HeadTransform;
 
     private boolean canMoveForward;
     private boolean canMoveBackward;
-    private static  final float boundA = -0.9f;
+    private static final float boundA = -0.9f;
     private static final float boundB = 5.5f;
 
     public PlayerMovement() {}
