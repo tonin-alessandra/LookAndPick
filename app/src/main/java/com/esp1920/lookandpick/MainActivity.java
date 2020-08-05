@@ -148,10 +148,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         initializeGvrView();
 
+        // Initializes the first level
         mLevel = new Level();
-
+        // Initializes the handler to manage the switching between levels
         mHandler = new Handler();
-        initLevelTimer();
+        changeLevel();
 
         gameStatus = new GameStatus(INITIAL_SCORE, NUMBER_OF_LIVES, getApplicationContext());
 
@@ -453,20 +454,38 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             }
     }
 
-    /** TODO: cambiare descrizione del metodo e magari anche nome
-     * Initializes the level timer.
+    /**
+     * TODO: use real level duration, here I used 20 seconds and 60 seconds to try.
+     * TODO: use random categories (commented code).
+     * Handles the change of level, changing parameters after a fixed amount of time (which is the level duration).
+     * Since there are 3 different levels, when the duration time of the first one is reached, there is
+     * a switch to the second one. Same thing for the third level.
      */
-    private void initLevelTimer() {
-        mHandler = new Handler();
+    private void changeLevel() {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mLevel.nextLevel();
+                // To try the code, the second level requires the player to collect only animals
+                mLevel.setCategory(ObjCategory.ANIMAL);
+                //mLevel.setCategory(ObjCategory.getRandomCategory());
+                mLevel.setDuration(60);
                 Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
                 hideAllTargets();
-                mHandler.postDelayed(this,10000);
+                mHandler.removeCallbacks(this);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLevel.nextLevel();
+                        // The third level requires the player to collect bonus objects (plane and piakchu)
+                        mLevel.setCategory(ObjCategory.BONUS);
+                        //mLevel.setCategory(ObjCategory.getRandomCategory());
+                        Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
+                        hideAllTargets();
+                    }
+                }, mLevel.getDuration() * 1000); //Level duration is in seconds, but handler requires millis
             }
-        },10000);
+        }, 20000);
     }
 
     /**
@@ -529,7 +548,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         return tempPosition;
     }
-    
+
     /**
      * Checks if user is looking at the target object by calculating where the object is in eye-space.
      *
@@ -546,10 +565,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     /**
      * Checks if the category passed as param is the same of the level's category.
+     *
      * @param obj The category of the {@link PickableTarget} to check.
-     * @return  true if match, false otherwise.
+     * @return true if the categories match, false otherwise.
      */
     private boolean checkCategory(ObjCategory obj) {
+        // If the level's category is ALL, it means all objects are correct.
+        if (mLevel.getCategory() == ObjCategory.ALL) return true;
         return obj == mLevel.getCategory();
     }
 
@@ -605,4 +627,5 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectNotSelectedTextures.add(mTargetManager.getNotSelectedTexture());
         targetObjectSelectedTextures.add(mTargetManager.getSelectedTexture());
     }
+
 }
