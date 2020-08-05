@@ -126,6 +126,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private TargetManager mTargetManager = TargetManager.getInstance();
 
     private PlayerMovement mPlayerMovement = new PlayerMovement();
+
     private float eyeZ = 0.0f;
 
     private VrTextView scoreBar;
