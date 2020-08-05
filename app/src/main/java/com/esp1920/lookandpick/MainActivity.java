@@ -1,5 +1,6 @@
 package com.esp1920.lookandpick;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -130,8 +131,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float eyeZ = 0.0f;
 
     // Used to manage score and remaining lives (gameover)
-    private GameStatus lives;
-    private GameStatus score;
+    private GameStatus gameStatus;
+    private final static int INITIAL_SCORE = 0;
+    private final static int NUMBER_OF_LIVES = 3;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -143,8 +145,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         initializeGvrView();
 
-        lives = new GameStatus(3);
-        score = new GameStatus(0);
+        gameStatus = new GameStatus(INITIAL_SCORE, NUMBER_OF_LIVES, getApplicationContext());
 
         random = new Random();
 
@@ -419,14 +420,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
 
-                if(checkCategories(mPickableTargets[i].getTarget().getCategory(), ObjCategory.ANIMAL)) {
-                    score.increase(1); // TODO: amount -> mettere il punteggio del target?
-                    Log.d(TAG, "***Punteggio: " + score.getCounter());
-                }else{
-                    lives.decrease(1);
-                    Log.d(TAG, "***Vite: " + lives.getCounter());
+                if (checkCategories(mPickableTargets[i].getTarget().getCategory(), ObjCategory.ANIMAL)) {
+                    gameStatus.increaseScore(1); // TODO: amount -> mettere il punteggio del target?
+                    Log.d(TAG, "***Punteggio: " + gameStatus.getScore());
+                } else {
+                    gameStatus.decreaseLives(1);
+                    Log.d(TAG, "***Vite: " + gameStatus.getLives());
 
-                    if(lives.getCounter() == 0){
+                    if (gameStatus.gameOver()) {
                         // GAME OVER
                         Log.d(TAG, "***GAME OVER***");
                     }
@@ -510,7 +511,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return angle < ANGLE_LIMIT;
     }
 
-    private boolean checkCategories(ObjCategory obj1, ObjCategory obj2){
+    private boolean checkCategories(ObjCategory obj1, ObjCategory obj2) {
         return obj1 == obj2;
     }
 

@@ -1,68 +1,79 @@
 package com.esp1920.lookandpick;
 
+import android.content.Context;
+
 /**
- * This class represents a generic status of the game.
- * It is used to represent the lives counter or the score counters.
+ * This class handles a generic status of the game, made up by the actual player score and lives.
  */
 //TODO: nome provvisorio per ora
 public class GameStatus {
     private final String TAG = "GameStatus";
-    private int counter;
+    private int score;
+    private int lives;
     private StatusManager mScoreManager;
 
     /**
      * Constructor.
      *
-     * @param initialValue The initial value of the counter.
+     * @param initialScore The initial value of the score. At the beginning of the game, it should be zero.
+     * @param initialLives The initial value of the player's lives.
+     * @param context      The current application context.
      */
-    GameStatus(int initialValue) {
-        counter = initialValue;
+    GameStatus(int initialScore, int initialLives, Context context) {
+        score = initialScore;
+        lives = initialLives;
+        mScoreManager = StatusManager.getInstance(context);
     }
 
     /**
-     * Increases the counter of a given value.
+     * Increases the score by the specified amount of points.
+     * This is called when the player collects a correct {@link PickableTarget}.
      *
-     * @param amount
+     * @param points The number of points to add to the total score.
      */
-    public void increase(int amount) {
-        counter += amount;
+    public void increaseScore(int points) {
+        score += points;
     }
 
     /**
-     * Decreases the counter of a given value.
+     * Decreases the number of lives by the specified amount.
+     * This is called when the player collects a wrong {@link PickableTarget}.
      *
-     * @param amount
+     * @param amount The number of lives to remove.
      */
-    public void decrease(int amount) {
-        counter -= amount;
+    public void decreaseLives(int amount) {
+        lives -= amount;
     }
 
     /**
-     * Gets the counter value.
-     *
-     * @return The counter value.
+     * @return The actual score value.
      */
-    public int getCounter() {
-        return counter;
+    public int getScore() {
+        return score;
+    }
+
+    /**
+     * @return The actual number of lives.
+     */
+    public int getLives() {
+        return lives;
     }
 
     /**
      * Checks if there is game over.
      *
-     * @return True if the counter reached zero, false otherwise.
+     * @return True if the lives' number reached zero, false otherwise.
      */
     public boolean gameOver() {
-        if (counter == 0)
+        if (lives == 0)
             return true;
         return false;
     }
 
     /**
-     * Saves the counter value with a given TAG.
-     *
-     * @param score The value to save.
+     * Saves the actual score to sharedPreferences.
      */
-    public void saveValue(int score) {
+    public void saveCurrentScore() {
         mScoreManager.saveScore(score);
     }
 }

@@ -17,18 +17,30 @@ public class StatusManager {
     private SharedPreferences.Editor mEditor;
     private String mPreferencesFileName;
     private Context mContext;
+    private static StatusManager instance;
 
     /**
-     * Constructor.
+     * Constructor. It is private due to Singleton.
      *
      * @param context The current application context.
      */
-    public StatusManager(Context context) {
+    private StatusManager(Context context) {
         mContext = context;
         mPreferencesFileName = context.getResources().getString(R.string.ScorePreferences);
         // Retrieves the content of the preferences file identified by mPreferencesFileName.
         // MODE_PRIVATE means that it can only be accessed by the calling application.
         mSharedPref = context.getSharedPreferences(mPreferencesFileName, Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Manages StatusManager object according to Singleton design pattern.
+     *
+     * @returns A new instance of StatusManager or the current one, if it exists.
+     */
+    synchronized public static StatusManager getInstance(Context context) {
+        if (instance == null)
+            instance = new StatusManager(context);
+        return instance;
     }
 
     /**
