@@ -1,3 +1,7 @@
+# This model has been created by "Poly by Google" and the original name is "Cat".
+# It has been published on "poly.google.com" under the CC-BY license.
+# The only changes we made are resizing and renaming.
+
 mtllib cat2.mtl
 g node-0_primitive
 v 0.194645 1.013070 0.236885

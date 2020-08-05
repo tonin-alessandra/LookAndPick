@@ -37,7 +37,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final String TAG = "MainActivity";
 
     // Number of objects that can be rendered.
-    private static final int TARGET_MESH_COUNT = 3;
+    private static final int TARGET_MESH_COUNT = 6;
+    private static final int TARGET_NUMBER = 8;
 
     // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
@@ -47,20 +48,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float[] POS_MATRIX_MULTIPLY_VEC = {0.0f, 0.0f, 0.0f, 1.0f};
     private static final float[] FORWARD_VEC = {0.0f, 0.0f, -1.0f, 1.f};
 
-    private static final float MIN_TARGET_DISTANCE = 3.0f;
-    private static final float MAX_TARGET_DISTANCE = 3.5f;
-
     private static final String OBJECT_SOUND_FILE = "audio/HelloVR_Loop.ogg";
     private static final String SUCCESS_SOUND_FILE = "audio/HelloVR_Activation.ogg";
 
-    private static final float DEFAULT_FLOOR_HEIGHT = -1.6f;
+    private static final float DEFAULT_FLOOR_HEIGHT = -3.0f;
 
     private static final float ANGLE_LIMIT = 0.2f;
-
-    // The maximum yaw and pitch of the target object, in degrees. After hiding the target, its
-    // yaw will be within [-MAX_YAW, MAX_YAW] and pitch will be within [-MAX_PITCH, MAX_PITCH].
-    private static final float MAX_YAW = 100.0f;
-    private static final float MAX_PITCH = 25.0f;
 
     private static final String[] OBJECT_VERTEX_SHADER_CODE =
             new String[]{
@@ -93,28 +86,25 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private int objectUvParam;
     private int objectModelViewProjectionParam;
 
-    private float targetDistance = MAX_TARGET_DISTANCE;
-
-    private TexturedMesh room;
-    private Texture roomTex;
+    private Target room;
+    private TexturedMesh roomTextureMesh;
+    private Texture roomTexture;
     private ArrayList<TexturedMesh> targetObjectMeshes;
     private ArrayList<Texture> targetObjectNotSelectedTextures;
     private ArrayList<Texture> targetObjectSelectedTextures;
-    private int curTargetObject;
 
     private Random random;
 
-    // Transformation matrices used to render the scene.
-    private float[] targetPosition;
     private float[] camera;
     private float[] view;
     private float[] headView;
     private float[] modelViewProjection;
     private float[] modelView;
 
-    private float[] modelTarget;
-    // modelRoom is a matrix that contains the coordinates of the room based on user's location.
-    private float[] modelRoom;
+    // Array where are stored position and index of each pickable object.
+    private PickableTarget[] mPickableTargets;
+
+    private Position roomPosition;
 
     private float[] tempPosition;
     private float[] headRotation;
@@ -125,11 +115,16 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private volatile int successSourceId = GvrAudioEngine.INVALID_ID;
 
     private Properties gvrProperties;
+
     // This is an opaque wrapper around an internal GVR property. It is set via Properties and
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
-    ////////////////////////////////////////////////////
+
+    // Used to manage all target-related operations
+    // TODO: this is managed as a singleton, is it correct?
+    private TargetManager mTargetManager = TargetManager.getInstance();
+
     private PlayerMovement player = new PlayerMovement();
     private float eyeZ = 0.0f;
 
@@ -144,23 +139,29 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         initializeGvrView();
 
+        random = new Random();
+
         camera = new float[16];
         view = new float[16];
         modelViewProjection = new float[16];
         modelView = new float[16];
         headView = new float[16];
 
-        // Target object first appears directly in front of user.
-        targetPosition = new float[]{0.0f, 0.0f, -MIN_TARGET_DISTANCE};
+        // Creates TARGET_NUMBER pickable objects on the scene without any associated mesh with a
+        // random position.
+        mPickableTargets = new PickableTarget[TARGET_NUMBER];
+        for (int i = 0; i < TARGET_NUMBER; i++)
+            mPickableTargets[i] = new PickableTarget();
+
+        // Changes the position of each pickable target in order to avoid overlapping.
+        for(int i = 0; i < TARGET_NUMBER; i++)
+            mPickableTargets[i].setPosition(newPosition());
+
         tempPosition = new float[4];
         headRotation = new float[4];
-        modelTarget = new float[16];
-        modelRoom = new float[16];
+        roomPosition = new Position();
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
-
-        // Makes objects appear randomly.
-        random = new Random();
     }
 
     public void initializeGvrView() {
@@ -206,13 +207,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public void onSurfaceChanged(int width, int height) {
-    }
+    public void onSurfaceChanged(int width, int height) { }
 
 
     /**
      * Creates the buffers we use to store information about the 3D world.
-     * <p>
      * OpenGL doesn't use Java arrays, but rather needs data in a format it can understand.
      * Hence we use ByteBuffers.
      *
@@ -231,22 +230,24 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Returns the location of the uniform variable u_MVP within the program 'objectProgram'.
         objectModelViewProjectionParam = GLES20.glGetUniformLocation(objectProgram, "u_MVP");
 
-        // TODO: (per una spiegazione di queste due operazioni ho anche aggiunto un file nel drive)
-        Matrix.setIdentityM(modelRoom, 0);
-        Matrix.translateM(modelRoom, 0, 0, DEFAULT_FLOOR_HEIGHT, 0);
+        roomPosition.setPosition(0, DEFAULT_FLOOR_HEIGHT, 0);
 
         // Avoid any delays during start-up due to decoding of sound files.
         new Thread(
                 new Runnable() {
                     @Override
                     public void run() {
-                        // Start spatial audio playback of OBJECT_SOUND_FILE at the model position. The
+                        // Starts spatial audio playback of OBJECT_SOUND_FILE at the model position. The
                         // returned sourceId handle is stored and allows for repositioning the sound object
                         // whenever the target position changes.
                         gvrAudioEngine.preloadSoundFile(OBJECT_SOUND_FILE);
                         sourceId = gvrAudioEngine.createSoundObject(OBJECT_SOUND_FILE);
-                        gvrAudioEngine.setSoundObjectPosition(
-                                sourceId, targetPosition[0], targetPosition[1], targetPosition[2]);
+                        for (int i = 0; i < TARGET_NUMBER; i++)
+                            gvrAudioEngine.setSoundObjectPosition(
+                                    sourceId,
+                                    mPickableTargets[i].getPosition().getXCoordinate(),
+                                    mPickableTargets[i].getPosition().getYCoordinate(),
+                                    mPickableTargets[i].getPosition().getZCoordinate());
                         gvrAudioEngine.playSound(sourceId, true /* looped playback */);
                         // Preload an unspatialized sound to be played on a successful trigger on the
                         // target.
@@ -255,35 +256,40 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 })
                 .start();
 
-        // Update the target position for the first time
-        updateTargetPosition();
+        // Updates sound position for the first time
+        for (int i = 0; i < TARGET_NUMBER; i++)
+            updateSoundPosition(mPickableTargets[i]);
 
         Util.checkGlError("onSurfaceCreated");
 
         try {
-            room = new TexturedMesh(this, "graphics/room/BigCubeRoom.obj", objectPositionParam, objectUvParam);
-            roomTex = new Texture(this, "graphics/room/BigCubeRoom.png");
+            room = new Target(ObjName.ROOM, "graphics/room/BigCubeRoom.obj", "graphics/room/BigCubeRoom.png", "graphics/room/BigCubeRoom.png");
+            mTargetManager.applyTexture(this, room, objectPositionParam, objectUvParam);
+            roomTextureMesh = mTargetManager.getTexturedMesh();
+            roomTexture = mTargetManager.getSelectedTexture();
             addTargets(objectPositionParam, objectUvParam);
         } catch (IOException e) {
             Log.e(TAG, "Unable to initialize objects", e);
         }
 
-        // Chooses randomly the first object to show.
-        curTargetObject = random.nextInt(TARGET_MESH_COUNT);
+        // Chooses randomly the first object to show for each pickable object.
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
+            mPickableTargets[i].getTimer().startTimer();
+            Log.d(TAG, "*******primi oggetti " + i + " ********");
+        }
     }
 
     /**
-     * Updates the target object position.
+     * Updates the sounds' positions.
      */
-    private void updateTargetPosition() {
-        // Prepare the target's matrix
-        Matrix.setIdentityM(modelTarget, 0);
-        Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
-
-        // Update the sound location to match it with the new target position.
+    private void updateSoundPosition(PickableTarget pickableTarget) {
+        // Updates the sound location to match it with the new target position.
         if (sourceId != GvrAudioEngine.INVALID_ID) {
             gvrAudioEngine.setSoundObjectPosition(
-                    sourceId, targetPosition[0], targetPosition[1], targetPosition[2]);
+                    sourceId, pickableTarget.getPosition().getXCoordinate(),
+                    pickableTarget.getPosition().getYCoordinate(),
+                    pickableTarget.getPosition().getZCoordinate());
         }
         Util.checkGlError("updateTargetPosition");
     }
@@ -299,18 +305,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Build the camera matrix and apply it to the ModelView.
         Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
-        // Control if the floor height is available.
+        // Controls if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
         if (gvrProperties.get(PropertyType.TRACKING_FLOOR_HEIGHT, floorHeight)) {
             // The floor height can change each frame when tracking system detects a new floor position.
-            Matrix.setIdentityM(modelRoom, 0);
-            Matrix.translateM(modelRoom, 0, 0, floorHeight.asFloat(), 0);
+            roomPosition.setPosition(0, floorHeight.asFloat(), 0);
         } // else the device doesn't support floor height detection so DEFAULT_FLOOR_HEIGHT is used.
 
-        // Write into headView the transform from the camera space to the head space
+        // Writes into headView the transform from the camera space to the head space
         headTransform.getHeadView(headView, 0);
 
-        // Update the 3d audio engine with the most recent head rotation.
+        // Updates the 3d audio engine with the most recent head rotation.
         headTransform.getQuaternion(headRotation, 0);
         gvrAudioEngine.setHeadRotation(
                 headRotation[0], headRotation[1], headRotation[2], headRotation[3]);
@@ -331,42 +336,44 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // improve performance.
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        // Apply the eye transformation to the camera.
+        // Applies the eye transformation to the camera.
         Matrix.multiplyMM(view, 0, eye.getEyeView(), 0, camera, 0);
 
-        // Build the ModelView and ModelViewProjection matrices
-        // for calculating the position of the target object.
         float[] perspective = eye.getPerspective(Z_NEAR, Z_FAR);
 
-        // Set modelViewProjection to draw the target correctly
-        // TODO: I think it is used to show the target with the same view of the user.
-        //  We should try to change in some ways these values to see if a target can be rotated.
-        Matrix.multiplyMM(modelView, 0, view, 0, modelTarget, 0);
-        Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
-        drawTarget();
+        // Builds the ModelView and ModelViewProjection matrices
+        // for calculating the position of the target object.
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            Matrix.multiplyMM(modelView, 0, view, 0, mPickableTargets[i].getPosition().getModel(), 0);
+            Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
+            drawTarget(mPickableTargets[i]);
+        }
 
-        // Set modelView for the room, so it's drawn in the correct location
-        Matrix.multiplyMM(modelView, 0, view, 0, modelRoom, 0);
+        // Sets modelView for the room, so it's drawn in the correct location
+        Matrix.multiplyMM(modelView, 0, view, 0, roomPosition.getModel(), 0);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
         drawRoom();
     }
 
     @Override
-    public void onFinishFrame(Viewport viewport) {
-    }
+    public void onFinishFrame(Viewport viewport) { }
 
     /**
-     * Draw the target object.
+     * Draws the target object.
+     *
+     * @param pickableTarget The PickableTarget object to draw.
      */
-    public void drawTarget() {
+    public void drawTarget(PickableTarget pickableTarget) {
         GLES20.glUseProgram(objectProgram);
         GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
-        if (isLookingAtTarget()) {
-            targetObjectSelectedTextures.get(curTargetObject).bind();
+        if (isLookingAtTarget(pickableTarget)) {
+            targetObjectSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         } else {
-            targetObjectNotSelectedTextures.get(curTargetObject).bind();
+            targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
         }
-        targetObjectMeshes.get(curTargetObject).draw();
+        if (!(pickableTarget.isHidden())) {
+            targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
+        }
     }
 
     /**
@@ -382,8 +389,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
           The other is the value used to update the variable.
         */
         GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
-        roomTex.bind();
-        room.draw();
+        roomTexture.bind();
+        roomTextureMesh.draw();
         Util.checkGlError("drawRoom");
     }
 
@@ -394,59 +401,79 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onCardboardTrigger() {
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
-        if (isLookingAtTarget()) {
-            successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
-            gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-            hideTarget();
-        }
+        // TODO: modo più efficiente per gestire più oggetti?
+
+        // Checks all the targets and hides the one the user is looking at.
+        for (int i = 0; i < TARGET_NUMBER; i++)
+            if (isLookingAtTarget(mPickableTargets[i])) {
+                successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
+                gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
+                mPickableTargets[i].getTimer().stopTimer();
+                mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
+                break;
+            }
     }
 
     /**
-     * Find a new random position for the target object.
+     * Finds a new random position for the target object.
      */
-    private void hideTarget() {
-        float[] rotationMatrix = new float[16];
-        float[] posVec = new float[4];
+    private int hideTarget(PickableTarget pickableTarget) {
+        Position tempPosition = newPosition();
+        pickableTarget.setPosition(tempPosition);
 
-        // Matrix.setRotateM takes the angle in degrees, but Math.tan takes the angle in radians, so
-        // yaw is in degrees and pitch is in radians.
-        float yawDegrees = (random.nextFloat() - 0.5f) * 2.0f * MAX_YAW;
-        float pitchRadians = (float) Math.toRadians((random.nextFloat() - 0.5f) * 2.0f * MAX_PITCH);
+        updateSoundPosition(pickableTarget);
 
-        // Create a matrix for rotation by angle yawDegrees around the y axis.
-        Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
+        int temp = random.nextInt(TARGET_MESH_COUNT);
+        pickableTarget.getTimer().restartTimer();
 
-        // Calculate a new random position
-        targetDistance =
-                random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
-        targetPosition = new float[] {0.0f, 0.0f, -targetDistance};
-
-        Matrix.setIdentityM(modelTarget, 0);
-        Matrix.translateM(modelTarget, 0, targetPosition[0], targetPosition[1], targetPosition[2]);
-
-        //TODO: I think that the vector is [1,1,1,1] because the modelTarget matrix has the last column composed of 1. (see GDrive doc)
-        // so posVec will contain the new position after this operation
-
-        // Multiply the rotation matrix by a vector taken from modelTarget.
-        // The vector is [1,1,1,1]
-        Matrix.multiplyMV(posVec, 0, rotationMatrix, 0, modelTarget, 12);
-
-        targetPosition[0] = posVec[0];
-        targetPosition[1] = (float) Math.tan(pitchRadians) * targetDistance;
-        targetPosition[2] = posVec[2];
-
-        updateTargetPosition();
-        curTargetObject = random.nextInt(TARGET_MESH_COUNT);
+        return temp;
     }
 
     /**
-     * Check if user is looking at the target object by calculating where the object is in eye-space.
+     * Generates a new Position with a distance of at least 2.0 from the other objects.
+     *
+     * @return The new {@link Position}.
+     */
+    private Position newPosition(){
+        // TODO: Spostare questo metodo nella classe Position?
+        float distance;
+
+        Position tempPosition = new Position();
+        tempPosition.generateRandomPosition();
+
+        float x1 = tempPosition.getXCoordinate();
+        float y1 = tempPosition.getYCoordinate();
+        float z1 = tempPosition.getZCoordinate();
+
+        for(int i = 0; i < TARGET_NUMBER; i++) {
+            float x2 = mPickableTargets[i].getPosition().getXCoordinate();
+            float y2 = mPickableTargets[i].getPosition().getYCoordinate();
+            float z2 = mPickableTargets[i].getPosition().getZCoordinate();
+
+            // Calculates the Euclidean distance between the new position and all the pickableTarget objects.
+            distance = (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2) + Math.pow((z1 - z2), 2));
+
+            // If the distance is <2.0 then calculate a new random position and start the loop from the beginning
+            if (distance < 2.0) {
+                tempPosition.generateRandomPosition();
+                x1 = tempPosition.getXCoordinate();
+                y1 = tempPosition.getYCoordinate();
+                z1 = tempPosition.getZCoordinate();
+                i = 0;
+            }
+        }
+
+        return tempPosition;
+    }
+
+    /**
+     * Checks if user is looking at the target object by calculating where the object is in eye-space.
      *
      * @return true if the user is looking at the target object.
      */
-    private boolean isLookingAtTarget() {
+    private boolean isLookingAtTarget(PickableTarget pickableTarget) {
         // Convert object space to camera space. Use the headView from onNewFrame.
-        Matrix.multiplyMM(modelView, 0, headView, 0, modelTarget, 0);
+        Matrix.multiplyMM(modelView, 0, headView, 0, pickableTarget.getPosition().getModel(), 0);
         Matrix.multiplyMV(tempPosition, 0, modelView, 0, POS_MATRIX_MULTIPLY_VEC, 0);
 
         float angle = Util.angleBetweenVectors(tempPosition, FORWARD_VEC);
@@ -464,26 +491,33 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         targetObjectMeshes = new ArrayList<>();
         targetObjectNotSelectedTextures = new ArrayList<>();
         targetObjectSelectedTextures = new ArrayList<>();
-        // TODO: aggiornare variabile TARGET_MESH_COUNT
-        // TODO: check if files paths are needed
-        addObject("graphics/cat/cat.obj", "graphics/cat/cat.png", "graphics/cat/dark_cat.png", objectPositionParam, objectUvParam);
-        addObject("graphics/pikachu/pikachu.obj", "graphics/pikachu/pikachu.png", "graphics/pikachu/dark_pikachu.png", objectPositionParam, objectUvParam);
-        addObject("graphics/penguin/penguin.obj", "graphics/penguin/penguin.png", "graphics/penguin/dark_penguin.png", objectPositionParam, objectUvParam);
+
+        Target tarPenguin = new Target(ObjName.PENGUIN, "graphics/penguin/penguin.obj", "graphics/penguin/dark_penguin.png", "graphics/penguin/penguin.png");
+        Target tarCat = new Target(ObjName.CAT, "graphics/cat/cat.obj", "graphics/cat/dark_cat.png", "graphics/cat/cat.png");
+        Target tarPikachu = new Target(ObjName.PIKACHU, "graphics/pikachu/pikachu.obj", "graphics/pikachu/dark_pikachu.png", "graphics/pikachu/pikachu.png");
+        Target tarAndroid = new Target(ObjName.GREEN_ANDROID, "graphics/android/green_android.obj", "graphics/android/dark_green_android.png", "graphics/android/green_android.png");
+        Target tarCactus = new Target(ObjName.CACTUS, "graphics/cactus/cactus.obj", "graphics/cactus/dark_cactus.png", "graphics/cactus/cactus.png");
+        Target tarMouse = new Target(ObjName.MOUSE, "graphics/mouse/mouse.obj", "graphics/mouse/dark_mouse.png", "graphics/mouse/mouse.png");
+
+        addObject(tarCat, objectPositionParam, objectUvParam);
+        addObject(tarPikachu, objectPositionParam, objectUvParam);
+        addObject(tarPenguin, objectPositionParam, objectUvParam);
+        addObject(tarAndroid, objectPositionParam, objectUvParam);
+        addObject(tarCactus, objectPositionParam, objectUvParam);
+        addObject(tarMouse, objectPositionParam, objectUvParam);
     }
 
     /**
-     * Inizializes a 3D object with the correct texture, according to the given params.
+     * Initializes a 3D object with the correct texture, according to the given params.
      *
-     * @param obj                 The obj model file path.
-     * @param notSelTexture       The path of the object's texture when the user is not looking at it.
-     * @param selTexture          The path of the object's texture when the user is looking at it.
+     * @param target              The target object to initialize.
      * @param objectPositionParam The position attribute in the shader.
      * @param objectUvParam       The UV attribute in the shader.
-     * @throws IOException if unable to initialize objects.
      */
-    private void addObject(String obj, String notSelTexture, String selTexture, int objectPositionParam, int objectUvParam) throws IOException {
-        targetObjectMeshes.add(new TexturedMesh(this, obj, objectPositionParam, objectUvParam));
-        targetObjectNotSelectedTextures.add(new Texture(this, notSelTexture));
-        targetObjectSelectedTextures.add(new Texture(this, selTexture));
+    private void addObject(Target target, int objectPositionParam, int objectUvParam) {
+        mTargetManager.applyTexture(this, target, objectPositionParam, objectUvParam);
+        targetObjectMeshes.add(mTargetManager.getTexturedMesh());
+        targetObjectNotSelectedTextures.add(mTargetManager.getNotSelectedTexture());
+        targetObjectSelectedTextures.add(mTargetManager.getSelectedTexture());
     }
 }

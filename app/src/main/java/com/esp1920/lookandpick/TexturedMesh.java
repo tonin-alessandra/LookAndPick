@@ -2,10 +2,12 @@ package com.esp1920.lookandpick;
 
 import android.content.Context;
 import android.opengl.GLES20;
+
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -30,10 +32,10 @@ import java.nio.ShortBuffer;
     /**
      * Creates the polygon mesh from an .obj file.
      *
-     * @param context Context for loading the .obj file.
-     * @param objFilePath Path to the .obj file.
+     * @param context        Context for loading the .obj file.
+     * @param objFilePath    Path to the .obj file.
      * @param positionAttrib The position attribute in the shader.
-     * @param uvAttrib The UV attribute in the shader.
+     * @param uvAttrib       The UV attribute in the shader.
      * @throws IOException if unable to find file path.
      */
     public TexturedMesh(Context context, String objFilePath, int positionAttrib, int uvAttrib)
