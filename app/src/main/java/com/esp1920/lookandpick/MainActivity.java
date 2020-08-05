@@ -37,7 +37,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final String TAG = "MainActivity";
 
     // Number of objects that can be rendered.
-    private static final int TARGET_MESH_COUNT = 6;
+    private static final int TARGET_MESH_COUNT = 8;
     private static final int TARGET_NUMBER = 8;
 
     // TODO: change these values to change how far user can see
@@ -103,6 +103,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     // Array where are stored position and index of each pickable object.
     private PickableTarget[] mPickableTargets;
+    private Target[] mTargets;
 
     private Position roomPosition;
 
@@ -165,6 +166,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         tempPosition = new float[4];
         headRotation = new float[4];
         roomPosition = new Position();
+
+        mTargets = new Target[TARGET_MESH_COUNT];
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
@@ -280,6 +283,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Chooses randomly the first object to show for each pickable object.
         for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
+            mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
             mPickableTargets[i].getTimer().startTimer();
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
@@ -411,22 +415,26 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Checks all the targets and hides the one the user is looking at.
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
-                /*
+
 
                 // TODO: Gestione del punteggio e delle vite
-                if(checkCategories(mPickableTargets[i].getCategory, level.getCategory()))
+                if(checkCategories(mPickableTargets[i].getTarget().getCategory(), ObjCategory.ANIMAL)) {
                     score.increase(1); // TODO: amount -> mettere il punteggio del target?
-                else{
+                }else{
                     lives.decrease(1);
                     if(lives.getCounter() == 0){
                         // GAME OVER
                     }
                 }
-                */
+
+                Log.d(TAG, "Hai catturato un " + mPickableTargets[i].getTarget().getCategory());
+
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
                 mPickableTargets[i].getTimer().stopTimer();
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
+                mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
+
                 break;
             }
     }
@@ -497,6 +505,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return angle < ANGLE_LIMIT;
     }
 
+    private boolean checkCategories(ObjCategory obj1, ObjCategory obj2){
+        return obj1 == obj2;
+    }
+
     /**
      * Adds 3D objects to the scene.
      *
@@ -515,13 +527,25 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Target tarAndroid = new Target(ObjName.GREEN_ANDROID, "graphics/android/green_android.obj", "graphics/android/dark_green_android.png", "graphics/android/green_android.png");
         Target tarCactus = new Target(ObjName.CACTUS, "graphics/cactus/cactus.obj", "graphics/cactus/dark_cactus.png", "graphics/cactus/cactus.png");
         Target tarMouse = new Target(ObjName.MOUSE, "graphics/mouse/mouse.obj", "graphics/mouse/dark_mouse.png", "graphics/mouse/mouse.png");
+        Target tarPlane = new Target(ObjName.PLANE, "graphics/plane/plane.obj", "graphics/plane/dark_plane.png", "graphics/plane/plane.png");
+        Target tarSunflower = new Target(ObjName.SUNFLOWER, "graphics/sunflower/sunflower.obj", "graphics/sunflower/dark_sunflower.png", "graphics/sunflower/sunflower.png");
 
+        mTargets[0] = tarCat;
         addObject(tarCat, objectPositionParam, objectUvParam);
+        mTargets[1] = tarPikachu;
         addObject(tarPikachu, objectPositionParam, objectUvParam);
+        mTargets[2] = tarPenguin;
         addObject(tarPenguin, objectPositionParam, objectUvParam);
+        mTargets[3] = tarAndroid;
         addObject(tarAndroid, objectPositionParam, objectUvParam);
+        mTargets[4] = tarCactus;
         addObject(tarCactus, objectPositionParam, objectUvParam);
+        mTargets[5] = tarMouse;
         addObject(tarMouse, objectPositionParam, objectUvParam);
+        mTargets[6] = tarPlane;
+        addObject(tarPlane, objectPositionParam, objectUvParam);
+        mTargets[7] = tarSunflower;
+        addObject(tarSunflower, objectPositionParam, objectUvParam);
     }
 
     /**

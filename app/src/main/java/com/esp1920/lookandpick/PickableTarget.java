@@ -12,6 +12,7 @@ public class PickableTarget {
     private Position mPosition;
     private int mMeshIndex;
     private DisappearanceTimer mTimer;
+    private Target mTarget;
 
     /**
      * Constructor. It does not initialize the mesh index.
@@ -76,6 +77,22 @@ public class PickableTarget {
      */
     public void setMeshIndex(int meshIndex) {
         mMeshIndex = meshIndex;
+    }
+
+    /**
+     * Gets the {@link Target} instance.
+     * @return The Target object.
+     */
+    public Target getTarget() {
+        return mTarget;
+    }
+
+    /**
+     * Sets the {@link Target} associated to the PickableTarget objects.
+     * @param target The target to associate.
+     */
+    public void setTarget(Target target) {
+        mTarget = target;
     }
 
     /**
