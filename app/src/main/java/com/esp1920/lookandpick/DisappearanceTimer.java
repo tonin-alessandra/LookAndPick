@@ -25,7 +25,7 @@ public class DisappearanceTimer {
             @Override
             public void onTick(long millisUntilFinished) {
                 // This does nothing for us
-                Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
+                // Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
             }
 
             @Override

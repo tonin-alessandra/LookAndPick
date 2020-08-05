@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.vr.ndk.base.Properties;
@@ -135,6 +136,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final static int INITIAL_SCORE = 0;
     private final static int NUMBER_OF_LIVES = 3;
 
+    private Level mLevel;
+    private Handler mHandler;
+
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
      * to render our scene.
@@ -144,6 +148,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         super.onCreate(savedInstanceState);
 
         initializeGvrView();
+
+        mLevel = new Level();
+
+        mHandler = new Handler();
+        initLevelTimer();
 
         gameStatus = new GameStatus(INITIAL_SCORE, NUMBER_OF_LIVES, getApplicationContext());
 
@@ -420,7 +429,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
 
-                if (checkCategories(mPickableTargets[i].getTarget().getCategory(), ObjCategory.ANIMAL)) {
+                if (checkCategories(mPickableTargets[i].getTarget().getCategory(), mLevel.getCategory())) {
                     gameStatus.increaseScore(1); // TODO: amount -> mettere il punteggio del target?
                     Log.d(TAG, "***Punteggio: " + gameStatus.getScore());
                 } else {
@@ -437,12 +446,38 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                mPickableTargets[i].getTimer().stopTimer();
+                // mPickableTargets[i].getTimer().stopTimer(); // Timer stopped in hideTarget
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
 
                 break;
             }
+    }
+
+    /** TODO: cambiare descrizione del metodo e magari anche nome
+     * Initializes the level timer.
+     */
+    private void initLevelTimer() {
+        mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mLevel.nextLevel();
+                Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
+                hideAllTargets();
+                mHandler.postDelayed(this,10000);
+            }
+        },10000);
+    }
+
+    /**
+     * Changes all the targets' position and restarts their timer.
+     */
+    private void hideAllTargets() {
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
+            mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
+        }
     }
 
     /**
@@ -454,10 +489,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         updateSoundPosition(pickableTarget);
 
-        int temp = random.nextInt(TARGET_MESH_COUNT);
+        int newMesh = random.nextInt(TARGET_MESH_COUNT);
         pickableTarget.getTimer().restartTimer();
 
-        return temp;
+        return newMesh;
     }
 
     /**
@@ -466,7 +501,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @return The new {@link Position}.
      */
     private Position newPosition() {
-        // TODO: Spostare questo metodo nella classe Position?
         float distance;
 
         Position tempPosition = new Position();
@@ -496,6 +530,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         return tempPosition;
     }
+
+
 
     /**
      * Checks if user is looking at the target object by calculating where the object is in eye-space.
