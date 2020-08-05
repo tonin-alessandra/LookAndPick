@@ -129,6 +129,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
+    ////////////////////////////////////////////////////
+    private PlayerMovement player = new PlayerMovement();
+    private float eyeZ = 0.0f;
+
+
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
      * to render our scene.
@@ -203,6 +208,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onSurfaceChanged(int width, int height) {
     }
+
 
     /**
      * Creates the buffers we use to store information about the 3D world.
@@ -289,8 +295,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
+        eyeZ = player.updateEyePosition(headTransform, eyeZ);
         // Build the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Control if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
