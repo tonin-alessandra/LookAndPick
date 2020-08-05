@@ -128,6 +128,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private PlayerMovement player = new PlayerMovement();
     private float eyeZ = 0.0f;
 
+    private GameStatus lives;
+    private GameStatus score;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -138,6 +140,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         super.onCreate(savedInstanceState);
 
         initializeGvrView();
+
+        lives = new GameStatus(3);
+        score = new GameStatus(0);
 
         random = new Random();
 
@@ -406,6 +411,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Checks all the targets and hides the one the user is looking at.
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
+                /*
+
+                // TODO: Gestione del punteggio e delle vite
+                if(checkCategories(mPickableTargets[i].getCategory, level.getCategory()))
+                    score.increase(1); // TODO: amount -> mettere il punteggio del target?
+                else{
+                    lives.decrease(1);
+                    if(lives.getCounter() == 0){
+                        // GAME OVER
+                    }
+                }
+                */
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
                 mPickableTargets[i].getTimer().stopTimer();
