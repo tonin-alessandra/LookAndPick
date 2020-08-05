@@ -416,18 +416,20 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
 
-
-                // TODO: Gestione del punteggio e delle vite
                 if(checkCategories(mPickableTargets[i].getTarget().getCategory(), ObjCategory.ANIMAL)) {
                     score.increase(1); // TODO: amount -> mettere il punteggio del target?
+                    Log.d(TAG, "***Punteggio: " + score.getCounter());
                 }else{
                     lives.decrease(1);
+                    Log.d(TAG, "***Vite: " + lives.getCounter());
+
                     if(lives.getCounter() == 0){
                         // GAME OVER
+                        Log.d(TAG, "***GAME OVER***");
                     }
                 }
 
-                Log.d(TAG, "Hai catturato un " + mPickableTargets[i].getTarget().getCategory());
+                Log.d(TAG, "***Hai catturato un " + mPickableTargets[i].getTarget().getCategory());
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);

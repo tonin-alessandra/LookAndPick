@@ -24,7 +24,7 @@ public class DisappearanceTimer {
         mCDTimer = new CountDownTimer(TIMER, INTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
-                //This does nothing for us
+                // This does nothing for us
                 Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
             }
 
