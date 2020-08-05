@@ -5,7 +5,6 @@ import android.content.Context;
 /**
  * This class handles a generic status of the game, made up by the actual player score and lives.
  */
-//TODO: nome provvisorio per ora
 public class GameStatus {
     private final String TAG = "GameStatus";
     private int score;
