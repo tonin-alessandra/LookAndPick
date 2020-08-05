@@ -1,6 +1,5 @@
 package com.esp1920.lookandpick;
 
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -429,7 +428,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
 
-                if (checkCategories(mPickableTargets[i].getTarget().getCategory(), mLevel.getCategory())) {
+                if (checkCategory(mPickableTargets[i].getTarget().getCategory())) {
                     gameStatus.increaseScore(1); // TODO: amount -> mettere il punteggio del target?
                     Log.d(TAG, "***Punteggio: " + gameStatus.getScore());
                 } else {
@@ -530,9 +529,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         return tempPosition;
     }
-
-
-
+    
     /**
      * Checks if user is looking at the target object by calculating where the object is in eye-space.
      *
@@ -547,8 +544,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return angle < ANGLE_LIMIT;
     }
 
-    private boolean checkCategories(ObjCategory obj1, ObjCategory obj2) {
-        return obj1 == obj2;
+    /**
+     * Checks if the category passed as param is the same of the level's category.
+     * @param obj The category of the {@link PickableTarget} to check.
+     * @return  true if match, false otherwise.
+     */
+    private boolean checkCategory(ObjCategory obj) {
+        return obj == mLevel.getCategory();
     }
 
     /**
