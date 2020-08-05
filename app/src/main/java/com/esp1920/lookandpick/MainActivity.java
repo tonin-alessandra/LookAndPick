@@ -125,8 +125,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // TODO: this is managed as a singleton, is it correct?
     private TargetManager mTargetManager = TargetManager.getInstance();
 
-    private PlayerMovement player = new PlayerMovement();
+    private PlayerMovement mPlayerMovement = new PlayerMovement();
     private float eyeZ = 0.0f;
+
+    private VrTextView scoreBar;
+    private VrTextView msg;
+    private int taps = 0;
 
 
     /**
@@ -162,6 +166,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         roomPosition = new Position();
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
+
+        scoreBar = (VrTextView) findViewById(R.id.scoreBar);
+        msg = (VrTextView) findViewById(R.id.message);
+
+        msg.showVrToast("Level 0 \n Pick up as many objects as you can!");
+
     }
 
     public void initializeGvrView() {
@@ -278,6 +288,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             mPickableTargets[i].getTimer().startTimer();
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
+
+
     }
 
     /**
@@ -301,7 +313,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        eyeZ = player.updateEyePosition(headTransform, eyeZ);
+
+        scoreBar.showVrText("Score: "+String.valueOf(taps));
+
+        eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
         // Build the camera matrix and apply it to the ModelView.
         Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
@@ -399,6 +414,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
+        taps++;
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
         // TODO: modo più efficiente per gestire più oggetti?
