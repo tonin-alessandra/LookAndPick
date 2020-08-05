@@ -7,6 +7,8 @@ package com.esp1920.lookandpick;
  */
 
 public class PickableTarget {
+    private final String TAG = "PickableTarget";
+
     private Position mPosition;
     private int mMeshIndex;
     private DisappearanceTimer mTimer;
