@@ -128,6 +128,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private PlayerMovement player = new PlayerMovement();
     private float eyeZ = 0.0f;
 
+    // Used to manage score and remaining lives (gameover)
     private GameStatus lives;
     private GameStatus score;
 
@@ -159,7 +160,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             mPickableTargets[i] = new PickableTarget();
 
         // Changes the position of each pickable target in order to avoid overlapping.
-        for(int i = 0; i < TARGET_NUMBER; i++)
+        for (int i = 0; i < TARGET_NUMBER; i++)
             mPickableTargets[i].setPosition(newPosition());
 
         tempPosition = new float[4];
@@ -212,7 +213,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public void onSurfaceChanged(int width, int height) { }
+    public void onSurfaceChanged(int width, int height) {
+    }
 
 
     /**
@@ -308,7 +310,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onNewFrame(HeadTransform headTransform) {
         eyeZ = player.updateEyePosition(headTransform, eyeZ);
         // Build the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(camera, 0, 0, 0, eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Controls if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
@@ -361,7 +363,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public void onFinishFrame(Viewport viewport) { }
+    public void onFinishFrame(Viewport viewport) {
+    }
 
     /**
      * Draws the target object.
@@ -451,7 +454,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      *
      * @return The new {@link Position}.
      */
-    private Position newPosition(){
+    private Position newPosition() {
         // TODO: Spostare questo metodo nella classe Position?
         float distance;
 
@@ -462,7 +465,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         float y1 = tempPosition.getYCoordinate();
         float z1 = tempPosition.getZCoordinate();
 
-        for(int i = 0; i < TARGET_NUMBER; i++) {
+        for (int i = 0; i < TARGET_NUMBER; i++) {
             float x2 = mPickableTargets[i].getPosition().getXCoordinate();
             float y2 = mPickableTargets[i].getPosition().getYCoordinate();
             float z2 = mPickableTargets[i].getPosition().getZCoordinate();

@@ -8,33 +8,38 @@ package com.esp1920.lookandpick;
 public class GameStatus {
     private final String TAG = "GameStatus";
     private int counter;
+    private StatusManager mScoreManager;
 
     /**
      * Constructor.
+     *
      * @param initialValue The initial value of the counter.
      */
-    GameStatus(int initialValue){
+    GameStatus(int initialValue) {
         counter = initialValue;
     }
 
     /**
      * Increases the counter of a given value.
+     *
      * @param amount
      */
-    public void increase(int amount){
+    public void increase(int amount) {
         counter += amount;
     }
 
     /**
      * Decreases the counter of a given value.
+     *
      * @param amount
      */
-    public void decrease(int amount){
+    public void decrease(int amount) {
         counter -= amount;
     }
 
     /**
      * Gets the counter value.
+     *
      * @return The counter value.
      */
     public int getCounter() {
@@ -43,19 +48,21 @@ public class GameStatus {
 
     /**
      * Checks if there is game over.
-     * @return  True, counter is zero. False, otherwise.
+     *
+     * @return True if the counter reached zero, false otherwise.
      */
-    public boolean gameOver(){
-        if(counter == 0)
+    public boolean gameOver() {
+        if (counter == 0)
             return true;
         return false;
     }
 
     /**
      * Saves the counter value with a given TAG.
-     * @param TAG The given TAG.
+     *
+     * @param score The value to save.
      */
-    public void savePreferencies(String TAG){
-
+    public void saveValue(int score) {
+        mScoreManager.saveScore(score);
     }
 }
