@@ -1,10 +1,5 @@
 package com.esp1920.lookandpick;
 
-import android.os.CountDownTimer;
-import android.os.Handler;
-
-import java.util.Random;
-
 /**
  * This class manages game levels, intended as periods of time with specific settings.
  * We provided three different levels:
@@ -15,7 +10,6 @@ import java.util.Random;
  * so the player has to be fast to complete the request.
  */
 public class Level {
-    // TODO: e se nessun oggetto di quella categoria compare?
     private final String TAG = "Level";
     // A level object is initialized as the first level, so the associated number is 1 and its duration is 2 minutes.
     // In addition, the category associated in ALL, this means there are no constraints on what type of objects can be collected.

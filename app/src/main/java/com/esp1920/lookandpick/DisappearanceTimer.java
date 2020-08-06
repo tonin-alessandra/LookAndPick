@@ -17,11 +17,36 @@ public class DisappearanceTimer {
     private boolean mHidden;
 
     /**
-     * Constructor.
+     * Constructor. It initializes the timer with a default duration.
      */
     public DisappearanceTimer() {
         mHidden = false;
         mCDTimer = new CountDownTimer(TIMER, INTERVAL) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // This does nothing for us
+                // Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
+            }
+
+            @Override
+            public void onFinish() {
+                //Calls method to hide the object
+                mHidden = true;
+                Log.d(TAG, "*******timer finito**********");
+
+            }
+        };
+    }
+
+
+    /**
+     * Constructor.
+     *
+     * @param duration The timer duration expresses in milliseconds.
+     */
+    public DisappearanceTimer(long duration) {
+        mHidden = false;
+        mCDTimer = new CountDownTimer(duration, INTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
                 // This does nothing for us

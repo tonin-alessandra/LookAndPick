@@ -22,7 +22,7 @@ enum ObjCategory {
      */
     public static ObjCategory getRandomCategory() {
         Random random = new Random();
-        return values()[random.nextInt(values().length)];
+        return values()[random.nextInt(values().length-1)];
     }
 }
 
@@ -47,6 +47,6 @@ enum ObjName {
      */
     public static ObjName getRandomName() {
         Random random = new Random();
-        return values()[random.nextInt(values().length)];
+        return values()[random.nextInt(values().length-1)];
     }
 }

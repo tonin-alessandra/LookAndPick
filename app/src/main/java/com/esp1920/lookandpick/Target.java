@@ -79,13 +79,11 @@ public class Target {
                 mCategory = PLANT;
                 break;
             case CAT:
-            case COW:
             case PENGUIN:
             case MOUSE:
                 mCategory = ANIMAL;
                 break;
             case GREEN_ANDROID:
-            case WHITE_ANDROID:
                 mCategory = ANDROID_BOT;
                 break;
             case PIKACHU:

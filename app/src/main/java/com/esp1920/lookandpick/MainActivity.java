@@ -39,7 +39,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 8;
-    private static final int TARGET_NUMBER = 2;
+    private static final int TARGET_NUMBER = 6;
 
     // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
@@ -167,7 +167,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // random position.
         mPickableTargets = new PickableTarget[TARGET_NUMBER];
         for (int i = 0; i < TARGET_NUMBER; i++)
-            mPickableTargets[i] = new PickableTarget();
+            mPickableTargets[i] = new PickableTarget(mLevel.getDuration());
 
         // Changes the position of each pickable target in order to avoid overlapping.
         for (int i = 0; i < TARGET_NUMBER; i++)
@@ -299,9 +299,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
         // Changes a mesh of a random object if necessary.
-        // It won't change any object's mesh because the first level's category is ALL.
+        // In the first level it won't change any object's meshes because the first level category is ALL.
         // TODO: intanto l'ho messo comunque, nel caso basta togliere questa riga
-        checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
+        // checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
 
         // TODO: changeLevel messo dopo la generazione degli oggetti altrimenti dava errori
         changeLevel();
@@ -452,7 +452,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                // mPickableTargets[i].getTimer().stopTimer(); // Timer already stopped in hideTarget
 
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
@@ -478,6 +477,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 mLevel.setCategory(ObjCategory.ANIMAL);
                 //mLevel.setCategory(ObjCategory.getRandomCategory());
                 mLevel.setDuration(60);
+
+                for (int i = 0; i < TARGET_NUMBER; i++)
+                    mPickableTargets[i].changeTimerDuration(mLevel.getDuration());
+
                 Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
                 hideAllTargets();
@@ -489,6 +492,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         // The third level requires the player to collect bonus objects (plane and piakchu)
                         mLevel.setCategory(ObjCategory.BONUS);
                         //mLevel.setCategory(ObjCategory.getRandomCategory());
+
+                        for (int i = 0; i < TARGET_NUMBER; i++)
+                            mPickableTargets[i].defaultTimerDuration();
+
                         Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
                         Log.d(TAG, "***Category: " + mLevel.getCategory());
                         hideAllTargets();
@@ -519,6 +526,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         updateSoundPosition(pickableTarget);
 
         int newMesh = random.nextInt(TARGET_MESH_COUNT);
+
         pickableTarget.getTimer().restartTimer();
 
         return newMesh;
