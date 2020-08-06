@@ -39,7 +39,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 8;
-    private static final int TARGET_NUMBER = 8;
+    private static final int TARGET_NUMBER = 2;
 
     // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
@@ -152,7 +152,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         mLevel = new Level();
         // Initializes the handler to manage the switching between levels
         mHandler = new Handler();
-        changeLevel();
 
         gameStatus = new GameStatus(INITIAL_SCORE, NUMBER_OF_LIVES, getApplicationContext());
 
@@ -299,6 +298,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             mPickableTargets[i].getTimer().startTimer();
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
+        // Changes a mesh of a random object if necessary.
+        // It won't change any object's mesh because the first level's category is ALL.
+        // TODO: intanto l'ho messo comunque, nel caso basta togliere questa riga
+        checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
+
+        // TODO: changeLevel messo dopo la generazione degli oggetti altrimenti dava errori
+        changeLevel();
     }
 
     /**
@@ -446,10 +452,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
-                // mPickableTargets[i].getTimer().stopTimer(); // Timer stopped in hideTarget
+                // mPickableTargets[i].getTimer().stopTimer(); // Timer already stopped in hideTarget
+
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
                 mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
 
+                checkMesh(mPickableTargets[i]);
                 break;
             }
     }
@@ -471,6 +479,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 //mLevel.setCategory(ObjCategory.getRandomCategory());
                 mLevel.setDuration(60);
                 Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
+                Log.d(TAG, "***Category: " + mLevel.getCategory());
                 hideAllTargets();
                 mHandler.removeCallbacks(this);
                 mHandler.postDelayed(new Runnable() {
@@ -481,6 +490,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         mLevel.setCategory(ObjCategory.BONUS);
                         //mLevel.setCategory(ObjCategory.getRandomCategory());
                         Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
+                        Log.d(TAG, "***Category: " + mLevel.getCategory());
                         hideAllTargets();
                     }
                 }, mLevel.getDuration() * 1000); //Level duration is in seconds, but handler requires millis
@@ -496,6 +506,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
             mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
         }
+        checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
     }
 
     /**
@@ -547,6 +558,34 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         }
 
         return tempPosition;
+    }
+
+    /**
+     * Controls if the mesh of the {@link PickableTarget} object passed belongs to the same category
+     * of the level. If there are no objects belonging to the level category a new mesh will be
+     * calculated in order to have at least one object with the right category.
+     * @param pickableTarget The {@link PickableTarget} object to control.
+     */
+    private void checkMesh(PickableTarget pickableTarget) {
+        // If true then there is at least one object of the same category of the level.
+        if (checkCategory(pickableTarget.getTarget().getCategory()))
+            return;
+
+        // Controls if there is an object with the same category of the level.
+        for (int i = 0; i < TARGET_NUMBER; i++) {
+            if (checkCategory(mPickableTargets[i].getTarget().getCategory()))
+                return;
+        }
+
+        int newMesh;
+        // Changes the mesh of the pickableTarget with a new one until it belongs to the level category.
+        do {
+            newMesh = random.nextInt(TARGET_MESH_COUNT);
+        } while(!checkCategory(mTargets[newMesh].getCategory()));
+
+        // Updates the pickableTarget object with the new mesh
+        pickableTarget.setMeshIndex(newMesh);
+        pickableTarget.setTarget(mTargets[newMesh]);
     }
 
     /**

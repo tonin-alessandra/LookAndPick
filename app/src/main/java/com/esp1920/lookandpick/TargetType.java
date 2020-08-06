@@ -33,11 +33,9 @@ enum ObjName {
     PENGUIN,
     CAT,
     MOUSE,
-    COW,
     SUNFLOWER,
     CACTUS,
     GREEN_ANDROID,
-    WHITE_ANDROID,
     PLANE,
     PIKACHU,
     ROOM;
