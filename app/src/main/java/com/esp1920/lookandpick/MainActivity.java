@@ -479,7 +479,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 mLevel.setDuration(60);
 
                 for (int i = 0; i < TARGET_NUMBER; i++)
-                    mPickableTargets[i].changeTimerDuration(mLevel.getDuration());
+                    mPickableTargets[i].newTimer(mLevel.getDuration());
 
                 Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
@@ -494,7 +494,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         //mLevel.setCategory(ObjCategory.getRandomCategory());
 
                         for (int i = 0; i < TARGET_NUMBER; i++)
-                            mPickableTargets[i].defaultTimerDuration();
+                            mPickableTargets[i].defaultTimer();
 
                         Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
                         Log.d(TAG, "***Category: " + mLevel.getCategory());
@@ -513,6 +513,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
             mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
         }
+        // Chooses a random object and changes its mesh, if necessary.
         checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
     }
 

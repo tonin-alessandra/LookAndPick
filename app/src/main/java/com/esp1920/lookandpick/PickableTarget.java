@@ -24,9 +24,9 @@ public class PickableTarget {
     }
 
     /**
-     * Constructor.
+     * Constructor. It does not initialize the mesh index.
      *
-     * @param duration Initial timer duration.
+     * @param duration Initial timer duration expressed in seconds.
      */
     PickableTarget(int duration) {
         mPosition = new Position();
@@ -100,7 +100,7 @@ public class PickableTarget {
      *
      * @param duration The duration of the new timer in seconds.
      */
-    public void changeTimerDuration(long duration) {
+    public void newTimer(long duration) {
         if (mTimer != null)
             mTimer.stopTimer();
         mTimer = new DisappearanceTimer(duration*1000);
@@ -109,7 +109,7 @@ public class PickableTarget {
     /**
      * Changes the timer duration with the default one defined in {@link DisappearanceTimer}.
      */
-    public void defaultTimerDuration() {
+    public void defaultTimer() {
         if (mTimer != null)
             mTimer.stopTimer();
         mTimer = new DisappearanceTimer();

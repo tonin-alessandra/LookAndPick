@@ -42,7 +42,7 @@ public class DisappearanceTimer {
     /**
      * Constructor.
      *
-     * @param duration The timer duration expresses in milliseconds.
+     * @param duration The timer duration expressed in milliseconds.
      */
     public DisappearanceTimer(long duration) {
         mHidden = false;
