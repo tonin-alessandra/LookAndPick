@@ -129,10 +129,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private float eyeZ = 0.0f;
 
-    private VrTextView scoreBar;
-    private VrTextView msg;
+    private VrTextView scoreTv;
+    private VrTextView msgTv;
     private int taps = 0;
-
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -168,11 +167,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
 
-        scoreBar = (VrTextView) findViewById(R.id.scoreBar);
-        msg = (VrTextView) findViewById(R.id.message);
+        scoreTv = (VrTextView) findViewById(R.id.score);
 
-        msg.showVrToast("Level 0 \n Pick up as many objects as you can!");
-
+        msgTv = (VrTextView) findViewById(R.id.msg);
+        msgTv.showLongToast("Level 0 \n Pick up as many objects as you can!");
     }
 
     public void initializeGvrView() {
@@ -198,6 +196,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         setGvrView(gvrView);
         gvrProperties = gvrView.getGvrApi().getCurrentProperties();
+
     }
 
     @Override
@@ -290,7 +289,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
 
-
     }
 
     /**
@@ -314,10 +312,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-
-        scoreBar.showVrText("Score: "+String.valueOf(taps));
-
+        // Updates eye position along z axis to perform movement
         eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
+
         // Build the camera matrix and apply it to the ModelView.
         Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
@@ -415,7 +412,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
+        //TODO: score prototype, to delete
         taps++;
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                scoreTv.showShortToast("Score: "+String.valueOf(taps));
+            }
+
+        });
+
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
         // TODO: modo più efficiente per gestire più oggetti?

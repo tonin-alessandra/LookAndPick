@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -16,17 +15,19 @@ import android.widget.TextView;
  * This is a helper class for VrTextView.
  */
 public class VrEyeTextView extends ViewGroup {
-    private final ImageView imageView;
+
     private final TextView textView;
+
+    // This is necessary as the TextViews for the eyes must be correctly aligned in order to
+    // be seen correctly in VR
     private float offset;
+
+    // Vertical position of the text (as fraction of the ViewGroup's height)
+    // In this case, text will be centered in height
+    private static final float VERTICAL_TEXT_POS = 0.50f;
 
     public VrEyeTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        imageView = new ImageView(context, attrs);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        imageView.setAdjustViewBounds(true);  // Preserve aspect ratio.
-        addView(imageView);
 
         textView = new TextView(context, attrs);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10.0f);
@@ -36,7 +37,6 @@ public class VrEyeTextView extends ViewGroup {
     }
 
     public void setColor(int color) {
-        imageView.setColorFilter(color);
         textView.setTextColor(color);
     }
 
@@ -54,36 +54,18 @@ public class VrEyeTextView extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        // Width and height of this ViewGroup.
-        final int width = right - left;
-        final int height = bottom - top;
 
-        // The size of the image, given as a fraction of the dimension as a ViewGroup. We multiply
-        // both width and heading with this number to compute the image's bounding box. Inside the
-        // box, the image is the horizontally and vertically centered.
-        final float imageSize = 1f;
+        // Sets TextView layout
+        final int tvWidth = right - left;
+        final int tvHeight = bottom - top;
 
-        // The fraction of this ViewGroup's height by which we shift the image off the ViewGroup's
-        // center. Positive values shift downwards, negative values shift upwards.
-        final float verticalImageOffset = -0.07f;
+        float tvLeft = offset * tvWidth;
+        float tvRight = tvLeft + tvWidth;
 
-        // Vertical position of the text, specified in fractions of this ViewGroup's height.
-        final float verticalTextPos = 0.52f;
+        float tvTop = tvHeight * VERTICAL_TEXT_POS;
+        float tvBottom = tvTop * 2; // tvBottom = tvTop + tvHeight * (1 - VERTICAL_TEXT_POS))
 
-        // Layout ImageView
-        float imageMargin = (1.0f - imageSize) / 2.0f;
-        float leftMargin = (int) (width * (imageMargin + offset));
-        float topMargin = (int) (height * (imageMargin + verticalImageOffset));
+        textView.layout((int) tvLeft, (int) tvTop, (int) (tvRight), (int) (tvBottom));
 
-        imageView.layout(
-                (int) leftMargin, (int) topMargin,
-                (int) (leftMargin + width * imageSize), (int) (topMargin + height * imageSize));
-
-        // Layout TextView
-        leftMargin = offset * width;
-        topMargin = height * verticalTextPos;
-        textView.layout(
-                (int) leftMargin, (int) topMargin,
-                (int) (leftMargin + width), (int) (topMargin + height * (1.0f - verticalTextPos)));
     }
 }
