@@ -10,7 +10,7 @@ public class DisappearanceTimer {
     private static final String TAG = "DisappearanceTimer";
 
     //This indicates the time an object can remain in the scene before disappearing.
-    private final static long TIMER = 20000;
+    private long timer;
     private final static long INTERVAL = 1000;
 
     private CountDownTimer mCDTimer;
@@ -18,13 +18,16 @@ public class DisappearanceTimer {
 
     /**
      * Constructor.
+     *
+     * @param duration The timer duration expressed in milliseconds.
      */
-    public DisappearanceTimer() {
+    public DisappearanceTimer(long duration) {
         mHidden = false;
-        mCDTimer = new CountDownTimer(TIMER, INTERVAL) {
+        timer = duration;
+        mCDTimer = new CountDownTimer(timer, INTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
-                //This does nothing for us
+                // This does nothing for us
                 Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
             }
 
@@ -55,6 +58,7 @@ public class DisappearanceTimer {
         Log.d(TAG, "*******restart timer***********");
         stopTimer();
         startTimer();
+
     }
 
     /**
@@ -66,13 +70,6 @@ public class DisappearanceTimer {
             mHidden = false;
             Log.d(TAG, "*******timer stoppato***********");
         }
-    }
-
-    /**
-     * Gets the {@link CountDownTimer} object.
-     */
-    private CountDownTimer getCDTimer() {
-        return mCDTimer;
     }
 
     /**

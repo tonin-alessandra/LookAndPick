@@ -22,6 +22,7 @@ import com.google.vr.sdk.base.HeadTransform;
  *
  */
  public class PlayerMovement {
+    private final String TAG = "PlayerMovement";
 
     private static final double THRESHOLD_ANGLE = 30; // degrees
 

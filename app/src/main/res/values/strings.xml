@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LookAndPick</string>
+    <string name="ScorePreferences">LookAndPick.ScorePreferences</string>
 </resources>

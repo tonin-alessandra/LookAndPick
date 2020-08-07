@@ -1,5 +1,7 @@
 package com.esp1920.lookandpick;
 
+import androidx.annotation.Nullable;
+
 /**
  * This class represents a visible object that appears on the screen.
  * Every object is represented using its {@link Position} and an index, which indicates the associated mesh.
@@ -7,37 +9,28 @@ package com.esp1920.lookandpick;
  */
 
 public class PickableTarget {
+    private final String TAG = "PickableTarget";
+
     private Position mPosition;
     private int mMeshIndex;
     private DisappearanceTimer mTimer;
+    private Target mTarget;
 
     /**
-     * Constructor. It does not initialize the mesh index.
+     * Constructor. It does not initialize the mesh index and the timer.
      */
     PickableTarget() {
         mPosition = new Position();
         mPosition.generateRandomPosition();
-        mTimer = new DisappearanceTimer();
     }
 
     /**
-     * Constructor.
-     *
-     * @param index Initial index of the mesh.
+     * Initializes a timer for this object.
+     * It has been separated from the constructor because not always the timer is needed, so it
+     * is created only when necessary.
      */
-    PickableTarget(int index) {
-        mPosition = new Position();
-        mPosition.generateRandomPosition();
-        setMeshIndex(index);
-        mTimer = new DisappearanceTimer();
-
-    }
-
-    /**
-     * Changes the position with a random new one.
-     */
-    public void randomPosition() {
-        mPosition.generateRandomPosition();
+    public void initializeTimer(int duration) {
+        mTimer = new DisappearanceTimer(duration * 1000);
     }
 
     /**
@@ -77,10 +70,29 @@ public class PickableTarget {
     }
 
     /**
+     * Gets the {@link Target} instance.
+     *
+     * @return The Target object.
+     */
+    public Target getTarget() {
+        return mTarget;
+    }
+
+    /**
+     * Sets the {@link Target} associated to the PickableTarget objects.
+     *
+     * @param target The target to associate.
+     */
+    public void setTarget(Target target) {
+        mTarget = target;
+    }
+
+    /**
      * Gets the timer.
      *
      * @return A {@link DisappearanceTimer} object.
      */
+    @Nullable
     public DisappearanceTimer getTimer() {
         return mTimer;
     }
@@ -89,6 +101,7 @@ public class PickableTarget {
      * Checks if an object must be hidden.
      */
     public boolean isHidden() {
-        return mTimer.timeFinished();
+        if (mTimer != null) return mTimer.timeFinished();
+        return false;
     }
 }
