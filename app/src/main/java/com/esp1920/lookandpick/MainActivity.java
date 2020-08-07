@@ -126,11 +126,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // Used to manage all target-related operations
     private TargetManager mTargetManager = TargetManager.getInstance();
 
+
     // This is the default value of the objects' timer in seconds
     private int defaultTime = 20;
-
-    private PlayerMovement player = new PlayerMovement();
-    private float eyeZ = 0.0f;
 
     // Used to manage score and remaining lives (gameover)
     private GameStatus gameStatus;
@@ -139,6 +137,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private Level mLevel;
     private Handler mHandler;
+
+    private PlayerMovement mPlayerMovement = new PlayerMovement();
+
+    private float eyeZ = 0.0f;
+
+    private VrTextView scoreTv;
+    private VrTextView msgTv;
+    private int taps = 0;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -182,6 +188,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         mTargets = new Target[TARGET_MESH_COUNT];
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
+
+        scoreTv = (VrTextView) findViewById(R.id.score);
+
+        msgTv = (VrTextView) findViewById(R.id.msg);
+        msgTv.showLongToast("Level 0 \n Pick up as many objects as you can!");
     }
 
     /**
@@ -199,6 +210,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         setGvrView(gvrView);
         gvrProperties = gvrView.getGvrApi().getCurrentProperties();
+
     }
 
     @Override
@@ -316,9 +328,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        eyeZ = player.updateEyePosition(headTransform, eyeZ);
-        // Builds the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0, 0, 0, eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
+        // Updates eye position along z axis to perform movement
+        eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
+
+        // Build the camera matrix and apply it to the ModelView.
+        Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Controls if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
@@ -415,6 +429,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
+        //TODO: score prototype, to delete
+        taps++;
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                scoreTv.showShortToast("Score: "+String.valueOf(taps));
+            }
+
+        });
+
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
         // Checks all the targets and hides the one the user is looking at.

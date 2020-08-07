@@ -11,7 +11,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        />
+        android:layout_alignParentStart="true">
+
+        <com.esp1920.lookandpick.VrTextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginTop="40dp">
+
+        </com.esp1920.lookandpick.VrTextView>
+
+        <com.esp1920.lookandpick.VrTextView
+            android:id="@+id/msg"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginTop="200dp">
+
+        </com.esp1920.lookandpick.VrTextView>
+
+    </com.google.vr.sdk.base.GvrView>
 
 </RelativeLayout>

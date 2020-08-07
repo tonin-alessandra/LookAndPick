@@ -119,21 +119,6 @@ import static android.opengl.GLU.gluErrorString;
         return Matrix.length(vec[0], vec[1], vec[2]);
     }
 
-    public static float[] crossProduct(float[] vec1, float[] vec2){
-        float[] vec = new float[3];
-        vec[0] = vec1[1]*vec2[2] - vec2[1]*vec1[2];
-        vec[1] = vec2[0]*vec1[2] - vec1[0]*vec2[2];
-        vec[2] = vec1[0]*vec2[1] - vec2[0]*vec1[1];
-        return vec;
-    }
-
-    public static float[] normalize(float[] vec){
-        float norm = Matrix.length(vec[0], vec[1], vec[2]);
-        vec[0] = vec[0]/norm;
-        vec[1] = vec[1]/norm;
-        vec[2] = vec[2]/norm;
-        return vec;
-    }
 }
 
 
