@@ -6,14 +6,24 @@ import java.util.Random;
  * This enum defines the categories to which an object can belong.
  */
 enum ObjCategory {
-    ANIMAL,
-    PLANT,
-    ANDROID_BOT,
+    ANIMAL("animals"),
+    PLANT("plants"),
+    ANDROID_BOT("android bot"),
     //This can be useful to identify particular or special objects, such as Pikachu.
-    BONUS,
+    BONUS("bonus"),
     //This is used for the first level, where there are no constraints on what type of objects can be collected
-    ALL,
-    ROOM;
+    ALL("what you want"),
+    ROOM("room");
+
+    private String category;
+
+    ObjCategory(String description) {
+        this.category = description;
+    }
+
+    public String getDescription() {
+        return category;
+    }
 
     /**
      * Picks a random value of {@code ObjCategory}.
@@ -22,7 +32,7 @@ enum ObjCategory {
      */
     public static ObjCategory getRandomCategory() {
         Random random = new Random();
-        return values()[random.nextInt(values().length-1)];
+        return values()[random.nextInt(values().length - 1)];
     }
 }
 
@@ -47,6 +57,6 @@ enum ObjName {
      */
     public static ObjName getRandomName() {
         Random random = new Random();
-        return values()[random.nextInt(values().length-1)];
+        return values()[random.nextInt(values().length - 1)];
     }
 }

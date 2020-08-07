@@ -1,5 +1,6 @@
 package com.esp1920.lookandpick;
 
+import android.app.Activity;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -122,10 +123,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
-
     // Used to manage all target-related operations
-    // TODO: this is managed as a singleton, is it correct?
     private TargetManager mTargetManager = TargetManager.getInstance();
+
+    // This is the default value of the objects' timer in seconds
+    private int defaultTime = 20;
 
     private PlayerMovement player = new PlayerMovement();
     private float eyeZ = 0.0f;
@@ -167,7 +169,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // random position.
         mPickableTargets = new PickableTarget[TARGET_NUMBER];
         for (int i = 0; i < TARGET_NUMBER; i++)
-            mPickableTargets[i] = new PickableTarget(mLevel.getDuration());
+            mPickableTargets[i] = new PickableTarget();
 
         // Changes the position of each pickable target in order to avoid overlapping.
         for (int i = 0; i < TARGET_NUMBER; i++)
@@ -182,6 +184,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
 
+    /**
+     * TODO: write specification
+     */
     public void initializeGvrView() {
         setContentView(R.layout.activity_main);
         GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
@@ -191,17 +196,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         gvrView.setRenderer(this);
         gvrView.setTransitionViewEnabled(true);
-
-        // TODO: check -->This is not needed as it is for supporting daydream controller using the Cardboard trigger API.
-        //gvrView.enableCardboardTriggerEmulation();
-
-        // TODO: can we cancel this, since AsyncReprojection is not supported by Cardboard?
-        if (gvrView.setAsyncReprojectionEnabled(true)) {
-            // Async reprojection decouples the app framerate from the display framerate,
-            // allowing immersive interaction even at the throttled clockrates set by
-            // sustained performance mode.
-            AndroidCompat.setSustainedPerformanceMode(this, true);
-        }
 
         setGvrView(gvrView);
         gvrProperties = gvrView.getGvrApi().getCurrentProperties();
@@ -295,15 +289,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
             mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
-            mPickableTargets[i].getTimer().startTimer();
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
-        // Changes a mesh of a random object if necessary.
-        // In the first level it won't change any object's meshes because the first level category is ALL.
-        // TODO: intanto l'ho messo comunque, nel caso basta togliere questa riga
-        // checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
-
-        // TODO: changeLevel messo dopo la generazione degli oggetti altrimenti dava errori
+        // Manages the transition to the next levels.
         changeLevel();
     }
 
@@ -329,7 +317,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
         eyeZ = player.updateEyePosition(headTransform, eyeZ);
-        // Build the camera matrix and apply it to the ModelView.
+        // Builds the camera matrix and apply it to the ModelView.
         Matrix.setLookAtM(camera, 0, 0, 0, eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Controls if the floor height is available.
@@ -429,14 +417,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onCardboardTrigger() {
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
-        // TODO: modo più efficiente per gestire più oggetti?
-
         // Checks all the targets and hides the one the user is looking at.
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
-
                 if (checkCategory(mPickableTargets[i].getTarget().getCategory())) {
-                    gameStatus.increaseScore(1); // TODO: amount -> mettere il punteggio del target?
+                    gameStatus.increaseScore(mPickableTargets[i].getTarget().getScore());
                     Log.d(TAG, "***Punteggio: " + gameStatus.getScore());
                 } else {
                     gameStatus.decreaseLives(1);
@@ -445,6 +430,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     if (gameStatus.gameOver()) {
                         // GAME OVER
                         Log.d(TAG, "***GAME OVER***");
+                        gameStatus.saveCurrentScore();
+                        // TODO: show a TextView with Gameover and score
+                        //       make objects disappear from the scene
+                        //       (restart the game)
+
                     }
                 }
 
@@ -478,10 +468,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 //mLevel.setCategory(ObjCategory.getRandomCategory());
                 mLevel.setDuration(60);
 
-                for (int i = 0; i < TARGET_NUMBER; i++)
-                    mPickableTargets[i].newTimer(mLevel.getDuration());
-
-                Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
+                Log.d(TAG, "***Current level " + Level.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
                 hideAllTargets();
                 mHandler.removeCallbacks(this);
@@ -489,14 +476,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     @Override
                     public void run() {
                         mLevel.nextLevel();
-                        // The third level requires the player to collect bonus objects (plane and piakchu)
+                        // The third level requires the player to collect bonus objects (plane and pikachu)
                         mLevel.setCategory(ObjCategory.BONUS);
                         //mLevel.setCategory(ObjCategory.getRandomCategory());
 
                         for (int i = 0; i < TARGET_NUMBER; i++)
-                            mPickableTargets[i].defaultTimer();
+                            mPickableTargets[i].initializeTimer(defaultTime);
 
-                        Log.d(TAG, "***Current level " + mLevel.getLevelNumber());
+                        Log.d(TAG, "***Current level " + Level.getLevelNumber());
                         Log.d(TAG, "***Category: " + mLevel.getCategory());
                         hideAllTargets();
                     }
@@ -528,7 +515,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         int newMesh = random.nextInt(TARGET_MESH_COUNT);
 
-        pickableTarget.getTimer().restartTimer();
+        if ((Level.getLevelNumber() == 3) && (pickableTarget.getTimer() != null))
+            pickableTarget.getTimer().restartTimer();
 
         return newMesh;
     }
@@ -573,6 +561,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Controls if the mesh of the {@link PickableTarget} object passed belongs to the same category
      * of the level. If there are no objects belonging to the level category a new mesh will be
      * calculated in order to have at least one object with the right category.
+     *
      * @param pickableTarget The {@link PickableTarget} object to control.
      */
     private void checkMesh(PickableTarget pickableTarget) {
@@ -590,7 +579,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Changes the mesh of the pickableTarget with a new one until it belongs to the level category.
         do {
             newMesh = random.nextInt(TARGET_MESH_COUNT);
-        } while(!checkCategory(mTargets[newMesh].getCategory()));
+        } while (!checkCategory(mTargets[newMesh].getCategory()));
 
         // Updates the pickableTarget object with the new mesh
         pickableTarget.setMeshIndex(newMesh);

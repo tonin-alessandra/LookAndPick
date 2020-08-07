@@ -16,7 +16,7 @@ public class Target {
     private String mSelectedTexturePath;
     private String mNotSelectedTexturePath;
 
-    private int mScore;
+    private int mScore = 1;
 
     /**
      * Constructor.
@@ -33,13 +33,6 @@ public class Target {
         setSelectedTexturePath(selectedTexture);
         setNotSelectedTexturePath(notSelectedTexture);
     }
-
-//    public Target(int score){
-//        mPosition = new float[3];
-//        mModelTarget = new float[16];
-//        setScore(score);
-//    }
-
 
     /**
      * Gets the name of this target object.
@@ -97,12 +90,11 @@ public class Target {
     }
 
 
+    /**
+     * @return Returns the score associated to this object.
+     */
     public int getScore() {
         return mScore;
-    }
-
-    public void setScore(int score) {
-        mScore = score;
     }
 
     /**

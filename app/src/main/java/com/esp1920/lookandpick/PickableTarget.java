@@ -1,5 +1,7 @@
 package com.esp1920.lookandpick;
 
+import androidx.annotation.Nullable;
+
 /**
  * This class represents a visible object that appears on the screen.
  * Every object is represented using its {@link Position} and an index, which indicates the associated mesh.
@@ -15,22 +17,19 @@ public class PickableTarget {
     private Target mTarget;
 
     /**
-     * Constructor. It does not initialize the mesh index.
+     * Constructor. It does not initialize the mesh index and the timer.
      */
     PickableTarget() {
         mPosition = new Position();
         mPosition.generateRandomPosition();
-        mTimer = new DisappearanceTimer();
     }
 
     /**
-     * Constructor. It does not initialize the mesh index.
-     *
-     * @param duration Initial timer duration expressed in seconds.
+     * Initializes a timer for this object.
+     * It has been separated from the constructor because not always the timer is needed, so it
+     * is created only when necessary.
      */
-    PickableTarget(int duration) {
-        mPosition = new Position();
-        mPosition.generateRandomPosition();
+    public void initializeTimer(int duration) {
         mTimer = new DisappearanceTimer(duration * 1000);
     }
 
@@ -72,6 +71,7 @@ public class PickableTarget {
 
     /**
      * Gets the {@link Target} instance.
+     *
      * @return The Target object.
      */
     public Target getTarget() {
@@ -80,6 +80,7 @@ public class PickableTarget {
 
     /**
      * Sets the {@link Target} associated to the PickableTarget objects.
+     *
      * @param target The target to associate.
      */
     public void setTarget(Target target) {
@@ -91,34 +92,16 @@ public class PickableTarget {
      *
      * @return A {@link DisappearanceTimer} object.
      */
+    @Nullable
     public DisappearanceTimer getTimer() {
         return mTimer;
-    }
-
-    /**
-     * Changes the timer duration with a different one.
-     *
-     * @param duration The duration of the new timer in seconds.
-     */
-    public void newTimer(long duration) {
-        if (mTimer != null)
-            mTimer.stopTimer();
-        mTimer = new DisappearanceTimer(duration*1000);
-    }
-
-    /**
-     * Changes the timer duration with the default one defined in {@link DisappearanceTimer}.
-     */
-    public void defaultTimer() {
-        if (mTimer != null)
-            mTimer.stopTimer();
-        mTimer = new DisappearanceTimer();
     }
 
     /**
      * Checks if an object must be hidden.
      */
     public boolean isHidden() {
-        return mTimer.timeFinished();
+        if (mTimer != null) return mTimer.timeFinished();
+        return false;
     }
 }
