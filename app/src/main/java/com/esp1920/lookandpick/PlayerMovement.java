@@ -64,6 +64,7 @@ import com.google.vr.sdk.base.HeadTransform;
     private static  final float boundA = -0.9f; // bound regarding the wall Ahead
     private static final float boundB = 5.5f;   // bound regarding the wall Behind
 
+
     public PlayerMovement() {}
 
     /**

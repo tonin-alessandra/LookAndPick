@@ -21,7 +21,6 @@ enum ObjName {
     MOUSE,
     COW,
     SUNFLOWER,
-    ROSE,
     CACTUS,
     GREEN_ANDROID,
     WHITE_ANDROID,

@@ -4,7 +4,7 @@ import static com.esp1920.lookandpick.ObjName.*;
 import static com.esp1920.lookandpick.ObjCategory.*;
 
 /**
- * This class represents a generic {@link PickableTarget} object that will rendered to appear on the scene.
+ * This class represents a generic target object that will rendered to appear on the scene.
  * All operations to manage a {@link Target} behaviour can be found in {@link TargetManager}.
  */
 public class Target {
@@ -75,7 +75,6 @@ public class Target {
         ObjName objName = getName();
         switch (objName) {
             case CACTUS:
-            case ROSE:
             case SUNFLOWER:
                 mCategory = PLANT;
                 break;
