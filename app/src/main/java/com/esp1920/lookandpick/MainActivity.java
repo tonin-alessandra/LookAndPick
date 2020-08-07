@@ -144,7 +144,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private VrTextView scoreTv;
     private VrTextView msgTv;
-    private int taps = 0;
+    // private int taps = 0;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -192,7 +192,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scoreTv = (VrTextView) findViewById(R.id.score);
 
         msgTv = (VrTextView) findViewById(R.id.msg);
-        msgTv.showLongToast("Level 0 \n Pick up as many objects as you can!");
+        // msgTv.showLongToast("Level 0 \n Pick up as many objects as you can!");
     }
 
     /**
@@ -332,7 +332,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
 
         // Build the camera matrix and apply it to the ModelView.
-        Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(camera, 0, 0, 0, eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Controls if the floor height is available.
         // If true the modelRoom matrix is prepared to be used on onDrawEye method.
@@ -430,6 +430,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onCardboardTrigger() {
         //TODO: score prototype, to delete
+        /*
         taps++;
         runOnUiThread(new Runnable() {
 
@@ -439,6 +440,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             }
 
         });
+        */
 
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
@@ -447,10 +449,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(mPickableTargets[i])) {
                 if (checkCategory(mPickableTargets[i].getTarget().getCategory())) {
                     gameStatus.increaseScore(mPickableTargets[i].getTarget().getScore());
-                    Log.d(TAG, "***Punteggio: " + gameStatus.getScore());
+                    showStatus();
+                    Log.d(TAG, "***Score: " + gameStatus.getScore());
                 } else {
                     gameStatus.decreaseLives(1);
-                    Log.d(TAG, "***Vite: " + gameStatus.getLives());
+                    showStatus();
+                    Log.d(TAG, "***Remaining lives: " + gameStatus.getLives());
 
                     if (gameStatus.gameOver()) {
                         // GAME OVER
@@ -463,7 +467,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     }
                 }
 
-                Log.d(TAG, "***Hai catturato un " + mPickableTargets[i].getTarget().getCategory());
+                Log.d(TAG, "***Object category picked up " + mPickableTargets[i].getTarget().getCategory());
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
@@ -477,22 +481,35 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     /**
+     * Shows on the screen the score and the remaining lives.
+     */
+    private void showStatus() {
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                scoreTv.showShortToast("Score: " + String.valueOf(gameStatus.getScore())
+                        + "   Lives: " + String.valueOf(gameStatus.getLives()));
+            }
+        });
+    }
+
+    /**
      * TODO: use real level duration, here I used 20 seconds and 60 seconds to try.
-     * TODO: use random categories (commented code).
      * Handles the change of level, changing parameters after a fixed amount of time (which is the level duration).
      * Since there are 3 different levels, when the duration time of the first one is reached, there is
      * a switch to the second one. Same thing for the third level.
      */
     private void changeLevel() {
+        // TODO: stringa personalizzata per il Toast
+        msgTv.showLongToast("Level 1 \n Pick up as many objects as you can!");
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mLevel.nextLevel();
-                // To try the code, the second level requires the player to collect only animals
-                mLevel.setCategory(ObjCategory.ANIMAL);
-                //mLevel.setCategory(ObjCategory.getRandomCategory());
-                //TODO: far apparire la scritta con le indicazioni del livello
-                //.setText("Pick the " + mLevel.getCategory().getDescription())
+
+                mLevel.setCategory(ObjCategory.getRandomCategory());
+                msgTv.showLongToast("Level 2 \n Pick up the " + mLevel.getCategory().getDescription());
                 mLevel.setDuration(60);
 
                 Log.d(TAG, "***Current level " + Level.getLevelNumber());
@@ -503,9 +520,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     @Override
                     public void run() {
                         mLevel.nextLevel();
-                        // The third level requires the player to collect bonus objects (plane and pikachu)
-                        mLevel.setCategory(ObjCategory.BONUS);
-                        //mLevel.setCategory(ObjCategory.getRandomCategory());
+                        mLevel.setCategory(ObjCategory.getRandomCategory());
+                        msgTv.showLongToast("Level 3 \n Pick up the " + mLevel.getCategory().getDescription());
 
                         for (int i = 0; i < TARGET_NUMBER; i++)
                             mPickableTargets[i].initializeTimer(defaultTime);
