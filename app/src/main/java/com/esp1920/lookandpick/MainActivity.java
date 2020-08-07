@@ -466,6 +466,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 // To try the code, the second level requires the player to collect only animals
                 mLevel.setCategory(ObjCategory.ANIMAL);
                 //mLevel.setCategory(ObjCategory.getRandomCategory());
+                //TODO: far apparire la scritta con le indicazioni del livello
+                //.setText("Pick the " + mLevel.getCategory().getDescription())
                 mLevel.setDuration(60);
 
                 Log.d(TAG, "***Current level " + Level.getLevelNumber());
