@@ -125,9 +125,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // TODO: this is managed as a singleton, is it correct?
     private TargetManager mTargetManager = TargetManager.getInstance();
 
-    private PlayerMovement player = new PlayerMovement();
+    private PlayerMovement mPlayerMovement = new PlayerMovement();
+
     private float eyeZ = 0.0f;
 
+    private VrTextView scoreTv;
+    private VrTextView msgTv;
+    private int taps = 0;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -162,6 +166,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         roomPosition = new Position();
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
+
+        scoreTv = (VrTextView) findViewById(R.id.score);
+
+        msgTv = (VrTextView) findViewById(R.id.msg);
+        msgTv.showLongToast("Level 0 \n Pick up as many objects as you can!");
     }
 
     public void initializeGvrView() {
@@ -187,6 +196,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         setGvrView(gvrView);
         gvrProperties = gvrView.getGvrApi().getCurrentProperties();
+
     }
 
     @Override
@@ -278,6 +288,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             mPickableTargets[i].getTimer().startTimer();
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
+
     }
 
     /**
@@ -301,7 +312,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        eyeZ = player.updateEyePosition(headTransform, eyeZ);
+        // Updates eye position along z axis to perform movement
+        eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
+
         // Build the camera matrix and apply it to the ModelView.
         Matrix.setLookAtM(camera, 0,0, 0 , eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
@@ -399,6 +412,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
+        //TODO: score prototype, to delete
+        taps++;
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                scoreTv.showShortToast("Score: "+String.valueOf(taps));
+            }
+
+        });
+
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
         // TODO: modo più efficiente per gestire più oggetti?
