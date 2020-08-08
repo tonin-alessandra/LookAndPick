@@ -1,6 +1,7 @@
 package com.esp1920.lookandpick;
 
-import android.app.Activity;
+import android.app.Application;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -10,7 +11,6 @@ import android.util.Log;
 import com.google.vr.ndk.base.Properties;
 import com.google.vr.ndk.base.Value;
 import com.google.vr.sdk.audio.GvrAudioEngine;
-import com.google.vr.sdk.base.AndroidCompat;
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
 import com.google.vr.sdk.base.GvrView;
@@ -38,6 +38,11 @@ import javax.microedition.khronos.egl.EGLConfig;
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private static final String TAG = "MainActivity";
 
+    private final static String SPACE = " ";
+    private final static String SPACES = "     ";
+    //Used to convert seconds to millis.
+    private final static int MILLIS = 1000;
+
     // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 8;
     private static final int TARGET_NUMBER = 6;
@@ -56,7 +61,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float DEFAULT_FLOOR_HEIGHT = -3.0f;
 
     private static final float ANGLE_LIMIT = 0.2f;
-
     private static final String[] OBJECT_VERTEX_SHADER_CODE =
             new String[]{
                     "uniform mat4 u_MVP;",
@@ -144,7 +148,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private VrTextView scoreTv;
     private VrTextView msgTv;
-    // private int taps = 0;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -429,19 +432,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
-        //TODO: score prototype, to delete
-        /*
-        taps++;
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                scoreTv.showShortToast("Score: "+String.valueOf(taps));
-            }
-
-        });
-        */
-
         // TODO: add a message if the user doesn't hit the target (?) (like the other project)
 
         // Checks all the targets and hides the one the user is looking at.
@@ -449,12 +439,24 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(mPickableTargets[i])) {
                 if (checkCategory(mPickableTargets[i].getTarget().getCategory())) {
                     gameStatus.increaseScore(mPickableTargets[i].getTarget().getScore());
-                    showStatus();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
+                                    + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
+                        }
+                    });
                     Log.d(TAG, "***Score: " + gameStatus.getScore());
                 } else {
                     gameStatus.decreaseLives(1);
-                    showStatus();
-                    Log.d(TAG, "***Remaining lives: " + gameStatus.getLives());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
+                                    + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
+                        }
+                    });
+                    Log.d(TAG, getString(R.string.lives) + gameStatus.getLives());
 
                     if (gameStatus.gameOver()) {
                         // GAME OVER
@@ -467,7 +469,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     }
                 }
 
-                Log.d(TAG, "***Object category picked up " + mPickableTargets[i].getTarget().getCategory());
+                Log.d(TAG, "***Object category picked up: " + mPickableTargets[i].getTarget().getCategory());
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
@@ -480,19 +482,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             }
     }
 
-    /**
-     * Shows on the screen the score and the remaining lives.
-     */
-    private void showStatus() {
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                scoreTv.showShortToast("Score: " + String.valueOf(gameStatus.getScore())
-                        + "   Lives: " + String.valueOf(gameStatus.getLives()));
-            }
-        });
-    }
+//    /**
+//     * Shows on the screen the score and the remaining lives.
+//     */
+//    private void showStatus() {
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
+//                        + getString(R.string.spaces) + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
+//            }
+//        });
+//    }
 
     /**
      * TODO: use real level duration, here I used 20 seconds and 60 seconds to try.
@@ -501,36 +502,65 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * a switch to the second one. Same thing for the third level.
      */
     private void changeLevel() {
-        // TODO: stringa personalizzata per il Toast
-        msgTv.showLongToast("Level 1 \n Pick up as many objects as you can!");
+        msgTv.showLongToast(getString(R.string.level) + SPACE + Level.getLevelNumber() + getString(R.string.request) + SPACE + getString(R.string.all));
+//        Runnable changeLvl = new Runnable(){
+//            @Override
+//            public void run() {
+//                mLevel.nextLevel();
+//                mLevel.setCategory(ObjCategory.getRandomCategory());
+//                msgTv.showLongToast(getString(R.string.level) + SPACE + Level.getLevelNumber() +
+//                        getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
+//                if(Level.getLevelNumber() ==2){
+//                mLevel.setDuration(60);}
+//                if(Level.getLevelNumber() == 3){
+//                    for (int i = 0; i < TARGET_NUMBER; i++)
+//                        mPickableTargets[i].initializeTimer(defaultTime);
+//                }
+//                Log.d(TAG, getString(R.string.level) + Level.getLevelNumber());
+//                Log.d(TAG, "***Category: " + mLevel.getCategory());
+//                hideAllTargets();
+//                mHandler.removeCallbacks(this);
+//
+//            }
+//        };
+//
+//        mHandler.postDelayed(changeLvl,20000 );
+//        mHandler.postDelayed(changeLvl,mLevel.getDuration() * MILLIS );
+
+
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                //*********************************
                 mLevel.nextLevel();
-
                 mLevel.setCategory(ObjCategory.getRandomCategory());
-                msgTv.showLongToast("Level 2 \n Pick up the " + mLevel.getCategory().getDescription());
-                mLevel.setDuration(60);
+                msgTv.showLongToast(getString(R.string.level) + SPACE + Level.getLevelNumber() +
+                        getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
+                //*******************************
 
-                Log.d(TAG, "***Current level " + Level.getLevelNumber());
+                mLevel.setDuration(60);
+                ///*************************
+                Log.d(TAG, getString(R.string.level) + Level.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
                 hideAllTargets();
+                //************
                 mHandler.removeCallbacks(this);
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         mLevel.nextLevel();
                         mLevel.setCategory(ObjCategory.getRandomCategory());
-                        msgTv.showLongToast("Level 3 \n Pick up the " + mLevel.getCategory().getDescription());
+                        msgTv.showLongToast(getString(R.string.level) + Level.getLevelNumber() +
+                                getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
 
                         for (int i = 0; i < TARGET_NUMBER; i++)
                             mPickableTargets[i].initializeTimer(defaultTime);
 
-                        Log.d(TAG, "***Current level " + Level.getLevelNumber());
+                        Log.d(TAG, getString(R.string.level) + Level.getLevelNumber());
                         Log.d(TAG, "***Category: " + mLevel.getCategory());
                         hideAllTargets();
                     }
-                }, mLevel.getDuration() * 1000); //Level duration is in seconds, but handler requires millis
+                }, mLevel.getDuration() * MILLIS); //Level duration is in seconds, but handler requires millis
             }
         }, 20000);
     }

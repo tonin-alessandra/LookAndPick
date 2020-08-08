@@ -16,7 +16,7 @@ public class StatusManager {
     private SharedPreferences mSharedPref;
     private SharedPreferences.Editor mEditor;
     private String mPreferencesFileName;
-    private Context mContext;
+    //private Context mContext;
     private static StatusManager instance;
 
     /**
@@ -25,8 +25,8 @@ public class StatusManager {
      * @param context The current application context.
      */
     private StatusManager(Context context) {
-        mContext = context;
-        mPreferencesFileName = context.getResources().getString(R.string.ScorePreferences);
+        //mContext = context;
+        mPreferencesFileName = context.getResources().getString(R.string.score_preferences);
         // Retrieves the content of the preferences file identified by mPreferencesFileName.
         // MODE_PRIVATE means that it can only be accessed by the calling application.
         mSharedPref = context.getSharedPreferences(mPreferencesFileName, Context.MODE_PRIVATE);
