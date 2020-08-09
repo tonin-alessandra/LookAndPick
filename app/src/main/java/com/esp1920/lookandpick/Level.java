@@ -11,25 +11,27 @@ package com.esp1920.lookandpick;
  */
 public class Level {
     private final String TAG = "Level";
-    // A level object is initialized as the first level, so the associated number is 1 and its duration is 2 minutes.
-    // In addition, the category associated in ALL, this means there are no constraints on what type of objects can be collected.
-    // This values will be updated successively.
-    private static int levelNumber = 1;
-    private int levelDuration = 120; //in seconds
-    private ObjCategory mCategory = ObjCategory.ALL;
+    private int levelNumber;
+    private int levelDuration; //in seconds
+    private ObjCategory mCategory;
 
 
     /**
      * Constructor.
+     * A level object is initialized as the first level, so the associated number is 1 and its duration is 2 minutes.
+     * In addition, the category associated in ALL, this means there are no constraints on what type of objects can be collected.
+     * This values will be updated successively.
      */
     Level() {
+        levelNumber = 1;
         setCategory(ObjCategory.ALL);
+        setDuration(120);
     }
 
     /**
      * @return The number of the current level.
      */
-    public static int getLevelNumber() {
+    public int getLevelNumber() {
         return levelNumber;
     }
 
@@ -73,4 +75,5 @@ public class Level {
     public void nextLevel() {
         levelNumber++;
     }
+
 }

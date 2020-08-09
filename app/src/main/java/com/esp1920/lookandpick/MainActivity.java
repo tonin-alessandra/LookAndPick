@@ -1,6 +1,7 @@
 package com.esp1920.lookandpick;
 
 import android.app.Application;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -464,8 +465,16 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         gameStatus.saveCurrentScore();
                         // TODO: show a TextView with Gameover and score
                         //       make objects disappear from the scene
-                        //       (restart the game)
-
+                        Intent restart = new Intent(this, MainActivity.class);
+                        // Before recreating the Main Activity, closes all the activities on top of it
+                        // (so the intent will be delivered to the MainActivity, which is now on
+                        // the top of the stack).
+                        restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        // Makes the MainActivity become the start of a new task (group of activities)
+                        restart.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        // Closes the current activity and restarts it (starts a new one).
+                        finish();
+                        startActivity(restart);
                     }
                 }
 
@@ -502,7 +511,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * a switch to the second one. Same thing for the third level.
      */
     private void changeLevel() {
-        msgTv.showLongToast(getString(R.string.level) + SPACE + Level.getLevelNumber() + getString(R.string.request) + SPACE + getString(R.string.all));
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                msgTv.showLongToast(getString(R.string.level) + SPACE + mLevel.getLevelNumber() + getString(R.string.request) + SPACE + getString(R.string.all));
+            }
+        });
 //        Runnable changeLvl = new Runnable(){
 //            @Override
 //            public void run() {
@@ -534,13 +548,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 //*********************************
                 mLevel.nextLevel();
                 mLevel.setCategory(ObjCategory.getRandomCategory());
-                msgTv.showLongToast(getString(R.string.level) + SPACE + Level.getLevelNumber() +
+                msgTv.showLongToast(getString(R.string.level) + SPACE + mLevel.getLevelNumber() +
                         getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
                 //*******************************
 
                 mLevel.setDuration(60);
                 ///*************************
-                Log.d(TAG, getString(R.string.level) + Level.getLevelNumber());
+                Log.d(TAG, getString(R.string.level) + mLevel.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
                 hideAllTargets();
                 //************
@@ -550,13 +564,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     public void run() {
                         mLevel.nextLevel();
                         mLevel.setCategory(ObjCategory.getRandomCategory());
-                        msgTv.showLongToast(getString(R.string.level) + Level.getLevelNumber() +
+                        msgTv.showLongToast(getString(R.string.level) + mLevel.getLevelNumber() +
                                 getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
 
                         for (int i = 0; i < TARGET_NUMBER; i++)
                             mPickableTargets[i].initializeTimer(defaultTime);
 
-                        Log.d(TAG, getString(R.string.level) + Level.getLevelNumber());
+                        Log.d(TAG, getString(R.string.level) + mLevel.getLevelNumber());
                         Log.d(TAG, "***Category: " + mLevel.getCategory());
                         hideAllTargets();
                     }
@@ -588,7 +602,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         int newMesh = random.nextInt(TARGET_MESH_COUNT);
 
-        if ((Level.getLevelNumber() == 3) && (pickableTarget.getTimer() != null))
+        if ((mLevel.getLevelNumber() == 3) && (pickableTarget.getTimer() != null))
             pickableTarget.getTimer().restartTimer();
 
         return newMesh;
