@@ -11,6 +11,8 @@
     <string name="bonus">only planes or Pikachu</string>
     <string name="all">as many objects as you can</string>
     <string name="room">room</string>
+    <string name="gameover"> GAMEOVER!!</string>
+    <string name="record"> Your record is </string>
 
     <!--    <string-array name="vertex_shader_code">-->
     <!--        <item>uniform mat4 u_MVP;</item>-->

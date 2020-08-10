@@ -1,8 +1,6 @@
 package com.esp1920.lookandpick;
 
-import android.app.Application;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -41,6 +39,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private final static String SPACE = " ";
     private final static String SPACES = "     ";
+    private final static String NEW_LINE = "\n";
     //Used to convert seconds to millis.
     private final static int MILLIS = 1000;
 
@@ -137,6 +136,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     // Used to manage score and remaining lives (gameover)
     private GameStatus gameStatus;
+    private StatusManager prefManager;
     private final static int INITIAL_SCORE = 0;
     private final static int NUMBER_OF_LIVES = 3;
 
@@ -149,6 +149,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private VrTextView scoreTv;
     private VrTextView msgTv;
+
+    private VrTextView gameoverTv;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -166,6 +168,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         mHandler = new Handler();
 
         gameStatus = new GameStatus(INITIAL_SCORE, NUMBER_OF_LIVES, getApplicationContext());
+        prefManager = StatusManager.getInstance(getApplicationContext());
 
         random = new Random();
 
@@ -196,7 +199,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scoreTv = (VrTextView) findViewById(R.id.score);
 
         msgTv = (VrTextView) findViewById(R.id.msg);
-        // msgTv.showLongToast("Level 0 \n Pick up as many objects as you can!");
+
+        gameoverTv = (VrTextView) findViewById(R.id.gameover);
     }
 
     /**
@@ -440,31 +444,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (isLookingAtTarget(mPickableTargets[i])) {
                 if (checkCategory(mPickableTargets[i].getTarget().getCategory())) {
                     gameStatus.increaseScore(mPickableTargets[i].getTarget().getScore());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
-                                    + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
-                        }
-                    });
                     Log.d(TAG, "***Score: " + gameStatus.getScore());
                 } else {
                     gameStatus.decreaseLives(1);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
-                                    + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
-                        }
-                    });
                     Log.d(TAG, getString(R.string.lives) + gameStatus.getLives());
 
                     if (gameStatus.gameOver()) {
-                        // GAME OVER
                         Log.d(TAG, "***GAME OVER***");
+                        showGameover();
                         gameStatus.saveCurrentScore();
-                        // TODO: show a TextView with Gameover and score
-                        //       make objects disappear from the scene
+                        // TODO: make objects disappear from the scene
+                        //       add a button to restart game
+
                         Intent restart = new Intent(this, MainActivity.class);
                         // Before recreating the Main Activity, closes all the activities on top of it
                         // (so the intent will be delivered to the MainActivity, which is now on
@@ -477,7 +468,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         startActivity(restart);
                     }
                 }
-
+                // Displays current score and remaining lives.
+                showStatus();
                 Log.d(TAG, "***Object category picked up: " + mPickableTargets[i].getTarget().getCategory());
 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
@@ -491,18 +483,32 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             }
     }
 
-//    /**
-//     * Shows on the screen the score and the remaining lives.
-//     */
-//    private void showStatus() {
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
-//                        + getString(R.string.spaces) + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
-//            }
-//        });
-//    }
+    /**
+     * Shows on the screen the score and the remaining lives.
+     */
+    private void showStatus() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
+                        + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
+            }
+        });
+    }
+
+    /**
+     * Shows on the screen the score and the remaining lives.
+     */
+    private void showGameover() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                gameoverTv.showLongToast(getString(R.string.gameover) + NEW_LINE +
+                        getString(R.string.score) + String.valueOf(gameStatus.getScore()) + NEW_LINE +
+                        getString(R.string.record) + SPACE + prefManager.getCurrentRecord());
+            }
+        });
+    }
 
     /**
      * TODO: use real level duration, here I used 20 seconds and 60 seconds to try.
