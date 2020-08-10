@@ -1,6 +1,7 @@
 package com.esp1920.lookandpick;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -40,14 +41,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final static String SPACE = " ";
     private final static String SPACES = "     ";
     private final static String NEW_LINE = "\n";
-    //Used to convert seconds to millis.
+
+    // Useful constants which indicate the time expressed in seconds.
+    private final static int FIRST_LEVEL_DURATION = 20;
+    private final static int SECOND_LEVEL_DURATION = 10;
+    private final static int THIRD_LEVEL_DURATION = 30;
+
+    private final static int TIME_BEFORE_RESTART = 10;
+
+    // Used to convert seconds to millis.
     private final static int MILLIS = 1000;
 
     // Number of objects that can be rendered.
     private static final int TARGET_MESH_COUNT = 8;
     private static final int TARGET_NUMBER = 6;
 
-    // TODO: change these values to change how far user can see
     private static final float Z_NEAR = 0.01f;
     private static final float Z_FAR = 20.0f;
 
@@ -130,7 +138,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // Used to manage all target-related operations
     private TargetManager mTargetManager = TargetManager.getInstance();
 
-
     // This is the default value of the objects' timer in seconds
     private int defaultTime = 20;
 
@@ -149,8 +156,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private VrTextView scoreTv;
     private VrTextView msgTv;
-
     private VrTextView gameoverTv;
+
+    private boolean gameOver;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -163,7 +171,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         initializeGvrView();
 
         // Initializes the first level
-        mLevel = new Level();
+        mLevel = new Level(FIRST_LEVEL_DURATION);
         // Initializes the handler to manage the switching between levels
         mHandler = new Handler();
 
@@ -200,6 +208,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         msgTv = (VrTextView) findViewById(R.id.msg);
 
+        gameOver = false;
         gameoverTv = (VrTextView) findViewById(R.id.gameover);
     }
 
@@ -402,14 +411,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @param pickableTarget The PickableTarget object to draw.
      */
     public void drawTarget(PickableTarget pickableTarget) {
-        GLES20.glUseProgram(objectProgram);
-        GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
-        if (isLookingAtTarget(pickableTarget)) {
-            targetObjectSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
-        } else {
-            targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
-        }
-        if (!(pickableTarget.isHidden())) {
+        // If the timer of the object is not finished or the game is not over, it draws the objects on the scene.
+        if (!gameOver && !pickableTarget.isHidden()) {
+            GLES20.glUseProgram(objectProgram);
+            GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
+
+
+            if (isLookingAtTarget(pickableTarget)) {
+                targetObjectSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
+            } else {
+                targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
+            }
+
             targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
         }
     }
@@ -451,21 +464,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
                     if (gameStatus.gameOver()) {
                         Log.d(TAG, "***GAME OVER***");
-                        showGameover();
-                        gameStatus.saveCurrentScore();
-                        // TODO: make objects disappear from the scene
-                        //       add a button to restart game
-
-                        Intent restart = new Intent(this, MainActivity.class);
-                        // Before recreating the Main Activity, closes all the activities on top of it
-                        // (so the intent will be delivered to the MainActivity, which is now on
-                        // the top of the stack).
-                        restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        // Makes the MainActivity become the start of a new task (group of activities)
-                        restart.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        // Closes the current activity and restarts it (starts a new one).
-                        finish();
-                        startActivity(restart);
+                        // showGameOver();
+                        // gameStatus.saveCurrentScore();
+                        gameOver();
                     }
                 }
                 // Displays current score and remaining lives.
@@ -484,6 +485,41 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     /**
+     * Performs the game over procedures and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
+     */
+    // TODO: cambiare nome metodo? perché nella classe gamestatus ce n'è già uno chiamato così
+    private void gameOver() {
+        gameOver = true;
+
+        showGameOver();
+        gameStatus.saveCurrentScore();
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mHandler.removeCallbacks(this);
+                restartGame();
+            }
+        }, TIME_BEFORE_RESTART * MILLIS);
+    }
+
+    /**
+     * Restarts the app.
+     */
+    private void restartGame() {
+        Intent restart = new Intent(this, MainActivity.class);
+        // Before recreating the Main Activity, closes all the activities on top of it
+        // (so the intent will be delivered to the MainActivity, which is now on
+        // the top of the stack).
+        restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // Makes the MainActivity become the start of a new task (group of activities)
+        restart.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Closes the current activity and restarts it (starts a new one).
+        finish();
+        startActivity(restart);
+    }
+
+    /**
      * Shows on the screen the score and the remaining lives.
      */
     private void showStatus() {
@@ -499,19 +535,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Shows on the screen the score and the remaining lives.
      */
-    private void showGameover() {
+    private void showGameOver() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                Resources res = getResources();
                 gameoverTv.showLongToast(getString(R.string.gameover) + NEW_LINE +
                         getString(R.string.score) + String.valueOf(gameStatus.getScore()) + NEW_LINE +
-                        getString(R.string.record) + SPACE + prefManager.getCurrentRecord());
+                        getString(R.string.record) + SPACE + prefManager.getCurrentRecord() + NEW_LINE +
+                        String.format(res.getString(R.string.restart), TIME_BEFORE_RESTART));
             }
         });
     }
 
     /**
-     * TODO: use real level duration, here I used 20 seconds and 60 seconds to try.
+     * TODO: PER PROVARE HO CAMBIATO IL TEMPO DEL LIVELLO 20 secondi, 10 secondi e 30 secondi rispettivamente
      * Handles the change of level, changing parameters after a fixed amount of time (which is the level duration).
      * Since there are 3 different levels, when the duration time of the first one is reached, there is
      * a switch to the second one. Same thing for the third level.
@@ -547,7 +585,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 //        mHandler.postDelayed(changeLvl,20000 );
 //        mHandler.postDelayed(changeLvl,mLevel.getDuration() * MILLIS );
 
-
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -557,8 +594,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 msgTv.showLongToast(getString(R.string.level) + SPACE + mLevel.getLevelNumber() +
                         getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
                 //*******************************
-
-                mLevel.setDuration(60);
+                // Sets the next level duration (in this case the second).
+                mLevel.setDuration(SECOND_LEVEL_DURATION);
                 ///*************************
                 Log.d(TAG, getString(R.string.level) + mLevel.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
@@ -575,14 +612,25 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
                         for (int i = 0; i < TARGET_NUMBER; i++)
                             mPickableTargets[i].initializeTimer(defaultTime);
-
+                        //*******************************
+                        // Sets the next level duration (in this case the last).
+                        mLevel.setDuration(THIRD_LEVEL_DURATION);
+                        ///*************************
                         Log.d(TAG, getString(R.string.level) + mLevel.getLevelNumber());
                         Log.d(TAG, "***Category: " + mLevel.getCategory());
                         hideAllTargets();
+                        mHandler.removeCallbacks(this);
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                gameOver();
+                            }
+                        }, mLevel.getDuration() * MILLIS);
                     }
-                }, mLevel.getDuration() * MILLIS); //Level duration is in seconds, but handler requires millis
+                }, mLevel.getDuration() * MILLIS);
             }
-        }, 20000);
+        }, mLevel.getDuration() * MILLIS); // Level duration is in seconds, but handler requires millis.
+
     }
 
     /**

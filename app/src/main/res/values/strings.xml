@@ -13,6 +13,7 @@
     <string name="room">room</string>
     <string name="gameover"> GAMEOVER!!</string>
     <string name="record"> Your record is </string>
+    <string name="restart">The game will restart in %1$d seconds</string>
 
     <!--    <string-array name="vertex_shader_code">-->
     <!--        <item>uniform mat4 u_MVP;</item>-->
