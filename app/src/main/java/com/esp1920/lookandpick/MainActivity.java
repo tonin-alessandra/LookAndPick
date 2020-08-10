@@ -497,7 +497,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mHandler.removeCallbacks(this);
+                // mHandler.removeCallbacks(this);
                 restartGame();
             }
         }, TIME_BEFORE_RESTART * MILLIS);
@@ -507,6 +507,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Restarts the app.
      */
     private void restartGame() {
+        Log.d(TAG, "***RESTART GAME***");
+        mHandler.removeCallbacksAndMessages(null);
         Intent restart = new Intent(this, MainActivity.class);
         // Before recreating the Main Activity, closes all the activities on top of it
         // (so the intent will be delivered to the MainActivity, which is now on
