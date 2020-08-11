@@ -301,7 +301,11 @@ import com.google.vr.sdk.base.HeadTransform;
     }
 
     /**
+     * Check if the user can move forward and backward, according to the boundaries set.
      *
+     * boundA is the bound regarding the wall AHEAD; boundB regards the wall BEHIND.
+     * To understand conditions, keep in mind that moving towards the wall AHEAD means moving
+     * towards the negative values of the Z axis.
      */
     private void checkBounds(){
         if ((orientation == AHEAD && newEyeZ < boundA) || (orientation == BEHIND && newEyeZ > boundB)) {
