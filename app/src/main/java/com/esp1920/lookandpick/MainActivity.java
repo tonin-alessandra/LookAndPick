@@ -156,7 +156,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private VrTextView scoreTv;
     private VrTextView msgTv;
-    private VrTextView gameoverTv;
+    private VrTextView finalStatusTv;
 
     private boolean gameOver;
 
@@ -209,7 +209,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         msgTv = (VrTextView) findViewById(R.id.msg);
 
         gameOver = false;
-        gameoverTv = (VrTextView) findViewById(R.id.gameover);
+        finalStatusTv = (VrTextView) findViewById(R.id.gameover);
     }
 
     /**
@@ -462,11 +462,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     gameStatus.decreaseLives(1);
                     Log.d(TAG, getString(R.string.lives) + gameStatus.getLives());
 
-                    if (gameStatus.gameOver()) {
+                    if (gameStatus.isGameOver()) {
                         Log.d(TAG, "***GAME OVER***");
-                        // showGameOver();
-                        // gameStatus.saveCurrentScore();
-                        gameOver();
+                        gameOver = true;
+                        gameEnd();
                     }
                 }
                 // Displays current score and remaining lives.
@@ -487,17 +486,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Performs the game over procedures and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
      */
-    // TODO: cambiare nome metodo? perché nella classe gamestatus ce n'è già uno chiamato così
-    private void gameOver() {
-        gameOver = true;
-
-        showGameOver();
+    private void gameEnd() {
         gameStatus.saveCurrentScore();
+        showFinalStatus();
 
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // mHandler.removeCallbacks(this);
                 restartGame();
             }
         }, TIME_BEFORE_RESTART * MILLIS);
@@ -537,12 +532,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     /**
      * Shows on the screen the score and the remaining lives.
      */
-    private void showGameOver() {
+    private void showFinalStatus() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Resources res = getResources();
-                gameoverTv.showLongToast(getString(R.string.gameover) + NEW_LINE +
+                String finalStatus;
+                if (gameOver)
+                    finalStatus = getString(R.string.gameover);
+                else
+                    finalStatus = getString(R.string.time_finished);
+                finalStatusTv.showLongToast(finalStatus + NEW_LINE +
                         getString(R.string.score) + String.valueOf(gameStatus.getScore()) + NEW_LINE +
                         getString(R.string.record) + SPACE + prefManager.getCurrentRecord() + NEW_LINE +
                         String.format(res.getString(R.string.restart), TIME_BEFORE_RESTART));
@@ -625,7 +625,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                gameOver();
+                                gameEnd();
                             }
                         }, mLevel.getDuration() * MILLIS);
                     }
