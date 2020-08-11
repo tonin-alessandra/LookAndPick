@@ -43,8 +43,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final static String NEW_LINE = "\n";
 
     // Useful constants which indicate the time expressed in seconds.
-    private final static int FIRST_LEVEL_DURATION = 20;
-    private final static int SECOND_LEVEL_DURATION = 10;
+    private final static int FIRST_LEVEL_DURATION = 30;
+    private final static int SECOND_LEVEL_DURATION = 30;
     private final static int THIRD_LEVEL_DURATION = 30;
 
     private final static int TIME_BEFORE_RESTART = 10;
@@ -115,9 +115,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] modelViewProjection;
     private float[] modelView;
 
-    // Array where are stored position and index of each pickable object.
+    // Array that contains the position of each PickableTarget object.
     private PickableTarget[] mPickableTargets;
-    private Target[] mTargets;
+    // ArrayList which contains the right mesh index of PickableTarget object.
+    private ArrayList<Target> mTargets;
 
     private Position roomPosition;
 
@@ -200,7 +201,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         headRotation = new float[4];
         roomPosition = new Position();
 
-        mTargets = new Target[TARGET_MESH_COUNT];
+        // mTargets = new ArrayList<>();
+        // mTargets = new Target[TARGET_MESH_COUNT];
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
 
@@ -317,7 +319,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Chooses randomly the first object to show for each pickable object.
         for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i].setMeshIndex(random.nextInt(TARGET_MESH_COUNT));
-            mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
+            mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
             Log.d(TAG, "*******primi oggetti " + i + " ********");
         }
         // Manages the transition to the next levels.
@@ -476,7 +478,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
 
                 mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
-                mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
+                mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
 
                 checkMesh(mPickableTargets[i]);
                 break;
@@ -641,7 +643,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private void hideAllTargets() {
         for (int i = 0; i < TARGET_NUMBER; i++) {
             mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
-            mPickableTargets[i].setTarget(mTargets[mPickableTargets[i].getMeshIndex()]);
+            mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
         }
         // Chooses a random object and changes its mesh, if necessary.
         checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
@@ -722,11 +724,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Changes the mesh of the pickableTarget with a new one until it belongs to the level category.
         do {
             newMesh = random.nextInt(TARGET_MESH_COUNT);
-        } while (!checkCategory(mTargets[newMesh].getCategory()));
+        } while (!checkCategory(mTargets.get(newMesh).getCategory()));
 
         // Updates the pickableTarget object with the new mesh
         pickableTarget.setMeshIndex(newMesh);
-        pickableTarget.setTarget(mTargets[newMesh]);
+        pickableTarget.setTarget(mTargets.get(newMesh));
     }
 
     /**
@@ -763,20 +765,24 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @throws IOException if unable to initialize objects.
      */
     private void addTargets(int objectPositionParam, int objectUvParam) throws IOException {
+        mTargets = new ArrayList<>();
         targetObjectMeshes = new ArrayList<>();
         targetObjectNotSelectedTextures = new ArrayList<>();
         targetObjectSelectedTextures = new ArrayList<>();
 
-        Target tarPenguin = new Target(ObjName.PENGUIN, "graphics/penguin/penguin.obj", "graphics/penguin/dark_penguin.png", "graphics/penguin/penguin.png");
-        Target tarCat = new Target(ObjName.CAT, "graphics/cat/cat.obj", "graphics/cat/dark_cat.png", "graphics/cat/cat.png");
-        Target tarPikachu = new Target(ObjName.PIKACHU, "graphics/pikachu/pikachu.obj", "graphics/pikachu/dark_pikachu.png", "graphics/pikachu/pikachu.png");
-        Target tarAndroid = new Target(ObjName.GREEN_ANDROID, "graphics/android/green_android.obj", "graphics/android/dark_green_android.png", "graphics/android/green_android.png");
-        Target tarCactus = new Target(ObjName.CACTUS, "graphics/cactus/cactus.obj", "graphics/cactus/dark_cactus.png", "graphics/cactus/cactus.png");
-        Target tarMouse = new Target(ObjName.MOUSE, "graphics/mouse/mouse.obj", "graphics/mouse/dark_mouse.png", "graphics/mouse/mouse.png");
-        Target tarPlane = new Target(ObjName.PLANE, "graphics/plane/plane.obj", "graphics/plane/dark_plane.png", "graphics/plane/plane.png");
-        Target tarSunflower = new Target(ObjName.SUNFLOWER, "graphics/sunflower/sunflower.obj", "graphics/sunflower/dark_sunflower.png", "graphics/sunflower/sunflower.png");
+        mTargets.add(new Target(ObjName.PENGUIN, "graphics/penguin/penguin.obj", "graphics/penguin/dark_penguin.png", "graphics/penguin/penguin.png"));
+        mTargets.add(new Target(ObjName.CAT, "graphics/cat/cat.obj", "graphics/cat/dark_cat.png", "graphics/cat/cat.png"));
+        mTargets.add(new Target(ObjName.PIKACHU, "graphics/pikachu/pikachu.obj", "graphics/pikachu/dark_pikachu.png", "graphics/pikachu/pikachu.png"));
+        mTargets.add(new Target(ObjName.GREEN_ANDROID, "graphics/android/green_android.obj", "graphics/android/dark_green_android.png", "graphics/android/green_android.png"));
+        mTargets.add(new Target(ObjName.CACTUS, "graphics/cactus/cactus.obj", "graphics/cactus/dark_cactus.png", "graphics/cactus/cactus.png"));
+        mTargets.add(new Target(ObjName.MOUSE, "graphics/mouse/mouse.obj", "graphics/mouse/dark_mouse.png", "graphics/mouse/mouse.png"));
+        mTargets.add(new Target(ObjName.PLANE, "graphics/plane/plane.obj", "graphics/plane/dark_plane.png", "graphics/plane/plane.png"));
+        mTargets.add(new Target(ObjName.SUNFLOWER, "graphics/sunflower/sunflower.obj", "graphics/sunflower/dark_sunflower.png", "graphics/sunflower/sunflower.png"));
 
-        mTargets[0] = tarCat;
+        for (int i = 0; i < TARGET_MESH_COUNT; i++) {
+            addObject(mTargets.get(i), objectPositionParam, objectUvParam);
+        }
+        /*mTargets[0] = tarCat;
         addObject(tarCat, objectPositionParam, objectUvParam);
         mTargets[1] = tarPikachu;
         addObject(tarPikachu, objectPositionParam, objectUvParam);
@@ -791,7 +797,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         mTargets[6] = tarPlane;
         addObject(tarPlane, objectPositionParam, objectUvParam);
         mTargets[7] = tarSunflower;
-        addObject(tarSunflower, objectPositionParam, objectUvParam);
+        addObject(tarSunflower, objectPositionParam, objectUvParam);*/
     }
 
     /**
