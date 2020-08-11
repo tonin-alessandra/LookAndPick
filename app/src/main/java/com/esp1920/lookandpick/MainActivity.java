@@ -477,8 +477,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 successSourceId = gvrAudioEngine.createStereoSound(SUCCESS_SOUND_FILE);
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
 
-                mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
-                mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
+                hideTarget(mPickableTargets[i]);
+                // mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
+                // mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
 
                 checkMesh(mPickableTargets[i]);
                 break;
@@ -642,17 +643,20 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     private void hideAllTargets() {
         for (int i = 0; i < TARGET_NUMBER; i++) {
-            mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
-            mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
+            hideTarget(mPickableTargets[i]);
+            // mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
+            // mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
         }
         // Chooses a random object and changes its mesh, if necessary.
         checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
     }
 
     /**
-     * Finds a new random position for the target object.
+     * Changes the position of the {@link PickableTarget} object and updates its mesh.
+     *
+     * @param pickableTarget The object to update.
      */
-    private int hideTarget(PickableTarget pickableTarget) {
+    private void hideTarget(PickableTarget pickableTarget) {
         Position tempPosition = newPosition();
         pickableTarget.setPosition(tempPosition);
 
@@ -663,7 +667,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         if ((mLevel.getLevelNumber() == 3) && (pickableTarget.getTimer() != null))
             pickableTarget.getTimer().restartTimer();
 
-        return newMesh;
+        pickableTarget.changeMesh(newMesh, mTargets.get(newMesh));
     }
 
     /**

@@ -77,8 +77,13 @@ public class VrTextView extends LinearLayout {
      * Listener to handle notifications from an animation.
      */
     private abstract class EndAnimationListener implements Animation.AnimationListener {
-        @Override public void onAnimationRepeat(Animation animation) {}
-        @Override public void onAnimationStart(Animation animation) {}
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+        }
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+        }
     }
 
     /**
@@ -121,7 +126,7 @@ public class VrTextView extends LinearLayout {
      * @param text String of text that will be showed.
      */
     // TODO: remove if never used
-    public void showText(String text){
+    public void showText(String text) {
         setText(text);
     }
 

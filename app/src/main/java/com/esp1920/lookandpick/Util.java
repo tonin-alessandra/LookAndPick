@@ -14,11 +14,16 @@ import static android.opengl.GLU.gluErrorString;
 /* package */ class Util {
     private static final String TAG = "Util";
 
-    /** Debug builds should fail quickly. Release versions of the app should have this disabled. */
+    /**
+     * Debug builds should fail quickly. Release versions of the app should have this disabled.
+     */
     private static final boolean HALT_ON_GL_ERROR = true;
 
-    /** Class only contains static methods. */
-    private Util() {}
+    /**
+     * Class only contains static methods.
+     */
+    private Util() {
+    }
 
     /**
      * Checks GLES20.glGetError and fails quickly if the state isn't GL_NO_ERROR.
@@ -45,7 +50,7 @@ import static android.opengl.GLU.gluErrorString;
      * Builds a GL shader program from vertex & fragment shader code. The vertex and fragment shaders
      * are passed as arrays of strings in order to make debugging compilation issues easier.
      *
-     * @param vertexCode GLES20 vertex shader program.
+     * @param vertexCode   GLES20 vertex shader program.
      * @param fragmentCode GLES20 fragment shader program.
      * @return GLES20 program id.
      */

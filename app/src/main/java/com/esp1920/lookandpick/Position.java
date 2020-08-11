@@ -26,7 +26,7 @@ public class Position {
     /**
      * Constructor.
      */
-    Position(){
+    Position() {
         mPosition = new float[]{0, 0, -MIN_TARGET_DISTANCE};
         mModel = new float[16];
         random = new Random();
@@ -34,11 +34,12 @@ public class Position {
 
     /**
      * Constructor.
+     *
      * @param x The x coordinate.
      * @param y The y coordinate.
      * @param z The z coordinate.
      */
-    Position(float x, float y, float z){
+    Position(float x, float y, float z) {
         mPosition = new float[]{x, y, z};
         mModel = new float[16];
         random = new Random();
@@ -46,12 +47,16 @@ public class Position {
 
     /**
      * Gets the target position.
-     * @return  The position of a {@link Target}.
+     *
+     * @return The position of a {@link Target}.
      */
-    public float[] getPosition() { return mPosition; }
+    public float[] getPosition() {
+        return mPosition;
+    }
 
     /**
      * Sets the target position.
+     *
      * @param x The x coordinate.
      * @param y The y coordinate.
      * @param z The z coordinate.
@@ -64,6 +69,7 @@ public class Position {
 
     /**
      * Sets the target position from a Position object.
+     *
      * @param position The Position object.
      */
     public void setPosition(Position position) {
@@ -74,7 +80,8 @@ public class Position {
 
     /**
      * Gets the model.
-     * @return  The model of a {@link Target}.
+     *
+     * @return The model of a {@link Target}.
      */
     public float[] getModel() {
         updateModel();
@@ -91,26 +98,35 @@ public class Position {
 
     /**
      * Gets the x coordinate.
-     * @return  The x coordinate.
+     *
+     * @return The x coordinate.
      */
-    public float getXCoordinate(){ return mPosition[0]; }
+    public float getXCoordinate() {
+        return mPosition[0];
+    }
 
     /**
      * Gets the y coordinate.
-     * @return  The y coordinate.
+     *
+     * @return The y coordinate.
      */
-    public float getYCoordinate(){ return mPosition[1]; }
+    public float getYCoordinate() {
+        return mPosition[1];
+    }
 
     /**
      * Gets the z coordinate.
-     * @return  The z coordinate.
+     *
+     * @return The z coordinate.
      */
-    public float getZCoordinate(){ return mPosition[2]; }
+    public float getZCoordinate() {
+        return mPosition[2];
+    }
 
     /**
-     *  Generates random position.
+     * Generates random position.
      */
-    public void generateRandomPosition(){
+    public void generateRandomPosition() {
         float[] rotationMatrix = new float[16];
         float[] posVec = new float[4];
 
@@ -128,10 +144,10 @@ public class Position {
 
         Position temp;
         // Allows to generate objects with negative z coordinate randomly.
-        if(random.nextBoolean())
-            temp = new Position(0,0, -targetDistance);
+        if (random.nextBoolean())
+            temp = new Position(0, 0, -targetDistance);
         else
-            temp = new Position(0,0, targetDistance);
+            temp = new Position(0, 0, targetDistance);
 
         Matrix.multiplyMV(posVec, 0, rotationMatrix, 0, temp.getModel(), 12);
 

@@ -81,7 +81,8 @@ public class VrEyeTextView extends ViewGroup {
         this.offset = offset;
     }
 
-    /** Assigns a size and position to each of the ViewGroup's children.
+    /**
+     * Assigns a size and position to each of the ViewGroup's children.
      *
      * @param changed Boolean set to true if this is a new size or position for this view.
      * @param left    Left position, relative to parent (the ViewGroup)

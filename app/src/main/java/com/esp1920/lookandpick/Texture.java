@@ -7,6 +7,7 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import java.io.IOException;
+
 /**
  * This class has been written by Google and represents a texture, meant for use with TexturedMesh.
  * It is taken from gvr-android-sdk-1.200 project, more precisely from sdk-hellovr sample.
@@ -17,7 +18,7 @@ import java.io.IOException;
     /**
      * Initializes the texture.
      *
-     * @param context Context for loading the texture file.
+     * @param context     Context for loading the texture file.
      * @param texturePath Path to the image to use for the texture.
      */
     public Texture(Context context, String texturePath) throws IOException {
@@ -46,7 +47,9 @@ import java.io.IOException;
 
     }
 
-    /** Binds the texture to GL_TEXTURE0. */
+    /**
+     * Binds the texture to GL_TEXTURE0.
+     */
     public void bind() {
         // Activates texture unit
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);

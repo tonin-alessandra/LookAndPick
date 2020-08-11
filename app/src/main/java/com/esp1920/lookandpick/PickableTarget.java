@@ -98,6 +98,17 @@ public class PickableTarget {
     }
 
     /**
+     * Changes both mMeshIndex and mTarget with new ones.
+     *
+     * @param newMeshIndex The new index.
+     * @param newTarget    The new target associated with the index.
+     */
+    public void changeMesh(int newMeshIndex, Target newTarget) {
+        setMeshIndex(newMeshIndex);
+        setTarget(newTarget);
+    }
+
+    /**
      * Checks if an object must be hidden.
      */
     public boolean isHidden() {
