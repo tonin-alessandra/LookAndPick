@@ -4,22 +4,18 @@ import com.google.vr.sdk.base.HeadTransform;
 
 
 /**
- * Class to handle user movement along Z axis.
+ * Class to handle user movement along the Z axis.
  *
- * If the user tilts the cardboard viewer down with an angle greater than the threshold, the player
- * will start moving forward in the direction the head is looking at.
- * If the user tilts the cardboard viewer up with an angle greater than the threshold, the player
+ * If the user tilts the cardboard viewer DOWN with an angle greater than the threshold, the player
+ * will start moving forward, along the Z axis, depending on the direction the head is looking at.
+ * If the user tilts the cardboard viewer UP with an angle greater than the threshold, the player
  * will move backwards.
- * Movement is enabled only along the Z axis. If the user looks at the wall to the left and tilts the
- * viewer, for example, he/she won't move.
+ * Movement is enabled only along the Z axis. The player will move only with respect to the walls
+ * that are in front of and behind him/her when the game starts (wall with pink tiles and wall with
+ * blue tiles).
  *
- * This feature is designed to be comfortable when using a Cardboard viewer.
- *
- * Explanations of the formulas used in the code below are provided in the following comments.
- * Please note that we came up with these formulas by ourselves, after a lot of tests and experiments.
- * These were not found on the internet, in fact, examples of movement in virtual reality, using
- * Google VR SDK for Android Studio, cannot be found anywhere.
- *
+ * This feature is designed to be comfortable when using a Cardboard viewer: boundaries to movement
+ * forward and backward are added for this reason.
  */
  public class PlayerMovement {
     private final String TAG = "PlayerMovement";
@@ -36,8 +32,8 @@ import com.google.vr.sdk.base.HeadTransform;
 
     // Orientation represents the wall the user is facing and looking at.
     // The only 'valid' walls are the wall AHEAD and the wall BEHIND, as movement is performed
-    // along the z axis.
-    // The wall AHEAD is the purple wall (ahead when game begins)
+    // along the Z axis.
+    // The wall AHEAD is the pink wall (ahead when game begins)
     // The wall BEHIND is the blue wall (behind when game begins)
     private static final int AHEAD = -1;
     private static final int BEHIND = 1;
@@ -47,6 +43,7 @@ import com.google.vr.sdk.base.HeadTransform;
     private float[] eulerAngles = new float[3];
     private float[] forwardVec = new float[3];
 
+    // rotation around the X axis in the head's reference system
     private double pitch;
 
     private float newEyeZ;
@@ -63,53 +60,58 @@ import com.google.vr.sdk.base.HeadTransform;
     // Movement boundaries to avoid discomfort and to ensure a fluid movement.
     // The user cannot walk past these points.
     private static  final float boundA = -0.9f; // bound regarding the wall Ahead
-    private static final float boundB = 5.5f;   // bound regarding the wall Behind
+    private static final float boundB = 4.5f;   // bound regarding the wall Behind
 
-
+    /**
+     * Constructor.
+     */
     public PlayerMovement() {}
 
     /**
-     * Checks if and how the player is moving the viewer to walk.
+     * Checks if and how the player is moving the viewer, to move in the room.
      * If the user tilts the viewer (up or down) with an angle greater than THRESHOLD_ANGLE,
      * he/she will begin to move accordingly.
      *
      * @param eulerAngles vector of Euler angles (pitch, yaw, roll) that describe head's movement
-     *                    around the Y, Z and X axis respectively.
-     * @return direction in which the user wants to walk.
+     *                    around the X, Y and Z axes respectively (head's reference system).
+     * @return direction  in which the user wants to walk.
      */
     private int getDirection(float[] eulerAngles){
-        // Gets pitch, rotation of the head around the Y axis, in order to detect viewer-tilting.
-        // Note that this axis is different from the Y axis of the room's reference system.
+        // Gets pitch, rotation of the head around the X axis, in order to detect viewer-tilting.
         pitch = Math.toDegrees(eulerAngles[0]);
 
-        // Condition: if viewer is tilted down with angle greater than the threshold
+        // If viewer is tilted down with angle greater than the threshold, the user will move
+        // forward, towards the wall he/she is facing.
         if(pitch <= THRESHOLD_ANGLE * -1){
             return FORWARD;
         }
 
-        // Condition: if viewer is tilted up with angle greater than the threshold
+        // If viewer is tilted up with angle greater than the threshold, the user will move
+        // backward, towards the wall he/she is facing.
         if(pitch >= THRESHOLD_ANGLE){
             return BACKWARD;
         }
 
+        // The user will not move.
         return STILL;
     }
 
     /**
-     * Calculates the position of the eyes along the z axis, according to direction and
+     * Calculates the position of the eyes along the Z axis, according to direction and
      * orientation.
      *
-     * @param headTransform object that describes the head rotation
-     * @param eyeZ position of the eyes along the z axis that has to be updated in case
-     *             of movement
-     * @return the updated position of the eyes along the z axis.
+     * @param headTransform Object that describes the head rotation.
+     * @param eyeZ          Position of the eyes along the Z axis that has to be updated in case
+     *                      of movement.
+     * @return newEyeZ      The updated position of the eyes along the Z axis.
      *
      * Update of the eye position along the Z axis.
-     * Note that this axis is the Z axis in the room's reference system, which is right-hand  based.
-     * The axis crosses the room from the wall AHEAD to the wall BEHIND, so it points to the back
+     * Note that this axis is the Z axis in the X-Y-Z right-handed coordinate system. This means that
+     * it crosses the room from the wall AHEAD to the wall BEHIND, so it points to the back
      * of the room. For this reason, if we want to move towards the wall AHEAD (forward or backward),
      * the eye position has to DECREMENT. If we want to move towards the wall BEHIND, the eye position
-     * has to INCREMENT.
+     * has to INCREMENT. It is fundamental to keep this in mind, because the Z component of the forward
+     * vector of the head is positive when facing BEHIND and negative when facing AHEAD.
      *
      * ---> when moving FORWARD:
      *
