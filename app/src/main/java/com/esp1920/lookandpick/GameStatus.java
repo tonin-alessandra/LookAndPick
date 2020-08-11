@@ -63,7 +63,7 @@ public class GameStatus {
      *
      * @return True if the lives' number reached zero, false otherwise.
      */
-    public boolean gameOver() {
+    public boolean isGameOver() {
         if (lives == 0) {
             return true;
         }
