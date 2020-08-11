@@ -24,7 +24,7 @@ import com.google.vr.sdk.base.HeadTransform;
  * This feature is designed to be comfortable when using a Cardboard viewer: boundaries to movement
  * forward and backward are added for this reason.
  */
- public class PlayerMovement {
+public class PlayerMovement {
     private final String TAG = "PlayerMovement";
 
     private static final double THRESHOLD_ANGLE = 30; // degrees
@@ -66,13 +66,14 @@ import com.google.vr.sdk.base.HeadTransform;
 
     // Movement boundaries to avoid discomfort and to ensure a fluid movement.
     // The user cannot walk past these points.
-    private static  final float boundA = -0.9f; // bound regarding the wall Ahead
+    private static final float boundA = -0.9f; // bound regarding the wall Ahead
     private static final float boundB = 5.5f;   // bound regarding the wall Behind
 
     /**
      * Constructor.
      */
-    public PlayerMovement() {}
+    public PlayerMovement() {
+    }
 
     /**
      * Checks if and how the player is moving the viewer, to move in the room.
@@ -83,19 +84,19 @@ import com.google.vr.sdk.base.HeadTransform;
      *                    around the X, Y and Z axes respectively (head's reference system).
      * @return direction  in which the user wants to walk.
      */
-    private int getDirection(float[] eulerAngles){
+    private int getDirection(float[] eulerAngles) {
         // Gets pitch, rotation of the head around the X axis, in order to detect viewer-tilting.
         pitch = Math.toDegrees(eulerAngles[0]);
 
         // If viewer is tilted down with angle greater than the threshold, the user will move
         // forward, towards the wall he/she is facing.
-        if(pitch <= THRESHOLD_ANGLE * -1){
+        if (pitch <= THRESHOLD_ANGLE * -1) {
             return FORWARD;
         }
 
         // If viewer is tilted up with angle greater than the threshold, the user will move
         // backward, towards the wall he/she is facing.
-        if(pitch >= THRESHOLD_ANGLE){
+        if (pitch >= THRESHOLD_ANGLE) {
             return BACKWARD;
         }
 
@@ -137,7 +138,7 @@ import com.google.vr.sdk.base.HeadTransform;
      *           Further details concerning this will be given in the method nextStep().
      *
      *      ---> 1b) facing behind and moving backward
-*                In this case, forwardVec[2] is positive and the eye position has to decrement.
+     *                In this case, forwardVec[2] is positive and the eye position has to decrement.
      *
      *           new eye position = (old eye position + step) * -1 * forwardVec[2]
      *
@@ -169,7 +170,7 @@ import com.google.vr.sdk.base.HeadTransform;
      *           compensation, for the same reason explained in case 2a.
      *
      */
-    public float updateEyePosition (HeadTransform headTransform, float eyeZ) {
+    public float updateEyePosition(HeadTransform headTransform, float eyeZ) {
         // Gets head's forward vector to get orientation.
         headTransform.getForwardVector(forwardVec, 0); // (X, Y, Z)
 
@@ -177,14 +178,14 @@ import com.google.vr.sdk.base.HeadTransform;
         headTransform.getEulerAngles(eulerAngles, 0);  // (pitch, yaw, roll)
 
         // Gets the sign of the Z component of the forward vector to identify orientation.
-        orientation = (int)Math.signum(forwardVec[2]);
+        orientation = (int) Math.signum(forwardVec[2]);
 
         direction = getDirection(eulerAngles);
 
         newEyeZ = eyeZ;
 
         // Player does not move
-        if(direction == STILL){
+        if (direction == STILL) {
             return newEyeZ;
         }
 
@@ -192,15 +193,14 @@ import com.google.vr.sdk.base.HeadTransform;
         checkBounds();
 
         // Update the eye position along the Z axis.
-        if(direction == FORWARD && canMoveForward){
+        if (direction == FORWARD && canMoveForward) {
             newEyeZ = (eyeZ + nextStep()) * forwardVec[2]; // Updates eye position
-            if(orientation == BEHIND){
+            if (orientation == BEHIND) {
                 newEyeZ *= compensation;
             }
-        }
-        else if(direction == BACKWARD && canMoveBackward){
+        } else if (direction == BACKWARD && canMoveBackward) {
             newEyeZ = (eyeZ + nextStep()) * -1 * forwardVec[2]; // Updates eye position
-            if(orientation == AHEAD){
+            if (orientation == AHEAD) {
                 newEyeZ *= compensation;
             }
         }
@@ -281,18 +281,18 @@ import com.google.vr.sdk.base.HeadTransform;
      * when moving towards the wall BEHIND.
      *
      */
-    private float nextStep(){
+    private float nextStep() {
 
         // Resets step when needed
-        if((direction != prevDirection) || (orientation != prevOrientation)) {
+        if ((direction != prevDirection) || (orientation != prevOrientation)) {
             prevDirection = direction;
             prevOrientation = orientation;
             // moving towards the wall AHEAD
-            if ((orientation == AHEAD && direction == FORWARD) || (orientation == BEHIND && direction == BACKWARD)){
+            if ((orientation == AHEAD && direction == FORWARD) || (orientation == BEHIND && direction == BACKWARD)) {
                 return step = (newEyeZ * 2 - START) * -1;
             }
             // moving towards the wall BEHIND
-            if ((orientation == AHEAD && direction == BACKWARD) || (orientation == BEHIND && direction == FORWARD)){
+            if ((orientation == AHEAD && direction == BACKWARD) || (orientation == BEHIND && direction == FORWARD)) {
                 return step = START;
             }
         }
@@ -307,15 +307,15 @@ import com.google.vr.sdk.base.HeadTransform;
      * To understand conditions, keep in mind that moving towards the wall AHEAD means moving
      * towards the negative values of the Z axis.
      */
-    private void checkBounds(){
+    private void checkBounds() {
         if ((orientation == AHEAD && newEyeZ < boundA) || (orientation == BEHIND && newEyeZ > boundB)) {
             canMoveForward = false;
-        } else{
+        } else {
             canMoveForward = true;
         }
         if ((orientation == AHEAD && newEyeZ > boundB) || (orientation == BEHIND && newEyeZ < boundA)) {
             canMoveBackward = false;
-        } else{
+        } else {
             canMoveBackward = true;
         }
     }
