@@ -439,12 +439,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     Log.d(TAG, "***Score: " + gameStatus.getScore());
                 } else {
                     gameStatus.decreaseLives(1);
-                    Log.d(TAG, getString(R.string.lives) + gameStatus.getLives());
+                    Log.d(TAG, "***Lives: " + gameStatus.getLives());
 
                     if (gameStatus.isGameOver()) {
                         Log.d(TAG, "***GAME OVER***");
                         gameOver = true;
                         gameEnd();
+                        break;
                     }
                 }
                 // Displays current score and remaining lives.
@@ -464,6 +465,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * Performs the game over procedure and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
      */
     private void gameEnd() {
+        if (mLevel.getLevelNumber() > 2)
+            for (int i = 0; i < TARGET_NUMBER; i++) {
+                mPickableTargets[i].getTimer().stopAndHide();
+            }
+
         gameStatus.saveCurrentScore();
         showFinalStatus();
 
@@ -681,8 +687,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         } while (!checkCategory(mTargets.get(newMesh).getCategory()));
 
         // Updates the pickableTarget object with the new mesh.
-        pickableTarget.setMeshIndex(newMesh);
-        pickableTarget.setTarget(mTargets.get(newMesh));
+        pickableTarget.changeMesh(newMesh, mTargets.get(newMesh));
     }
 
     /**

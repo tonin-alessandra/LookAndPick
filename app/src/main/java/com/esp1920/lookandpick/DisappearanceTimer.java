@@ -33,7 +33,7 @@ public class DisappearanceTimer {
 
             @Override
             public void onFinish() {
-                //Calls method to hide the object.
+                // Calls method to hide the object.
                 mHidden = true;
                 Log.d(TAG, "*******timer finito**********");
 
@@ -58,7 +58,6 @@ public class DisappearanceTimer {
         Log.d(TAG, "*******restart timer***********");
         stopTimer();
         startTimer();
-
     }
 
     /**
@@ -71,6 +70,19 @@ public class DisappearanceTimer {
             Log.d(TAG, "*******timer stoppato***********");
         }
     }
+
+    /**
+     * Stops the timer and hides the object. For example, it is useful when the game is over and
+     * all objects have to disappear without a timer.
+     */
+    public void stopAndHide() {
+        if (mCDTimer != null) {
+            mCDTimer.cancel();
+            mHidden = true;
+            Log.d(TAG, "*******timer stoppato e oggetto nascosto***********");
+        }
+    }
+
 
     /**
      * Checks if the timer for this object is finished.
