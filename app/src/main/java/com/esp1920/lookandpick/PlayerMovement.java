@@ -15,11 +15,10 @@ import com.google.vr.sdk.base.HeadTransform;
  * blue tiles).
  *
  * Movement can be performed in two ways:
- *      1) tilting the viewer up or down and keeping it tilted for some seconds.
- *         This will result in a fluid movement with direction and orientation according to what has
- *         been said previously.
+ *      1) tilting the viewer up or down, keeping it tilted for some seconds.
+ *         This will result in a fluid movement in the direction the head is looking at.
  *      2) tilting the viewer up or down and then quickly returning to the "standard" position.
- *         This will result in the player taking single steps.
+ *         This will result in the player taking a single step.
  *
  * This feature is designed to be comfortable when using a Cardboard viewer: boundaries to movement
  * forward and backward are added for this reason.
