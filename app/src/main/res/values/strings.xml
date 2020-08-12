@@ -16,27 +16,27 @@
     <string name="record"> Your record is </string>
     <string name="restart">The game will restart in %1$d seconds</string>
 
-    <!--    <string-array name="vertex_shader_code">-->
-    <!--        <item>uniform mat4 u_MVP;</item>-->
-    <!--        <item>attribute vec4 a_Position;</item>-->
-    <!--        <item>attribute vec2 a_UV;</item>-->
-    <!--        <item>varying vec2 v_UV;</item>-->
-    <!--        <item></item>-->
-    <!--        <item>void main() {</item>-->
-    <!--        <item>  v_UV = a_UV;</item>-->
-    <!--        <item>  gl_Position = u_MVP * a_Position;</item>-->
-    <!--        <item>}</item>-->
-    <!--    </string-array>-->
-    <!--    <string-array name="fragment_shader_code">-->
-    <!--        <item>precision mediump float;</item>-->
-    <!--        <item>varying vec2 v_UV;</item>-->
-    <!--        <item>uniform sampler2D u_Texture;</item>-->
-    <!--        <item></item>-->
-    <!--        <item>void main() {</item>-->
-    <!--        <item>  // The y coordinate of this sample\'s textures is reversed compared to</item>-->
-    <!--        <item>  // what OpenGL expects, so we invert the y coordinate.</item>-->
-    <!--        <item>  gl_FragColor = texture2D(u_Texture, vec2(v_UV.x, 1.0 - v_UV.y));</item>-->
-    <!--        <item>}</item>-->
-    <!--    </string-array>-->
+    <string-array name="vertex_shader_code">
+        <item>uniform mat4 u_MVP;</item>
+        <item>attribute vec4 a_Position;</item>
+        <item>attribute vec2 a_UV;</item>
+        <item>varying vec2 v_UV;</item>
+        <item></item>
+        <item>void main() {</item>
+        <item>  v_UV = a_UV;</item>
+        <item>  gl_Position = u_MVP * a_Position;</item>
+        <item>}</item>
+    </string-array>
+    <string-array name="fragment_shader_code">
+        <item>precision mediump float;</item>
+        <item>varying vec2 v_UV;</item>
+        <item>uniform sampler2D u_Texture;</item>
+        <item></item>
+        <item>void main() {</item>
+        <item>  // The y coordinate of this sample\'s textures is reversed compared to</item>
+        <item>  // what OpenGL expects, so we invert the y coordinate.</item>
+        <item>  gl_FragColor = texture2D(u_Texture, vec2(v_UV.x, 1.0 - v_UV.y));</item>
+        <item>}</item>
+    </string-array>
 </resources>
 

@@ -1,5 +1,6 @@
 package com.esp1920.lookandpick;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.opengl.GLES20;
@@ -69,30 +70,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float DEFAULT_FLOOR_HEIGHT = -3.0f;
 
     private static final float ANGLE_LIMIT = 0.2f;
-    private static final String[] OBJECT_VERTEX_SHADER_CODE =
-            new String[]{
-                    "uniform mat4 u_MVP;",
-                    "attribute vec4 a_Position;",
-                    "attribute vec2 a_UV;",
-                    "varying vec2 v_UV;",
-                    "",
-                    "void main() {",
-                    "  v_UV = a_UV;",
-                    "  gl_Position = u_MVP * a_Position;",
-                    "}",
-            };
-    private static final String[] OBJECT_FRAGMENT_SHADER_CODE =
-            new String[]{
-                    "precision mediump float;",
-                    "varying vec2 v_UV;",
-                    "uniform sampler2D u_Texture;",
-                    "",
-                    "void main() {",
-                    "  // The y coordinate of this sample's textures is reversed compared to",
-                    "  // what OpenGL expects, so we invert the y coordinate.",
-                    "  gl_FragColor = texture2D(u_Texture, vec2(v_UV.x, 1.0 - v_UV.y));",
-                    "}",
-            };
+
+    private static String[] OBJECT_VERTEX_SHADER_CODE;
+    private static String[] OBJECT_FRAGMENT_SHADER_CODE;
 
     private int objectProgram;
 
@@ -170,6 +150,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         super.onCreate(savedInstanceState);
 
         initializeGvrView();
+
+        OBJECT_VERTEX_SHADER_CODE = getApplicationContext().getResources().getStringArray(R.array.vertex_shader_code);
+        OBJECT_FRAGMENT_SHADER_CODE = getApplicationContext().getResources().getStringArray(R.array.fragment_shader_code);
 
         // Initializes the first level
         mLevel = new Level(FIRST_LEVEL_DURATION);
