@@ -328,7 +328,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        // Updates eye position along z axis to perform movement.
+        // Updates eye position along the Z axis to perform movement.
         eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
 
         // Build the camera matrix and apply it to the ModelView.
