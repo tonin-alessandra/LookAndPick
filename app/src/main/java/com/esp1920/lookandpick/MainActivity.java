@@ -7,6 +7,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.vr.ndk.base.Properties;
 import com.google.vr.ndk.base.Value;
@@ -132,7 +133,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private Handler mHandler;
 
     private PlayerMovement mPlayerMovement = new PlayerMovement();
-
+    private String s;
     private float eyeZ = 0.0f;
 
     // Customized TextViews to render and display a string on the scene.
@@ -343,7 +344,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Writes into headView the transform from the camera space to the head space.
         headTransform.getHeadView(headView, 0);
-
+        Matrix.translateM(headView, 0, 0, 0, eyeZ*-1);
         // Updates the 3d audio engine with the most recent head rotation.
         headTransform.getQuaternion(headRotation, 0);
         gvrAudioEngine.setHeadRotation(
@@ -431,6 +432,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
+
+        Toast.makeText(this, s, Toast.LENGTH_LONG).show();
         // Checks all the objects on the scene and hides the one the user is looking at.
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
