@@ -1,6 +1,5 @@
 package com.esp1920.lookandpick;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.opengl.GLES20;
@@ -47,7 +46,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private final static int FIRST_LEVEL_DURATION = 30;
     private final static int SECOND_LEVEL_DURATION = 30;
     private final static int THIRD_LEVEL_DURATION = 30;
-
     private final static int TIME_BEFORE_RESTART = 10;
 
     // Used to convert seconds to millis.
@@ -71,6 +69,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private static final float ANGLE_LIMIT = 0.2f;
 
+    // GL shader programs used to render objects.
     private static String[] OBJECT_VERTEX_SHADER_CODE;
     private static String[] OBJECT_FRAGMENT_SHADER_CODE;
 
@@ -116,17 +115,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // should be shutdown via a {@link Value#close()} call when no longer needed.
     private final Value floorHeight = new Value();
 
-    // Used to manage all target-related operations
+    // Used to manage all target-related operations.
     private TargetManager mTargetManager = TargetManager.getInstance();
 
-    // This is the default value of the objects' timer in seconds
+    // This is the default value of the objects' timer in seconds.
     private int defaultTime = 20;
 
-    // Used to manage score and remaining lives (gameover)
+    // Used to manage score and remaining lives.
     private GameStatus gameStatus;
     private StatusManager prefManager;
     private final static int INITIAL_SCORE = 0;
     private final static int NUMBER_OF_LIVES = 3;
+    private boolean gameOver;
 
     private Level mLevel;
     private Handler mHandler;
@@ -135,11 +135,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private float eyeZ = 0.0f;
 
+    // Customized TextViews to render and display a string on the scene.
     private VrTextView scoreTv;
     private VrTextView msgTv;
     private VrTextView finalStatusTv;
-
-    private boolean gameOver;
 
     /**
      * Sets the view to our GvrView and initializes the transformation matrices we will use
@@ -154,9 +153,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         OBJECT_VERTEX_SHADER_CODE = getApplicationContext().getResources().getStringArray(R.array.vertex_shader_code);
         OBJECT_FRAGMENT_SHADER_CODE = getApplicationContext().getResources().getStringArray(R.array.fragment_shader_code);
 
-        // Initializes the first level
+        // Initializes the first level.
         mLevel = new Level(FIRST_LEVEL_DURATION);
-        // Initializes the handler to manage the switching between levels
+        // Initializes the handler to manage the switching between levels.
         mHandler = new Handler();
 
         gameStatus = new GameStatus(INITIAL_SCORE, NUMBER_OF_LIVES, getApplicationContext());
@@ -184,17 +183,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         headRotation = new float[4];
         roomPosition = new Position();
 
-        // mTargets = new ArrayList<>();
-        // mTargets = new Target[TARGET_MESH_COUNT];
-
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
 
         scoreTv = (VrTextView) findViewById(R.id.score);
-
         msgTv = (VrTextView) findViewById(R.id.msg);
+        finalStatusTv = (VrTextView) findViewById(R.id.gameover);
 
         gameOver = false;
-        finalStatusTv = (VrTextView) findViewById(R.id.gameover);
+
     }
 
     /**
@@ -248,7 +244,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onSurfaceCreated(EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        // Builds a GL shader program using vertex and fragment shaders as arrays of strings
+        // Builds a GL shader program using vertex and fragment shaders as arrays of strings.
         objectProgram = Util.compileProgram(OBJECT_VERTEX_SHADER_CODE, OBJECT_FRAGMENT_SHADER_CODE);
 
         objectPositionParam = GLES20.glGetAttribLocation(objectProgram, "a_Position");
@@ -283,7 +279,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 })
                 .start();
 
-        // Updates sound position for the first time
+        // Updates sound position for the first time.
         for (int i = 0; i < TARGET_NUMBER; i++)
             updateSoundPosition(mPickableTargets[i]);
 
@@ -311,6 +307,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     /**
      * Updates the sounds' positions.
+     *
+     * @param pickableTarget The object to which associate the sound.
      */
     private void updateSoundPosition(PickableTarget pickableTarget) {
         // Updates the sound location to match it with the new target position.
@@ -330,7 +328,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        // Updates eye position along z axis to perform movement
+        // Updates eye position along z axis to perform movement.
         eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
 
         // Build the camera matrix and apply it to the ModelView.
@@ -343,7 +341,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             roomPosition.setPosition(0, floorHeight.asFloat(), 0);
         } // else the device doesn't support floor height detection so DEFAULT_FLOOR_HEIGHT is used.
 
-        // Writes into headView the transform from the camera space to the head space
+        // Writes into headView the transform from the camera space to the head space.
         headTransform.getHeadView(headView, 0);
 
         // Updates the 3d audio engine with the most recent head rotation.
@@ -380,7 +378,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             drawTarget(mPickableTargets[i]);
         }
 
-        // Sets modelView for the room, so it's drawn in the correct location
+        // Sets modelView for the room, so it's drawn in the correct location.
         Matrix.multiplyMM(modelView, 0, view, 0, roomPosition.getModel(), 0);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
         drawRoom();
@@ -396,18 +394,16 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @param pickableTarget The PickableTarget object to draw.
      */
     public void drawTarget(PickableTarget pickableTarget) {
-        // If the timer of the object is not finished or the game is not over, it draws the objects on the scene.
+        // If the timer of the object is not finished and the game is not over, it draws the objects on the scene.
         if (!gameOver && !pickableTarget.isHidden()) {
             GLES20.glUseProgram(objectProgram);
             GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
-
 
             if (isLookingAtTarget(pickableTarget)) {
                 targetObjectSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
             } else {
                 targetObjectNotSelectedTextures.get(pickableTarget.getMeshIndex()).bind();
             }
-
             targetObjectMeshes.get(pickableTarget.getMeshIndex()).draw();
         }
     }
@@ -435,9 +431,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCardboardTrigger() {
-        // TODO: add a message if the user doesn't hit the target (?) (like the other project)
-
-        // Checks all the targets and hides the one the user is looking at.
+        // Checks all the objects on the scene and hides the one the user is looking at.
         for (int i = 0; i < TARGET_NUMBER; i++)
             if (isLookingAtTarget(mPickableTargets[i])) {
                 if (checkCategory(mPickableTargets[i].getTarget().getCategory())) {
@@ -461,16 +455,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 gvrAudioEngine.playSound(successSourceId, false /* looping disabled */);
 
                 hideTarget(mPickableTargets[i]);
-                // mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
-                // mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
-
                 checkMesh(mPickableTargets[i]);
                 break;
             }
     }
 
     /**
-     * Performs the game over procedures and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
+     * Performs the game over procedure and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
      */
     private void gameEnd() {
         gameStatus.saveCurrentScore();
@@ -495,7 +486,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // (so the intent will be delivered to the MainActivity, which is now on
         // the top of the stack).
         restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        // Makes the MainActivity become the start of a new task (group of activities)
+        // Makes the MainActivity become the start of a new task (group of activities).
         restart.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // Closes the current activity and restarts it (starts a new one).
         finish();
@@ -503,7 +494,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     /**
-     * Shows on the screen the score and the remaining lives.
+     * Shows on the screen the current score and the remaining lives.
      */
     private void showStatus() {
         runOnUiThread(new Runnable() {
@@ -549,65 +540,45 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 msgTv.showLongToast(getString(R.string.level) + SPACE + mLevel.getLevelNumber() + getString(R.string.request) + SPACE + getString(R.string.all));
             }
         });
-//        Runnable changeLvl = new Runnable(){
-//            @Override
-//            public void run() {
-//                mLevel.nextLevel();
-//                mLevel.setCategory(ObjCategory.getRandomCategory());
-//                msgTv.showLongToast(getString(R.string.level) + SPACE + Level.getLevelNumber() +
-//                        getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
-//                if(Level.getLevelNumber() ==2){
-//                mLevel.setDuration(60);}
-//                if(Level.getLevelNumber() == 3){
-//                    for (int i = 0; i < TARGET_NUMBER; i++)
-//                        mPickableTargets[i].initializeTimer(defaultTime);
-//                }
-//                Log.d(TAG, getString(R.string.level) + Level.getLevelNumber());
-//                Log.d(TAG, "***Category: " + mLevel.getCategory());
-//                hideAllTargets();
-//                mHandler.removeCallbacks(this);
-//
-//            }
-//        };
-//
-//        mHandler.postDelayed(changeLvl,20000 );
-//        mHandler.postDelayed(changeLvl,mLevel.getDuration() * MILLIS );
 
-        mHandler.postDelayed(new Runnable() {
+        // Two Runnable variables which contains code useful to switch between levels.
+        final Runnable change = new Runnable() {
             @Override
             public void run() {
-                //*********************************
                 mLevel.nextLevel();
                 mLevel.setCategory(ObjCategory.getRandomCategory());
                 msgTv.showLongToast(getString(R.string.level) + SPACE + mLevel.getLevelNumber() +
                         getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
-                //*******************************
-                // Sets the next level duration (in this case the second).
-                mLevel.setDuration(SECOND_LEVEL_DURATION);
-                ///*************************
                 Log.d(TAG, getString(R.string.level) + mLevel.getLevelNumber());
                 Log.d(TAG, "***Category: " + mLevel.getCategory());
+            }
+        };
+
+        final Runnable hide = new Runnable() {
+            @Override
+            public void run() {
                 hideAllTargets();
-                //************
                 mHandler.removeCallbacks(this);
+            }
+        };
+
+        // From level 1 to level 2.
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                change.run();
+                mLevel.setDuration(SECOND_LEVEL_DURATION);
+                hide.run();
+                // From level 2 to level 3.
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mLevel.nextLevel();
-                        mLevel.setCategory(ObjCategory.getRandomCategory());
-                        msgTv.showLongToast(getString(R.string.level) + mLevel.getLevelNumber() +
-                                getString(R.string.request) + SPACE + getString(mLevel.getCategory().getDescription()));
-
+                        change.run();
                         for (int i = 0; i < TARGET_NUMBER; i++)
                             mPickableTargets[i].initializeTimer(defaultTime);
-                        //*******************************
-                        // Sets the next level duration (in this case the last).
                         mLevel.setDuration(THIRD_LEVEL_DURATION);
-                        ///*************************
-                        Log.d(TAG, getString(R.string.level) + mLevel.getLevelNumber());
-                        Log.d(TAG, "***Category: " + mLevel.getCategory());
-                        hideAllTargets();
-                        mHandler.removeCallbacks(this);
+                        hide.run();
+                        // End the game after a fixed time (otherwise it would be infinite).
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -617,8 +588,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                     }
                 }, mLevel.getDuration() * MILLIS);
             }
-        }, mLevel.getDuration() * MILLIS); // Level duration is in seconds, but handler requires millis.
-
+        }, mLevel.getDuration() * MILLIS);
     }
 
     /**
@@ -627,8 +597,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private void hideAllTargets() {
         for (int i = 0; i < TARGET_NUMBER; i++) {
             hideTarget(mPickableTargets[i]);
-            // mPickableTargets[i].setMeshIndex(hideTarget(mPickableTargets[i]));
-            // mPickableTargets[i].setTarget(mTargets.get(mPickableTargets[i].getMeshIndex()));
         }
         // Chooses a random object and changes its mesh, if necessary.
         checkMesh(mPickableTargets[random.nextInt(TARGET_NUMBER)]);
@@ -676,7 +644,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             // Calculates the Euclidean distance between the new position and all the pickableTarget objects.
             distance = (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2) + Math.pow((z1 - z2), 2));
 
-            // If the distance is <2.0 then calculate a new random position and start the loop from the beginning
+            // If the distance is <2.0, calculates a new random position and starts the loop from the beginning.
             if (distance < 2.0) {
                 tempPosition.generateRandomPosition();
                 x1 = tempPosition.getXCoordinate();
@@ -685,7 +653,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 i = 0;
             }
         }
-
         return tempPosition;
     }
 
@@ -697,7 +664,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @param pickableTarget The {@link PickableTarget} object to control.
      */
     private void checkMesh(PickableTarget pickableTarget) {
-        // If true then there is at least one object of the same category of the level.
+        // If true then there is at least one object of the right category according to the level request.
         if (checkCategory(pickableTarget.getTarget().getCategory()))
             return;
 
@@ -713,7 +680,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             newMesh = random.nextInt(TARGET_MESH_COUNT);
         } while (!checkCategory(mTargets.get(newMesh).getCategory()));
 
-        // Updates the pickableTarget object with the new mesh
+        // Updates the pickableTarget object with the new mesh.
         pickableTarget.setMeshIndex(newMesh);
         pickableTarget.setTarget(mTargets.get(newMesh));
     }
@@ -769,22 +736,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         for (int i = 0; i < TARGET_MESH_COUNT; i++) {
             addObject(mTargets.get(i), objectPositionParam, objectUvParam);
         }
-        /*mTargets[0] = tarCat;
-        addObject(tarCat, objectPositionParam, objectUvParam);
-        mTargets[1] = tarPikachu;
-        addObject(tarPikachu, objectPositionParam, objectUvParam);
-        mTargets[2] = tarPenguin;
-        addObject(tarPenguin, objectPositionParam, objectUvParam);
-        mTargets[3] = tarAndroid;
-        addObject(tarAndroid, objectPositionParam, objectUvParam);
-        mTargets[4] = tarCactus;
-        addObject(tarCactus, objectPositionParam, objectUvParam);
-        mTargets[5] = tarMouse;
-        addObject(tarMouse, objectPositionParam, objectUvParam);
-        mTargets[6] = tarPlane;
-        addObject(tarPlane, objectPositionParam, objectUvParam);
-        mTargets[7] = tarSunflower;
-        addObject(tarSunflower, objectPositionParam, objectUvParam);*/
     }
 
     /**
