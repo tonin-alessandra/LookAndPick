@@ -29,7 +29,8 @@ import com.google.vr.sdk.base.HeadTransform;
 public class PlayerMovement {
     private final String TAG = "PlayerMovement";
 
-    private static final double THRESHOLD_ANGLE = 38; // degrees
+    private static final double THRESHOLD_ANGLE = 37.5; // degrees
+    //private static final double LIMIT_ANGLE = 45; // degrees
 
     // Direction represents the *type* of movement: this can be FORWARD or BACKWARD, depending on
     // how the viewer is tilted.
@@ -46,7 +47,8 @@ public class PlayerMovement {
     // The wall BEHIND is the blue wall (behind when game begins).
     private static final int AHEAD = -1;
     private static final int BEHIND = 1;
-    private int prevOrientation = 0; // prevOrientation is set to an invalid orientation value.
+    private static final int INVALID = 0;
+    private int prevOrientation = INVALID;
     private int orientation;
 
     private float[] eulerAngles = new float[3];
@@ -68,7 +70,7 @@ public class PlayerMovement {
 
     // Movement boundaries to avoid discomfort and to ensure a fluid movement.
     // The user cannot walk past these points.
-    private static final float boundA = -0.98f; // bound regarding the wall Ahead.
+    private static final float boundA = -0.9f; // bound regarding the wall Ahead.
     private static final float boundB = 5.5f;   // bound regarding the wall Behind.
 
     /**
@@ -92,7 +94,7 @@ public class PlayerMovement {
 
         // If viewer is tilted down with angle greater than the threshold, the user will move
         // forward, towards the wall he/she is facing.
-        if (pitch <= THRESHOLD_ANGLE * -1) {
+        if (pitch <= -THRESHOLD_ANGLE) {
             return FORWARD;
         }
 
@@ -179,14 +181,15 @@ public class PlayerMovement {
         headTransform.getEulerAngles(eulerAngles, 0);  // (pitch, yaw, roll)
 
         // Gets the sign of the Z component of the forward vector to identify orientation.
-        orientation = (int) Math.signum(forwardVec[2]);
+        //orientation = (int) Math.signum(forwardVec[2]);
+        orientation = getOrientation(forwardVec);
 
         direction = getDirection(eulerAngles);
 
         newEyeZ = eyeZ;
 
         // Player does not move
-        if (direction == STILL) {
+        if ((direction == STILL) || (orientation == INVALID)) {
             return newEyeZ;
         }
 
@@ -317,5 +320,15 @@ public class PlayerMovement {
         } else {
             canMoveBackward = true;
         }
+    }
+
+    private int getOrientation(float[] forwardVec){
+        if (forwardVec[2] <= -0.25f){
+            return AHEAD;
+        }
+        if (forwardVec[2] >= 0.25f){
+            return BEHIND;
+        }
+        else return INVALID;
     }
 }
