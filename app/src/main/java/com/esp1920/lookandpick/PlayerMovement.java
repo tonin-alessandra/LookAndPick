@@ -30,7 +30,6 @@ public class PlayerMovement {
     private final String TAG = "PlayerMovement";
 
     private static final double THRESHOLD_ANGLE = 37.5; // degrees
-    //private static final double LIMIT_ANGLE = 45; // degrees
 
     // Direction represents the *type* of movement: this can be FORWARD or BACKWARD, depending on
     // how the viewer is tilted.
@@ -50,6 +49,8 @@ public class PlayerMovement {
     private static final int INVALID = 0;
     private int prevOrientation = INVALID;
     private int orientation;
+
+    private static final float FORWARD_VEC_LIMIT = 0.25f;
 
     private float[] eulerAngles = new float[3];
     private float[] forwardVec = new float[3];
@@ -180,8 +181,6 @@ public class PlayerMovement {
         // Gets Euler angles to get head's rotation around X, Y and Z axes respectively.
         headTransform.getEulerAngles(eulerAngles, 0);  // (pitch, yaw, roll)
 
-        // Gets the sign of the Z component of the forward vector to identify orientation.
-        //orientation = (int) Math.signum(forwardVec[2]);
         orientation = getOrientation(forwardVec);
 
         direction = getDirection(eulerAngles);
@@ -322,11 +321,18 @@ public class PlayerMovement {
         }
     }
 
+    /**
+     * Determs
+     *
+     *
+     * @param forwardVec
+     * @return
+     */
     private int getOrientation(float[] forwardVec){
-        if (forwardVec[2] <= -0.25f){
+        if (forwardVec[2] <= -FORWARD_VEC_LIMIT){
             return AHEAD;
         }
-        if (forwardVec[2] >= 0.25f){
+        if (forwardVec[2] >= FORWARD_VEC_LIMIT){
             return BEHIND;
         }
         else return INVALID;
