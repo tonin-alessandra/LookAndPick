@@ -146,6 +146,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "***onCreate() called");
         super.onCreate(savedInstanceState);
 
         initializeGvrView();
@@ -221,6 +222,19 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onResume() {
         super.onResume();
         gvrAudioEngine.resume();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "***onBackPressed() called");
+        mHandler.removeCallbacksAndMessages(null);
+        if (mLevel.getLevelNumber() > 2)
+            for (int i = 0; i < TARGET_NUMBER; i++) {
+                mPickableTargets[i].getTimer().stopAndHide();
+            }
+        GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
+        gvrView.shutdown();
+        super.onBackPressed();
     }
 
     @Override
