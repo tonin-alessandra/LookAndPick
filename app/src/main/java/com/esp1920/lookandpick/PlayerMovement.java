@@ -81,35 +81,6 @@ public class PlayerMovement {
     }
 
     /**
-     * Checks if and how the player is moving the viewer, to move in the room.
-     * If the user tilts the viewer (up or down) with an angle greater than THRESHOLD_ANGLE,
-     * he/she will begin to move accordingly.
-     *
-     * @param eulerAngles vector of Euler angles (pitch, yaw, roll) that describe head's movement
-     *                    around the X, Y and Z axes respectively (head's coordinate system).
-     * @return direction in which the user wants to walk.
-     */
-    private int getDirection(float[] eulerAngles) {
-        // Gets pitch, rotation of the head around the X axis, in order to detect viewer-tilting.
-        pitch = Math.toDegrees(eulerAngles[0]);
-
-        // If viewer is tilted down with angle greater than the threshold, the user will move
-        // forward, towards the wall he/she is facing.
-        if (pitch <= -THRESHOLD_ANGLE) {
-            return FORWARD;
-        }
-
-        // If viewer is tilted up with angle greater than the threshold, the user will move
-        // backward, towards the opposite wall he/she is facing.
-        if (pitch >= THRESHOLD_ANGLE) {
-            return BACKWARD;
-        }
-
-        // If viewer is not tilted enough, the user will not move.
-        return STILL;
-    }
-
-    /**
      * Calculates the position of the eyes along the Z axis, according to direction and
      * orientation.
      *
@@ -211,6 +182,80 @@ public class PlayerMovement {
     }
 
     /**
+     * Determines if the user is facing the pink wall (wall AHEAD) or the blue wall (wall BEHIND).
+     * If the player is looking at the walls to the left or to the right, the orientation is INVALID, as
+     * movement towards those is not enabled.
+     *
+     * @param forwardVec direction the head is looking towards, as a 3x1 vector
+     * @return the orientation of the head (which wall is looking at)
+     */
+    private int getOrientation(float[] forwardVec){
+        // FORWARD_VEC_LIMIT is a threshold value, set empirically.
+
+        // If the Z component of the forward  vector is less than -FORWARD_VEC_LIMIT, the
+        // orientation is AHEAD.
+        if (forwardVec[2] <= -FORWARD_VEC_LIMIT){
+            return AHEAD;
+        }
+        // If the Z component of the forward  vector is greater than FORWARD_VEC_LIMIT, the
+        // orientation is BEHIND.
+        if (forwardVec[2] >= FORWARD_VEC_LIMIT){
+            return BEHIND;
+        }
+        // The user is looking at walls towards which movement is not enabled.
+        else return INVALID;
+    }
+
+    /**
+     * Checks if and how the player is moving the viewer, to move in the room.
+     * If the user tilts the viewer (up or down) with an angle greater than THRESHOLD_ANGLE,
+     * he/she will begin to move accordingly.
+     *
+     * @param eulerAngles vector of Euler angles (pitch, yaw, roll) that describe head's movement
+     *                    around the X, Y and Z axes respectively (head's coordinate system).
+     * @return direction in which the user wants to walk.
+     */
+    private int getDirection(float[] eulerAngles) {
+        // Gets pitch, rotation of the head around the X axis, in order to detect viewer-tilting.
+        pitch = Math.toDegrees(eulerAngles[0]);
+
+        // If viewer is tilted down with angle greater than the threshold, the user will move
+        // forward, towards the wall he/she is facing.
+        if (pitch <= -THRESHOLD_ANGLE) {
+            return FORWARD;
+        }
+
+        // If viewer is tilted up with angle greater than the threshold, the user will move
+        // backward, towards the opposite wall he/she is facing.
+        if (pitch >= THRESHOLD_ANGLE) {
+            return BACKWARD;
+        }
+
+        // If viewer is not tilted enough, the user will not move.
+        return STILL;
+    }
+
+    /**
+     * Checks if the user can move forward and backward, according to the boundaries set.
+     *
+     * boundA is the bound regarding the wall AHEAD; boundB regards the wall BEHIND.
+     * To understand conditions, keep in mind that moving towards the wall AHEAD means moving
+     * towards the negative values of the Z axis.
+     */
+    private void checkBounds() {
+        if ((orientation == AHEAD && newEyeZ < boundA) || (orientation == BEHIND && newEyeZ > boundB)) {
+            canMoveForward = false;
+        } else {
+            canMoveForward = true;
+        }
+        if ((orientation == AHEAD && newEyeZ > boundB) || (orientation == BEHIND && newEyeZ < boundA)) {
+            canMoveBackward = false;
+        } else {
+            canMoveBackward = true;
+        }
+    }
+
+    /**
      * Calculates the next step, in order to make the player move.
      *
      * @return the value of the next step.
@@ -299,42 +344,5 @@ public class PlayerMovement {
         }
 
         return step += SPEED;
-    }
-
-    /**
-     * Check if the user can move forward and backward, according to the boundaries set.
-     *
-     * boundA is the bound regarding the wall AHEAD; boundB regards the wall BEHIND.
-     * To understand conditions, keep in mind that moving towards the wall AHEAD means moving
-     * towards the negative values of the Z axis.
-     */
-    private void checkBounds() {
-        if ((orientation == AHEAD && newEyeZ < boundA) || (orientation == BEHIND && newEyeZ > boundB)) {
-            canMoveForward = false;
-        } else {
-            canMoveForward = true;
-        }
-        if ((orientation == AHEAD && newEyeZ > boundB) || (orientation == BEHIND && newEyeZ < boundA)) {
-            canMoveBackward = false;
-        } else {
-            canMoveBackward = true;
-        }
-    }
-
-    /**
-     * Determs
-     *
-     *
-     * @param forwardVec
-     * @return
-     */
-    private int getOrientation(float[] forwardVec){
-        if (forwardVec[2] <= -FORWARD_VEC_LIMIT){
-            return AHEAD;
-        }
-        if (forwardVec[2] >= FORWARD_VEC_LIMIT){
-            return BEHIND;
-        }
-        else return INVALID;
     }
 }

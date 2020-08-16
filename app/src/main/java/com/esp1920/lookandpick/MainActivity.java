@@ -331,7 +331,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Updates eye position along the Z axis to perform movement.
         eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
 
-        // Build the camera matrix and apply it to the ModelView.
+        // Builds the camera matrix and applies it to the ModelView.
+        // This matrix determines what the user looks at.
         Matrix.setLookAtM(camera, 0, 0, 0, eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Controls if the floor height is available.
@@ -343,24 +344,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Writes into headView the transform from the camera space to the head space.
         headTransform.getHeadView(headView, 0);
-        Matrix.translateM(headView, 0, 0, 0, eyeZ*-1);
+
+        // Translate the headView matrix by the vector (0, 0, -eyeZ).
+        // Note that moving forward by eyeZ, along the Z axis, means that the "world" has to be
+        // translated backward by eyeZ (or translated forward by -eyeZ).
+        Matrix.translateM(headView, 0, 0, 0, -eyeZ);
         // Updates the 3d audio engine with the most recent head rotation.
         headTransform.getQuaternion(headRotation, 0);
         gvrAudioEngine.setHeadRotation(
                 headRotation[0], headRotation[1], headRotation[2], headRotation[3]);
         // Regular update call to GVR audio engine.
         gvrAudioEngine.update();
-        float[] fv = new float[3];
-        headTransform.getForwardVector(fv, 0);
-        String s = String.valueOf(fv[2]);
-        Log.d(TAG, "******forwardVec[2]" + s + "***********");
-        /*
-        float[] eu = new float[3];
-        headTransform.getEulerAngles(eu, 0);
-        s  = String.valueOf(eu[0]); // yaw
-        Log.d(TAG, "******pitch" + s + "***********");
-
-         */
     }
 
     /**
