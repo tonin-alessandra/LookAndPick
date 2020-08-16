@@ -5,7 +5,8 @@ import androidx.annotation.Nullable;
 /**
  * This class represents a visible object that appears on the screen.
  * Every object is represented using its {@link Position} and an index, which indicates the associated mesh.
- * Also, each object has a {@link DisappearanceTimer}.
+ * Also, each object has a {@link DisappearanceTimer}, which is a timer used to make the object
+ * disappear from the scene.
  */
 
 public class PickableTarget {
@@ -34,74 +35,10 @@ public class PickableTarget {
     }
 
     /**
-     * Gets the position of the {@link PickableTarget} object.
-     *
-     * @return The {@link Position} object.
-     */
-    public Position getPosition() {
-        return mPosition;
-    }
-
-    /**
-     * Sets the position.
-     *
-     * @param position A new Position.
-     */
-    public void setPosition(Position position) {
-        mPosition = position;
-    }
-
-    /**
-     * Gets the index of the current mesh.
-     *
-     * @return the current value of the index.
-     */
-    public int getMeshIndex() {
-        return mMeshIndex;
-    }
-
-    /**
-     * Sets a new index.
-     *
-     * @param meshIndex
-     */
-    public void setMeshIndex(int meshIndex) {
-        mMeshIndex = meshIndex;
-    }
-
-    /**
-     * Gets the {@link Target} instance.
-     *
-     * @return The Target object.
-     */
-    public Target getTarget() {
-        return mTarget;
-    }
-
-    /**
-     * Sets the {@link Target} associated to the PickableTarget objects.
-     *
-     * @param target The target to associate.
-     */
-    public void setTarget(Target target) {
-        mTarget = target;
-    }
-
-    /**
-     * Gets the timer.
-     *
-     * @return A {@link DisappearanceTimer} object.
-     */
-    @Nullable
-    public DisappearanceTimer getTimer() {
-        return mTimer;
-    }
-
-    /**
-     * Changes both mMeshIndex and mTarget with new ones.
+     * Changes both index and target with new ones.
      *
      * @param newMeshIndex The new index.
-     * @param newTarget    The new target associated with the index.
+     * @param newTarget    The new {@link Target} object with its mesh index.
      */
     public void changeMesh(int newMeshIndex, Target newTarget) {
         setMeshIndex(newMeshIndex);
@@ -114,5 +51,61 @@ public class PickableTarget {
     public boolean isHidden() {
         if (mTimer != null) return mTimer.timeFinished();
         return false;
+    }
+
+    /**
+     * @return the current {@link Position} of the object.
+     */
+    public Position getPosition() {
+        return mPosition;
+    }
+
+    /**
+     * Sets the position.
+     *
+     * @param position The new position.
+     */
+    public void setPosition(Position position) {
+        mPosition = position;
+    }
+
+    /**
+     * @return the current value of the index.
+     */
+    public int getMeshIndex() {
+        return mMeshIndex;
+    }
+
+    /**
+     * Sets a new index.
+     *
+     * @param meshIndex The new mesh index.
+     */
+    public void setMeshIndex(int meshIndex) {
+        mMeshIndex = meshIndex;
+    }
+
+    /**
+     * @return the associated {@link Target} object.
+     */
+    public Target getTarget() {
+        return mTarget;
+    }
+
+    /**
+     * Sets a new Target to the current object.
+     *
+     * @param target The {@link Target} object to associate.
+     */
+    public void setTarget(Target target) {
+        mTarget = target;
+    }
+
+    /**
+     * @return the {@link DisappearanceTimer} object.
+     */
+    @Nullable
+    public DisappearanceTimer getTimer() {
+        return mTimer;
     }
 }

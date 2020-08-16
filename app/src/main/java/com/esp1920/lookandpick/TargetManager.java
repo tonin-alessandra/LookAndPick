@@ -11,10 +11,12 @@ import java.io.IOException;
  */
 public class TargetManager {
     private final String TAG = "TargetManager";
+
+    private static TargetManager instance;
+
     private TexturedMesh mTexturedMesh;
     private Texture mNotSelectedTexture;
     private Texture mSelectedTexture;
-    private static TargetManager instance;
 
     /**
      * Constructor. It is private due to Singleton.

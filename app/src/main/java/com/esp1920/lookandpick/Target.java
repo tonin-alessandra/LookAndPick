@@ -5,7 +5,7 @@ import static com.esp1920.lookandpick.ObjCategory.*;
 
 /**
  * This class represents a generic target object that will rendered to appear on the scene.
- * All operations to manage a {@link Target} behaviour can be found in {@link TargetManager}.
+ * All operations to manage a Target behaviour can be found in {@link TargetManager}.
  */
 public class Target {
     private final String TAG = "Target";

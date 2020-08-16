@@ -7,9 +7,11 @@ import android.content.Context;
  */
 public class GameStatus {
     private final String TAG = "GameStatus";
+
+    private StatusManager mScoreManager;
+
     private int score;
     private int lives;
-    private StatusManager mScoreManager;
 
     /**
      * Constructor.

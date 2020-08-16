@@ -5,7 +5,7 @@ import android.opengl.Matrix;
 import java.util.Random;
 
 /**
- * This class represents a generic {@link Target} position.
+ * This class represents a {@link PickableTarget} position.
  */
 public class Position {
     private static final String TAG = "Position";
@@ -15,6 +15,7 @@ public class Position {
     private static final float MAX_YAW = 100.0f;
     private static final float MAX_PITCH = 25.0f;
 
+    // The minimum and maximum distance between the center of the scene and the object.
     private static final float MIN_TARGET_DISTANCE = 3.0f;
     private static final float MAX_TARGET_DISTANCE = 7.0f;
 
@@ -46,9 +47,7 @@ public class Position {
     }
 
     /**
-     * Gets the target position.
-     *
-     * @return The position of a {@link Target}.
+     * @return The position of a {@link Target} object.
      */
     public float[] getPosition() {
         return mPosition;
@@ -65,17 +64,6 @@ public class Position {
         mPosition[0] = x;
         mPosition[1] = y;
         mPosition[2] = z;
-    }
-
-    /**
-     * Sets the target position from a Position object.
-     *
-     * @param position The Position object.
-     */
-    public void setPosition(Position position) {
-        mPosition[0] = position.getXCoordinate();
-        mPosition[1] = position.getYCoordinate();
-        mPosition[2] = position.getYCoordinate();
     }
 
     /**
@@ -97,8 +85,6 @@ public class Position {
     }
 
     /**
-     * Gets the x coordinate.
-     *
      * @return The x coordinate.
      */
     public float getXCoordinate() {
@@ -106,8 +92,6 @@ public class Position {
     }
 
     /**
-     * Gets the y coordinate.
-     *
      * @return The y coordinate.
      */
     public float getYCoordinate() {
@@ -115,8 +99,6 @@ public class Position {
     }
 
     /**
-     * Gets the z coordinate.
-     *
      * @return The z coordinate.
      */
     public float getZCoordinate() {
@@ -124,7 +106,7 @@ public class Position {
     }
 
     /**
-     * Generates random position.
+     * Generates a new position in order to place the object with a suitable one.
      */
     public void generateRandomPosition() {
         float[] rotationMatrix = new float[16];
@@ -138,19 +120,18 @@ public class Position {
         // Creates a matrix for rotation by angle yawDegrees around the y axis.
         Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
 
-        // Calculates a new random position
+        // Calculates a new random position.
         float targetDistance =
                 random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
 
         Position temp;
-        // Allows to generate objects with negative z coordinate randomly.
+        // Allows to randomly generate objects with a negative z coordinate.
         if (random.nextBoolean())
             temp = new Position(0, 0, -targetDistance);
         else
             temp = new Position(0, 0, targetDistance);
 
         Matrix.multiplyMV(posVec, 0, rotationMatrix, 0, temp.getModel(), 12);
-
 
         setPosition(posVec[0], (float) Math.tan(pitchRadians) * temp.getZCoordinate(), posVec[2]);
     }

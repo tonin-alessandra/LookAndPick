@@ -13,11 +13,14 @@ import android.content.SharedPreferences;
 public class StatusManager {
     //This prefix is used as part of the key to save the score on sharedPreferences file.
     private final static String RECORD_KEY = "Record ";
+
+    private static StatusManager instance;
+
     private SharedPreferences mSharedPref;
     private SharedPreferences.Editor mEditor;
+
     private String mPreferencesFileName;
-    //private Context mContext;
-    private static StatusManager instance;
+
 
     /**
      * Constructor. It is private due to Singleton.
