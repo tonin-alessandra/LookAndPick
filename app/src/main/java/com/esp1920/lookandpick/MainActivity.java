@@ -132,7 +132,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private Handler mHandler;
 
     private PlayerMovement mPlayerMovement = new PlayerMovement();
-
+    private String s;
     private float eyeZ = 0.0f;
 
     // Customized TextViews to render and display a string on the scene.
@@ -328,10 +328,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        // Updates eye position along z axis to perform movement.
+        // Updates eye position along the Z axis to perform movement.
         eyeZ = mPlayerMovement.updateEyePosition(headTransform, eyeZ);
 
-        // Build the camera matrix and apply it to the ModelView.
+        // Builds the camera matrix and applies it to the ModelView.
+        // This matrix determines what the user looks at.
         Matrix.setLookAtM(camera, 0, 0, 0, eyeZ, 0.0f, 0.0f, -1f, 0.0f, 1.0f, 0.0f);
 
         // Controls if the floor height is available.
@@ -344,6 +345,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Writes into headView the transform from the camera space to the head space.
         headTransform.getHeadView(headView, 0);
 
+        // Translate the headView matrix by the vector (0, 0, -eyeZ).
+        // Note that moving forward by eyeZ, along the Z axis, means that the "world" has to be
+        // translated backward by eyeZ (or translated forward by -eyeZ), along the Z axis.
+        Matrix.translateM(headView, 0, 0, 0, -eyeZ);
         // Updates the 3d audio engine with the most recent head rotation.
         headTransform.getQuaternion(headRotation, 0);
         gvrAudioEngine.setHeadRotation(
