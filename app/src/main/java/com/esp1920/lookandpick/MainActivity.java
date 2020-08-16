@@ -347,7 +347,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Translate the headView matrix by the vector (0, 0, -eyeZ).
         // Note that moving forward by eyeZ, along the Z axis, means that the "world" has to be
-        // translated backward by eyeZ (or translated forward by -eyeZ).
+        // translated backward by eyeZ (or translated forward by -eyeZ), along the Z axis.
         Matrix.translateM(headView, 0, 0, 0, -eyeZ);
         // Updates the 3d audio engine with the most recent head rotation.
         headTransform.getQuaternion(headRotation, 0);

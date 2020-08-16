@@ -192,12 +192,12 @@ public class PlayerMovement {
     private int getOrientation(float[] forwardVec){
         // FORWARD_VEC_LIMIT is a threshold value, set empirically.
 
-        // If the Z component of the forward  vector is less than -FORWARD_VEC_LIMIT, the
+        // If the Z component of the forward vector is less than -FORWARD_VEC_LIMIT, the
         // orientation is AHEAD.
         if (forwardVec[2] <= -FORWARD_VEC_LIMIT){
             return AHEAD;
         }
-        // If the Z component of the forward  vector is greater than FORWARD_VEC_LIMIT, the
+        // If the Z component of the forward vector is greater than FORWARD_VEC_LIMIT, the
         // orientation is BEHIND.
         if (forwardVec[2] >= FORWARD_VEC_LIMIT){
             return BEHIND;
