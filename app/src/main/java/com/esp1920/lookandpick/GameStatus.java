@@ -3,7 +3,7 @@ package com.esp1920.lookandpick;
 import android.content.Context;
 
 /**
- * This class handles a generic status of the game, made up by the actual player score and lives.
+ * This class handles a generic status of the game, made up by the player's actual score and lives.
  */
 public class GameStatus {
     private final String TAG = "GameStatus";
@@ -47,14 +47,14 @@ public class GameStatus {
     }
 
     /**
-     * @return The actual score value.
+     * @return The current score value.
      */
     public int getScore() {
         return score;
     }
 
     /**
-     * @return The actual number of lives.
+     * @return The current number of lives.
      */
     public int getLives() {
         return lives;
@@ -73,7 +73,7 @@ public class GameStatus {
     }
 
     /**
-     * Saves the actual score to sharedPreferences.
+     * Saves the actual score to sharedPreferences, if the condition is satisfied.
      */
     public void saveCurrentScore() {
         mScoreManager.saveScore(score);

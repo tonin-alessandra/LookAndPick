@@ -18,7 +18,7 @@ public class VrTextView extends LinearLayout {
     private final VrEyeTextView mLeftEyeView;
     private final VrEyeTextView mRightEyeView;
 
-    // Animations to make text fade out
+    // Animations to make text fade out.
     private AlphaAnimation longFading;
     private AlphaAnimation shortFading;
 
@@ -36,7 +36,7 @@ public class VrTextView extends LinearLayout {
      * Creates a layout to show text in VR applications.
      *
      * @param context Context to show the layout.
-     * @param attrs   Set of attributes associated with the tag in the xml document.
+     * @param attrs   The set of attributes associated with the tag in the xml document.
      */
     public VrTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,16 +56,16 @@ public class VrTextView extends LinearLayout {
         mRightEyeView.setLayoutParams(params);
         addView(mRightEyeView);
 
-        // Sets offsets to make the TextViews overlap
+        // Sets offsets to make the TextViews overlap.
         setLeftOffset(OFFSET_LEFT);
         setRightOffset(OFFSET_RIGHT);
 
-        // Sets text color (this is a dark grey)
+        // Sets text color (this is a dark grey).
         setColor(Color.rgb(54, 54, 54));
 
         setVisibility(View.VISIBLE);
 
-        // Fading effects: to fully opaque (1.0f) to fully transparent (0.0f)
+        // Fading effects: from fully opaque (1.0f) to fully transparent (0.0f).
         longFading = new AlphaAnimation(1.0f, 0.0f);
         longFading.setDuration(TOAST_LONG);
 
@@ -87,9 +87,9 @@ public class VrTextView extends LinearLayout {
     }
 
     /**
-     * Shows a string of text that will fade in TOAST_LONG milliseconds.
+     * Shows a string of text that will fade in {@value TOAST_LONG} milliseconds.
      *
-     * @param text String of text that will be showed.
+     * @param text The string of text that will be showed.
      */
     public void showLongToast(String text) {
         setText(text);
@@ -104,9 +104,9 @@ public class VrTextView extends LinearLayout {
     }
 
     /**
-     * Shows a string of text that will fade in TOAST_SHORT milliseconds.
+     * Shows a string of text that will fade in {@value TOAST_SHORT} milliseconds.
      *
-     * @param text String of text that will be showed.
+     * @param text The string of text that will be showed.
      */
     public void showShortToast(String text) {
         setText(text);
@@ -123,7 +123,7 @@ public class VrTextView extends LinearLayout {
     /**
      * Sets the offset for the left eye's TextView.
      *
-     * @param offset Offset to set to left eye's TextView.
+     * @param offset The value of the offset to set.
      */
     private void setLeftOffset(float offset) {
         mLeftEyeView.setOffset(offset);
@@ -132,7 +132,7 @@ public class VrTextView extends LinearLayout {
     /**
      * Sets the offset for the right eye's TextView.
      *
-     * @param offset Offset to set to right eye's TextView.
+     * @param offset The value of the offset to set.
      */
     private void setRightOffset(float offset) {
         mRightEyeView.setOffset(offset);
@@ -141,7 +141,7 @@ public class VrTextView extends LinearLayout {
     /**
      * Sets the text to write in the eyes' TextViews.
      *
-     * @param text String of text that the eyes' TextViews will show.
+     * @param text The string of text that the eyes' TextViews will show.
      */
     private void setText(String text) {
         mLeftEyeView.setText(text);
@@ -152,7 +152,7 @@ public class VrTextView extends LinearLayout {
      * Sets the alpha (opacity value) that the text in the eyes' TextViews has to have when the
      * animation starts.
      *
-     * @param alpha Alpha of the text in the eyes' TextViews.
+     * @param alpha The alpha of the text in the eyes' TextViews.
      */
     private void setTextAlpha(float alpha) {
         mLeftEyeView.setTextViewAlpha(alpha);
@@ -162,7 +162,7 @@ public class VrTextView extends LinearLayout {
     /**
      * Sets the color of the text in the eyes' TextViews.
      *
-     * @param color Integer value of the color chosen for the text in the eyes' TextViews.
+     * @param color The integer value of the color chosen for the text in the eyes' TextViews.
      */
     private void setColor(int color) {
         mLeftEyeView.setColor(color);

@@ -17,7 +17,7 @@
     <string name="restart">The game will restart in %1$d seconds</string>
     <string name="init_failed">Unable to initialize objects</string>
 
-    <!-- These strings specifies the paths to the obj models, used to render 3D objects in the game. -->
+    <!-- The following strings specifies the paths to the obj models, used to render 3D objects in the game. -->
     <string name="room_obj">graphics/room/BigCubeRoom.obj</string>
     <string name="penguin_obj">graphics/penguin/penguin.obj</string>
     <string name="cat_obj">graphics/cat/cat.obj</string>
@@ -28,7 +28,7 @@
     <string name="mouse_obj">graphics/mouse/mouse.obj</string>
     <string name="plane_obj">graphics/plane/plane.obj</string>
 
-    <!-- These strings specifies the paths to the textures, used to render 3D objects in the game. -->
+    <!-- The following strings specifies the paths to the textures, used to render 3D objects in the game. -->
     <string name="room_png">graphics/room/BigCubeRoom.png</string>
 
     <string name="dark_penguin">graphics/penguin/dark_penguin.png</string>

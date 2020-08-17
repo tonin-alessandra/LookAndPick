@@ -472,76 +472,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     /**
-     * Performs the game over procedure, hiding all the object and stopping their timer,
-     * and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
+     * Checks if user is looking at the target object by calculating where the object is in eye-space.
+     *
+     * @return True if the user is looking at the target object.
      */
-    private void gameEnd() {
-        if (mLevel.getLevelNumber() > 2)
-            for (int i = 0; i < TARGET_NUMBER; i++) {
-                mPickableTargets[i].getTimer().stopAndHide();
-            }
-        gameStatus.saveCurrentScore();
-        showFinalStatus();
+    private boolean isLookingAtTarget(PickableTarget pickableTarget) {
+        // Converts object space to camera space. Uses the headView from onNewFrame.
+        Matrix.multiplyMM(modelView, 0, headView, 0, pickableTarget.getPosition().getModel(), 0);
+        Matrix.multiplyMV(tempPosition, 0, modelView, 0, POS_MATRIX_MULTIPLY_VEC, 0);
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                restartGame();
-            }
-        }, TIME_BEFORE_RESTART * MILLIS);
-    }
-
-    /**
-     * Restarts the app.
-     */
-    private void restartGame() {
-        mHandler.removeCallbacksAndMessages(null);
-        Intent restart = new Intent(this, MainActivity.class);
-        // Before recreating the Main Activity, closes all the activities on top of it
-        // (so the intent will be delivered to the MainActivity, which is now on
-        // the top of the stack).
-        restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        // Makes the MainActivity become the start of a new task (group of activities).
-        restart.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // Closes the current activity and restarts it (starts a new one).
-        finish();
-        startActivity(restart);
-    }
-
-    /**
-     * Shows on the screen the current score and the remaining lives.
-     */
-    private void showStatus() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
-                        + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
-            }
-        });
-    }
-
-    /**
-     * Shows on the screen the final score and the player's personal record.
-     * If the user has completed all levels, TIME IS OVER!! will be displayed.
-     * On the contrary, if the player has lost all lives, GAME OVER!! will be shown.
-     */
-    private void showFinalStatus() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Resources res = getResources();
-                String finalStatus;
-                if (gameOver)
-                    finalStatus = getString(R.string.gameover);
-                else
-                    finalStatus = getString(R.string.time_finished);
-                finalStatusTv.showLongToast(finalStatus + NEW_LINE +
-                        getString(R.string.score) + String.valueOf(gameStatus.getScore()) + NEW_LINE +
-                        getString(R.string.record) + SPACE + prefManager.getCurrentRecord() + NEW_LINE +
-                        String.format(res.getString(R.string.restart), TIME_BEFORE_RESTART));
-            }
-        });
+        float angle = Util.angleBetweenVectors(tempPosition, FORWARD_VEC);
+        return angle < ANGLE_LIMIT;
     }
 
     /**
@@ -603,6 +544,79 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 }, mLevel.getDuration() * MILLIS);
             }
         }, mLevel.getDuration() * MILLIS);
+    }
+
+    /**
+     * Shows on the screen the current score and the remaining lives.
+     */
+    private void showStatus() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                scoreTv.showShortToast(getString(R.string.score) + String.valueOf(gameStatus.getScore())
+                        + SPACES + getString(R.string.lives) + String.valueOf(gameStatus.getLives()));
+            }
+        });
+    }
+
+    /**
+     * Shows on the screen the final score and the player's personal record.
+     * If the user has completed all levels, TIME IS OVER!! will be displayed.
+     * On the contrary, if the player has lost all lives, GAME OVER!! will be shown.
+     */
+    private void showFinalStatus() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Resources res = getResources();
+                String finalStatus;
+                if (gameOver)
+                    finalStatus = getString(R.string.gameover);
+                else
+                    finalStatus = getString(R.string.time_finished);
+                finalStatusTv.showLongToast(finalStatus + NEW_LINE +
+                        getString(R.string.score) + String.valueOf(gameStatus.getScore()) + NEW_LINE +
+                        getString(R.string.record) + SPACE + prefManager.getCurrentRecord() + NEW_LINE +
+                        String.format(res.getString(R.string.restart), TIME_BEFORE_RESTART));
+            }
+        });
+    }
+
+    /**
+     * Performs the game over procedure, hiding all the object and stopping their timer,
+     * and restarts the app after {@value TIME_BEFORE_RESTART} seconds.
+     */
+    private void gameEnd() {
+        if (mLevel.getLevelNumber() > 2)
+            for (int i = 0; i < TARGET_NUMBER; i++) {
+                mPickableTargets[i].getTimer().stopAndHide();
+            }
+        gameStatus.saveCurrentScore();
+        showFinalStatus();
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                restartGame();
+            }
+        }, TIME_BEFORE_RESTART * MILLIS);
+    }
+
+    /**
+     * Restarts the app.
+     */
+    private void restartGame() {
+        mHandler.removeCallbacksAndMessages(null);
+        Intent restart = new Intent(this, MainActivity.class);
+        // Before recreating the Main Activity, closes all the activities on top of it
+        // (so the intent will be delivered to the MainActivity, which is now on
+        // the top of the stack).
+        restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // Makes the MainActivity become the start of a new task (group of activities).
+        restart.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Closes the current activity and restarts it (starts a new one).
+        finish();
+        startActivity(restart);
     }
 
     /**
@@ -695,20 +709,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Updates the pickableTarget object with the new mesh.
         pickableTarget.changeMesh(newMesh, mTargets.get(newMesh));
-    }
-
-    /**
-     * Checks if user is looking at the target object by calculating where the object is in eye-space.
-     *
-     * @return True if the user is looking at the target object.
-     */
-    private boolean isLookingAtTarget(PickableTarget pickableTarget) {
-        // Converts object space to camera space. Uses the headView from onNewFrame.
-        Matrix.multiplyMM(modelView, 0, headView, 0, pickableTarget.getPosition().getModel(), 0);
-        Matrix.multiplyMV(tempPosition, 0, modelView, 0, POS_MATRIX_MULTIPLY_VEC, 0);
-
-        float angle = Util.angleBetweenVectors(tempPosition, FORWARD_VEC);
-        return angle < ANGLE_LIMIT;
     }
 
     /**

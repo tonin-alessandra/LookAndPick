@@ -2,13 +2,12 @@ package com.esp1920.lookandpick;
 
 import com.google.vr.sdk.base.HeadTransform;
 
-
 /**
  * Class to handle user movement along the Z axis.
  *
- * If the user tilts the cardboard viewer DOWN with an angle greater than the threshold, the player
+ * If the user tilts the Cardboard viewer DOWN with an angle greater than the threshold, the player
  * will start moving forward, along the Z axis, depending on the direction the head is looking at.
- * If the user tilts the cardboard viewer UP with an angle greater than the threshold, the player
+ * If the user tilts the Cardboard viewer UP with an angle greater than the threshold, the player
  * will move backwards.
  * Movement is enabled only along the Z axis. The player will move only with respect to the walls
  * that are in front of and behind him/her when the game starts (wall with pink tiles and wall with
@@ -29,13 +28,13 @@ import com.google.vr.sdk.base.HeadTransform;
 public class PlayerMovement {
     private final String TAG = "PlayerMovement";
 
-    private static final double THRESHOLD_ANGLE = 37.5; // degrees
+    private static final double THRESHOLD_ANGLE = 37.5; // Degrees.
 
     // Direction represents the *type* of movement: this can be FORWARD or BACKWARD, depending on
     // how the viewer is tilted.
     private static final int FORWARD = 1;
     private static final int BACKWARD = -1;
-    private static final int STILL = 0; // player does not tilt the viewer beyond the threshold.
+    private static final int STILL = 0; // Player does not tilt the viewer beyond the threshold.
     private int prevDirection = STILL;
     private int direction;
 
@@ -55,7 +54,7 @@ public class PlayerMovement {
     private float[] eulerAngles = new float[3];
     private float[] forwardVec = new float[3];
 
-    // rotation around the X axis in the head's coordinate system.
+    // Rotation around the X axis in the head's coordinate system.
     private double pitch;
 
     private float newEyeZ;
@@ -71,8 +70,8 @@ public class PlayerMovement {
 
     // Movement boundaries to avoid discomfort and to ensure a fluid movement.
     // The user cannot walk past these points.
-    private static final float boundA = -0.9f; // bound regarding the wall Ahead.
-    private static final float boundB = 5.5f;   // bound regarding the wall Behind.
+    private static final float boundA = -0.9f; // Bound regarding the wall Ahead.
+    private static final float boundB = 5.5f;   // Bound regarding the wall Behind.
 
     /**
      * Constructor.
@@ -84,8 +83,8 @@ public class PlayerMovement {
      * Calculates the position of the eyes along the Z axis, according to direction and
      * orientation.
      *
-     * @param headTransform Object that describes the head rotation.
-     * @param eyeZ          Position of the eyes along the Z axis that has to be updated in case
+     * @param headTransform An Object that describes the head rotation.
+     * @param eyeZ          The position of the eyes along the Z axis that has to be updated in case
      *                      of movement.
      * @return newEyeZ      The updated position of the eyes along the Z axis.
      *
@@ -147,10 +146,10 @@ public class PlayerMovement {
      */
     public float updateEyePosition(HeadTransform headTransform, float eyeZ) {
         // Gets head's forward vector to get orientation.
-        headTransform.getForwardVector(forwardVec, 0); // (X, Y, Z)
+        headTransform.getForwardVector(forwardVec, 0); // (X, Y, Z).
 
         // Gets Euler angles to get head's rotation around X, Y and Z axes respectively.
-        headTransform.getEulerAngles(eulerAngles, 0);  // (pitch, yaw, roll)
+        headTransform.getEulerAngles(eulerAngles, 0);  // (pitch, yaw, roll).
 
         orientation = getOrientation(forwardVec);
 
@@ -158,7 +157,7 @@ public class PlayerMovement {
 
         newEyeZ = eyeZ;
 
-        // Player does not move
+        // Player does not move.
         if ((direction == STILL) || (orientation == INVALID)) {
             return newEyeZ;
         }
@@ -166,7 +165,7 @@ public class PlayerMovement {
         // Checks if the player can walk or must stop, depending on the movement boundaries.
         checkBounds();
 
-        // Update the eye position along the Z axis.
+        // Updates the eye position along the Z axis.
         if (direction == FORWARD && canMoveForward) {
             newEyeZ = (eyeZ + nextStep()) * forwardVec[2];
             if (orientation == BEHIND) {
@@ -186,8 +185,8 @@ public class PlayerMovement {
      * If the player is looking at the walls to the left or to the right, the orientation is INVALID, as
      * movement towards those is not enabled.
      *
-     * @param forwardVec direction the head is looking towards, as a 3x1 vector
-     * @return the orientation of the head (which wall is looking at)
+     * @param forwardVec The direction the head is looking towards, as a 3x1 vector.
+     * @return The orientation of the head (which wall it is looking at).
      */
     private int getOrientation(float[] forwardVec){
         // FORWARD_VEC_LIMIT is a threshold value, set empirically.
@@ -211,9 +210,9 @@ public class PlayerMovement {
      * If the user tilts the viewer (up or down) with an angle greater than THRESHOLD_ANGLE,
      * he/she will begin to move accordingly.
      *
-     * @param eulerAngles vector of Euler angles (pitch, yaw, roll) that describe head's movement
+     * @param eulerAngles The vector of Euler angles (pitch, yaw, roll) that describe head's movement
      *                    around the X, Y and Z axes respectively (head's coordinate system).
-     * @return direction in which the user wants to walk.
+     * @return The direction in which the user wants to walk.
      */
     private int getDirection(float[] eulerAngles) {
         // Gets pitch, rotation of the head around the X axis, in order to detect viewer-tilting.
@@ -258,7 +257,7 @@ public class PlayerMovement {
     /**
      * Calculates the next step, in order to make the player move.
      *
-     * @return the value of the next step.
+     * @return The value of the next step.
      *
      * Computation of the next step.
      * As soon as the user tilts the viewer, the direction changes (STILL --> FORWARD/BACKWARD)
@@ -329,20 +328,19 @@ public class PlayerMovement {
      */
     private float nextStep() {
 
-        // Resets step when needed
+        // Resets step when needed.
         if ((direction != prevDirection) || (orientation != prevOrientation)) {
             prevDirection = direction;
             prevOrientation = orientation;
-            // moving towards the wall AHEAD
+            // Moving towards the wall AHEAD.
             if ((orientation == AHEAD && direction == FORWARD) || (orientation == BEHIND && direction == BACKWARD)) {
                 return step = (newEyeZ * 2 - STRIDE) * -1;
             }
-            // moving towards the wall BEHIND
+            // Moving towards the wall BEHIND.
             if ((orientation == AHEAD && direction == BACKWARD) || (orientation == BEHIND && direction == FORWARD)) {
                 return step = STRIDE;
             }
         }
-
         return step += SPEED;
     }
 }
