@@ -61,6 +61,16 @@ public class PickableTarget {
     }
 
     /**
+     * @return the current {@link Position} as an array.
+     */
+    public float[] getPositionAsArray() {
+        float position[] = {mPosition.getXCoordinate(),
+                            mPosition.getYCoordinate(),
+                            mPosition.getZCoordinate()};
+        return position;
+    }
+
+    /**
      * Sets the position.
      *
      * @param position The new position.

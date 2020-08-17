@@ -408,7 +408,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
      * @param pickableTarget The PickableTarget object to draw.
      */
     public void drawTarget(PickableTarget pickableTarget) {
-        // Draws the objects on the scene if their timer is not finished and the game is not over.
+        // Draws the objects on the scene if their timer are not finished and the game is not over.
         if (!gameOver && !pickableTarget.isHidden()) {
             GLES20.glUseProgram(objectProgram);
             GLES20.glUniformMatrix4fv(objectModelViewProjectionParam, 1, false, modelViewProjection, 0);
@@ -648,23 +648,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Position tempPosition = new Position();
         tempPosition.generateRandomPosition();
 
-        float x1 = tempPosition.getXCoordinate();
-        float y1 = tempPosition.getYCoordinate();
-        float z1 = tempPosition.getZCoordinate();
+        float tempCoordinates[] = tempPosition.getPosition(); // [x, y, z]
 
         for (int i = 0; i < TARGET_NUMBER; i++) {
-            float x2 = mPickableTargets[i].getPosition().getXCoordinate();
-            float y2 = mPickableTargets[i].getPosition().getYCoordinate();
-            float z2 = mPickableTargets[i].getPosition().getZCoordinate();
+            float targetPosition[] = mPickableTargets[i].getPositionAsArray(); // [x, y, z]
 
             // Calculates the Euclidean distance between the new position and all the current objects.
-            distance = (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2) + Math.pow((z1 - z2), 2));
+            distance = (float) Math.sqrt(Math.pow((tempCoordinates[0] - targetPosition[0]), 2) +
+                                        Math.pow((tempCoordinates[1] - targetPosition[1]), 2) +
+                                        Math.pow((tempCoordinates[2] - targetPosition[2]), 2));
+            
             // If the distance is <2.0, calculates a new random position and restarts the loop.
             if (distance < 2.0) {
                 tempPosition.generateRandomPosition();
-                x1 = tempPosition.getXCoordinate();
-                y1 = tempPosition.getYCoordinate();
-                z1 = tempPosition.getZCoordinate();
+                tempCoordinates = tempPosition.getPosition();
+
                 i = 0;
             }
         }
