@@ -86,7 +86,7 @@ public class PickableTarget {
     }
 
     /**
-     * @return the associated {@link Target} object.
+     * @return The {@link Target} object associated to this.
      */
     public Target getTarget() {
         return mTarget;
@@ -102,9 +102,8 @@ public class PickableTarget {
     }
 
     /**
-     * @return the {@link DisappearanceTimer} object.
+     * @return The {@link DisappearanceTimer} object.
      */
-    @Nullable
     public DisappearanceTimer getTimer() {
         return mTimer;
     }

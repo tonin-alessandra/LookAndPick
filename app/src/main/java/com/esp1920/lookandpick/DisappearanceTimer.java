@@ -28,14 +28,12 @@ public class DisappearanceTimer {
             @Override
             public void onTick(long millisUntilFinished) {
                 // This does nothing for us.
-                Log.d(TAG, "*******tempo rimanente:********" + millisUntilFinished);
             }
 
             @Override
             public void onFinish() {
-                // Calls method to hide the object.
+                // When time is finished, the object must disappear.
                 mHidden = true;
-                Log.d(TAG, "*******timer finito**********");
 
             }
         };
@@ -47,7 +45,6 @@ public class DisappearanceTimer {
     private void startTimer() {
         if (mCDTimer != null) {
             mCDTimer.start();
-            Log.d(TAG, "*******timer partito**********");
         }
     }
 
@@ -55,7 +52,6 @@ public class DisappearanceTimer {
      * Restarts the countdown for this object.
      */
     public void restartTimer() {
-        Log.d(TAG, "*******restart timer***********");
         stopTimer();
         startTimer();
     }
@@ -67,7 +63,6 @@ public class DisappearanceTimer {
         if (mCDTimer != null) {
             mCDTimer.cancel();
             mHidden = false;
-            Log.d(TAG, "*******timer stoppato***********");
         }
     }
 
@@ -76,11 +71,8 @@ public class DisappearanceTimer {
      * all objects have to disappear without a timer.
      */
     public void stopAndHide() {
-        if (mCDTimer != null) {
-            mCDTimer.cancel();
-            mHidden = true;
-            Log.d(TAG, "*******timer stoppato e oggetto nascosto***********");
-        }
+        stopTimer();
+        mHidden = true;
     }
 
 
