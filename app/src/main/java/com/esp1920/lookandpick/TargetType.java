@@ -1,7 +1,5 @@
 package com.esp1920.lookandpick;
 
-import android.content.Context;
-
 import java.util.Random;
 
 /**
@@ -11,26 +9,35 @@ enum ObjCategory {
     ANIMAL(R.string.animals),
     PLANT(R.string.plants),
     ANDROID_BOT(R.string.android_bot),
-    //This can be useful to identify particular or special objects, such as Pikachu.
+    // This can be useful to identify particular or special objects, such as Pikachu.
     BONUS(R.string.bonus),
-    //This is used for the first level, where there are no constraints on what type of objects can be collected
+    // This is used for the first level, where there are no constraints on what type of objects can be collected.
     ALL(R.string.all),
     ROOM(R.string.room);
 
     private int category;
-    //Used to avoid selecting ALL or ROOM as a random category for the levels.
+    // Used to avoid selecting ALL or ROOM as a random category for the levels.
     private final static int LAST_TWO = 2;
 
+    /**
+     * Constructor.
+     *
+     * @param description The description associated to each category. Useful when creating levels' requests.
+     */
     ObjCategory(int description) {
         this.category = description;
     }
 
+    /**
+     * @return The description associated to this category.
+     */
     public int getDescription() {
         return category;
     }
 
     /**
      * Picks a random value of {@code ObjCategory}.
+     * Needed to create levels' requests.
      *
      * @return The selected random value.
      */
@@ -41,7 +48,7 @@ enum ObjCategory {
 }
 
 /**
- * This enum defines the name of an object.
+ * This enum defines the possible names of an object.
  */
 enum ObjName {
     PENGUIN,
@@ -53,14 +60,4 @@ enum ObjName {
     PLANE,
     PIKACHU,
     ROOM;
-
-    /**
-     * Picks a random value of {@code ObjName}.
-     *
-     * @return The selected random value.
-     */
-    public static ObjName getRandomName() {
-        Random random = new Random();
-        return values()[random.nextInt(values().length - 1)];
-    }
 }

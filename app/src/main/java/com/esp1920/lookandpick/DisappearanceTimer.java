@@ -1,7 +1,6 @@
 package com.esp1920.lookandpick;
 
 import android.os.CountDownTimer;
-import android.util.Log;
 
 /**
  * This class represents a timer after which an object disappears from the scene and can no longer be picked.
@@ -9,7 +8,7 @@ import android.util.Log;
 public class DisappearanceTimer {
     private static final String TAG = "DisappearanceTimer";
 
-    //This indicates the time an object can remain in the scene before disappearing.
+    // This indicates the time an object can remain in the scene before disappearing.
     private long timer;
     private final static long INTERVAL = 1000;
 
@@ -34,7 +33,6 @@ public class DisappearanceTimer {
             public void onFinish() {
                 // When time is finished, the object must disappear.
                 mHidden = true;
-
             }
         };
     }
@@ -67,14 +65,13 @@ public class DisappearanceTimer {
     }
 
     /**
-     * Stops the timer and hides the object. For example, it is useful when the game is over and
-     * all objects have to disappear without a timer.
+     * Stops the timer and hides this object. For example, it is useful when the game is over and
+     * all objects have to disappear, without continuing the timers' countdown.
      */
     public void stopAndHide() {
         stopTimer();
         mHidden = true;
     }
-
 
     /**
      * Checks if the timer for this object is finished.

@@ -11,7 +11,7 @@ import android.content.SharedPreferences;
  * previous one, in order to keep track of the best score achieved.
  */
 public class StatusManager {
-    //This prefix is used as part of the key to save the score on sharedPreferences file.
+    // This prefix is used as part of the key to save the score on sharedPreferences file.
     private final static String RECORD_KEY = "Record ";
 
     private static StatusManager instance;
@@ -28,7 +28,6 @@ public class StatusManager {
      * @param context The current application context.
      */
     private StatusManager(Context context) {
-        //mContext = context;
         mPreferencesFileName = context.getResources().getString(R.string.score_preferences);
         // Retrieves the content of the preferences file identified by mPreferencesFileName.
         // MODE_PRIVATE means that it can only be accessed by the calling application.
@@ -36,9 +35,9 @@ public class StatusManager {
     }
 
     /**
-     * Manages StatusManager object according to Singleton design pattern.
+     * Manages this class according to Singleton design pattern.
      *
-     * @returns A new instance of StatusManager or the current one, if it exists.
+     * @return A new instance of StatusManager or the current one, if it exists.
      */
     synchronized public static StatusManager getInstance(Context context) {
         if (instance == null)
@@ -82,5 +81,4 @@ public class StatusManager {
     public int getCurrentRecord() {
         return mSharedPref.getInt(RECORD_KEY, -1);
     }
-
 }

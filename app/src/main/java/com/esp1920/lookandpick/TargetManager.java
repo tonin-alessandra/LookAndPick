@@ -27,7 +27,7 @@ public class TargetManager {
     /**
      * Manages TargetManager object according to Singleton design pattern.
      *
-     * @returns A new instance of TargetManager or the current one, if it exists.
+     * @return A new instance of TargetManager or the current one, if it exists.
      */
     synchronized public static TargetManager getInstance() {
         if (instance == null)
@@ -36,7 +36,7 @@ public class TargetManager {
     }
 
     /**
-     * Applies the textures of a generic target object.
+     * Applies the textures to a generic target object.
      *
      * @param context             The current application context.
      * @param object              The target object to which apply textures.
@@ -49,7 +49,7 @@ public class TargetManager {
             mSelectedTexture = new Texture(context, object.getSelectedTexturePath());
             mNotSelectedTexture = new Texture(context, object.getNotSelectedTexturePath());
         } catch (IOException e) {
-            Log.e(TAG, "Unable to initialize objects", e);
+            Log.e(TAG, context.getResources().getString(R.string.init_failed), e);
         }
     }
 

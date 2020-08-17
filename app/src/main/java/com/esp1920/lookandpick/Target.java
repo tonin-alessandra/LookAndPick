@@ -1,10 +1,9 @@
 package com.esp1920.lookandpick;
 
-import static com.esp1920.lookandpick.ObjName.*;
 import static com.esp1920.lookandpick.ObjCategory.*;
 
 /**
- * This class represents a generic target object that will rendered to appear on the scene.
+ * This class represents a generic target object that will be rendered to appear on the scene.
  * All operations to manage a Target behaviour can be found in {@link TargetManager}.
  */
 public class Target {
@@ -62,7 +61,8 @@ public class Target {
     }
 
     /**
-     * Sets up the category of this object.  Must be selected from {@link ObjCategory}.
+     * Sets up the category of this object, according to his name.
+     * Must be selected from {@link ObjCategory}.
      */
     private void setCategory() {
         ObjName objName = getName();

@@ -5,7 +5,7 @@ import android.opengl.Matrix;
 import java.util.Random;
 
 /**
- * This class represents a {@link PickableTarget} position.
+ * This class represents a position of a {@link PickableTarget} object.
  */
 public class Position {
     private static final String TAG = "Position";
@@ -36,9 +36,9 @@ public class Position {
     /**
      * Constructor.
      *
-     * @param x The x coordinate.
-     * @param y The y coordinate.
-     * @param z The z coordinate.
+     * @param x The x coordinate of the position.
+     * @param y The y coordinate of the position.
+     * @param z The z coordinate of the position.
      */
     Position(float x, float y, float z) {
         mPosition = new float[]{x, y, z};
@@ -47,7 +47,7 @@ public class Position {
     }
 
     /**
-     * @return The position of a {@link Target} object.
+     * @return The position of this object.
      */
     public float[] getPosition() {
         return mPosition;
@@ -56,9 +56,9 @@ public class Position {
     /**
      * Sets the target position.
      *
-     * @param x The x coordinate.
-     * @param y The y coordinate.
-     * @param z The z coordinate.
+     * @param x The x coordinate of the position.
+     * @param y The y coordinate of the position.
+     * @param z The z coordinate of the position.
      */
     public void setPosition(float x, float y, float z) {
         mPosition[0] = x;
@@ -67,9 +67,11 @@ public class Position {
     }
 
     /**
-     * Gets the model.
+     * Gets the model matrix, used to place an object in the scene.
+     * In fact, an object's model is defined such that it is centered in (0,0,0), but it can be moved
+     * to position (x, y, z) by drawing it using a model matrix which translates everything of (x, y, z).
      *
-     * @return The model of a {@link Target}.
+     * @return The model matrix of a {@link Target}.
      */
     public float[] getModel() {
         updateModel();
@@ -77,7 +79,7 @@ public class Position {
     }
 
     /**
-     * Updates the model using the coordinates.
+     * Updates the model matrix using the coordinates of the current position.
      */
     private void updateModel() {
         Matrix.setIdentityM(mModel, 0);
@@ -106,7 +108,7 @@ public class Position {
     }
 
     /**
-     * Generates a new position in order to place the object with a suitable one.
+     * Generates a new position in order to place the object in a suitable one.
      */
     public void generateRandomPosition() {
         float[] rotationMatrix = new float[16];
@@ -121,8 +123,7 @@ public class Position {
         Matrix.setRotateM(rotationMatrix, 0, yawDegrees, 0.0f, 1.0f, 0.0f);
 
         // Calculates a new random position.
-        float targetDistance =
-                random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
+        float targetDistance = random.nextFloat() * (MAX_TARGET_DISTANCE - MIN_TARGET_DISTANCE) + MIN_TARGET_DISTANCE;
 
         Position temp;
         // Allows to randomly generate objects with a negative z coordinate.
@@ -132,7 +133,6 @@ public class Position {
             temp = new Position(0, 0, targetDistance);
 
         Matrix.multiplyMV(posVec, 0, rotationMatrix, 0, temp.getModel(), 12);
-
         setPosition(posVec[0], (float) Math.tan(pitchRadians) * temp.getZCoordinate(), posVec[2]);
     }
 }

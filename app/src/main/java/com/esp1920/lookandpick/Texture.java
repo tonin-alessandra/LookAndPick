@@ -18,43 +18,41 @@ import java.io.IOException;
     /**
      * Initializes the texture.
      *
-     * @param context     Context for loading the texture file.
-     * @param texturePath Path to the image to use for the texture.
+     * @param context     The context for loading the texture file.
+     * @param texturePath The path to the image to use for the texture.
      */
     public Texture(Context context, String texturePath) throws IOException {
-        // Generates a name for the texture and stores it in textureId
+        // Generates a name for the texture and stores it in textureId.
         GLES20.glGenTextures(1, textureId, 0);
 
-        // Binds texture to active texture unit and target
+        // Binds texture to active texture unit and target.
         bind();
 
-        // Sets wrap parameters for texture coordinates s and t
+        // Sets wrap parameters for texture coordinates s and t.
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
-        // Sets texture minifying and magnifying functions
-        GLES20.glTexParameteri(
-                GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        // Sets texture minifying and magnifying functions.
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 
-        // Creates a bitmap from the texture given
+        // Creates a bitmap from the given texture.
         Bitmap textureBitmap = BitmapFactory.decodeStream(context.getAssets().open(texturePath));
 
-        // Specifies the texture for the current texture unit and generates a MIP map
+        // Specifies the texture for the current texture unit and generates a MIP map.
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
         textureBitmap.recycle();
         GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
-
     }
 
     /**
      * Binds the texture to GL_TEXTURE0.
      */
     public void bind() {
-        // Activates texture unit
+        // Activates texture unit.
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-        // Binds texture to two-dimensional target (face of polygon)
+        // Binds texture to two-dimensional target (face of polygon).
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId[0]);
     }
 }

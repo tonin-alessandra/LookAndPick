@@ -121,16 +121,6 @@ public class VrTextView extends LinearLayout {
     }
 
     /**
-     * Shows a string of text.
-     *
-     * @param text String of text that will be showed.
-     */
-    // TODO: remove if never used
-    public void showText(String text) {
-        setText(text);
-    }
-
-    /**
      * Sets the offset for the left eye's TextView.
      *
      * @param offset Offset to set to left eye's TextView.
