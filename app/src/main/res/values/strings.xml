@@ -1,3 +1,76 @@
 <resources>
     <string name="app_name">LookAndPick</string>
+    <string name="score_preferences">LookAndPick.ScorePreferences</string>
+    <string name="level">Level</string>
+    <string name="score">Score: </string>
+    <string name="lives">Lives: </string>
+    <string name="request">: pick up</string>
+    <string name="animals">only animals</string>
+    <string name="plants">only plants</string>
+    <string name="android_bot">only android bot</string>
+    <string name="bonus">only planes or Pikachu</string>
+    <string name="all">as many objects as you can</string>
+    <string name="room">room</string>
+    <string name="gameover"> GAMEOVER!!</string>
+    <string name="time_finished"> TIME IS OVER!!</string>
+    <string name="record"> Your record is </string>
+    <string name="restart">The game will restart in %1$d seconds</string>
+    <string name="init_failed">Unable to initialize objects</string>
+
+    <!-- The following strings specifies the paths to the obj models, used to render 3D objects in the game. -->
+    <string name="room_obj">graphics/room/BigCubeRoom.obj</string>
+    <string name="penguin_obj">graphics/penguin/penguin.obj</string>
+    <string name="cat_obj">graphics/cat/cat.obj</string>
+    <string name="cactus_obj">graphics/cactus/cactus.obj</string>
+    <string name="sun_obj">graphics/sunflower/sunflower.obj</string>
+    <string name="pikachu_obj">graphics/pikachu/pikachu.obj</string>
+    <string name="bot_obj">graphics/android/green_android.obj</string>
+    <string name="mouse_obj">graphics/mouse/mouse.obj</string>
+    <string name="plane_obj">graphics/plane/plane.obj</string>
+
+    <!-- The following strings specifies the paths to the textures, used to render 3D objects in the game. -->
+    <string name="room_png">graphics/room/BigCubeRoom.png</string>
+
+    <string name="dark_penguin">graphics/penguin/dark_penguin.png</string>
+    <string name="dark_cat">graphics/cat/dark_cat.png</string>
+    <string name="dark_cactus">graphics/cactus/dark_cactus.png</string>
+    <string name="dark_sun">graphics/sunflower/dark_sunflower.png</string>
+    <string name="dark_pikachu">graphics/pikachu/dark_pikachu.png</string>
+    <string name="dark_bot">graphics/android/dark_green_android.png</string>
+    <string name="dark_mouse">graphics/mouse/dark_mouse.png</string>
+    <string name="dark_plane">graphics/plane/dark_plane.png</string>
+
+    <string name="light_penguin">graphics/penguin/penguin.png</string>
+    <string name="light_cat">graphics/cat/cat.png</string>
+    <string name="light_cactus">graphics/cactus/cactus.png</string>
+    <string name="light_sun">graphics/sunflower/sunflower.png</string>
+    <string name="light_pikachu">graphics/pikachu/pikachu.png</string>
+    <string name="light_bot">graphics/android/green_android.png</string>
+    <string name="light_mouse">graphics/mouse/mouse.png</string>
+    <string name="light_plane">graphics/plane/plane.png</string>
+
+
+    <string-array name="vertex_shader_code">
+        <item>uniform mat4 u_MVP;</item>
+        <item>attribute vec4 a_Position;</item>
+        <item>attribute vec2 a_UV;</item>
+        <item>varying vec2 v_UV;</item>
+        <item></item>
+        <item>void main() {</item>
+        <item>  v_UV = a_UV;</item>
+        <item>  gl_Position = u_MVP * a_Position;</item>
+        <item>}</item>
+    </string-array>
+    <string-array name="fragment_shader_code">
+        <item>precision mediump float;</item>
+        <item>varying vec2 v_UV;</item>
+        <item>uniform sampler2D u_Texture;</item>
+        <item></item>
+        <item>void main() {</item>
+        <item>  // The y coordinate of this sample\'s textures is reversed compared to</item>
+        <item>  // what OpenGL expects, so we invert the y coordinate.</item>
+        <item>  gl_FragColor = texture2D(u_Texture, vec2(v_UV.x, 1.0 - v_UV.y));</item>
+        <item>}</item>
+    </string-array>
 </resources>
+

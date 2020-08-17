@@ -1,18 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <com.google.vr.sdk.base.GvrView
+        android:id="@+id/gvr_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.esp1920.lookandpick.VrTextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginTop="40dp">
+
+        </com.esp1920.lookandpick.VrTextView>
+
+        <com.esp1920.lookandpick.VrTextView
+            android:id="@+id/gameover"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginTop="100dp">
+
+        </com.esp1920.lookandpick.VrTextView>
+
+        <com.esp1920.lookandpick.VrTextView
+            android:id="@+id/msg"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginTop="200dp">
+
+        </com.esp1920.lookandpick.VrTextView>
+
+    </com.google.vr.sdk.base.GvrView>
+
+</RelativeLayout>
