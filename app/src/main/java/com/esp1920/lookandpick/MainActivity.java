@@ -662,15 +662,15 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Position tempPosition = new Position();
         tempPosition.generateRandomPosition();
 
-        float tempCoordinates[] = tempPosition.getPosition(); // [x, y, z]
+        float[] tempCoordinates = tempPosition.getPosition(); // [x, y, z]
 
         for (int i = 0; i < TARGET_NUMBER; i++) {
-            float targetPosition[] = mPickableTargets[i].getPositionAsArray(); // [x, y, z]
+            float[] targetPosition = mPickableTargets[i].getPositionAsArray(); // [x, y, z]
 
             // Calculates the Euclidean distance between the new position and all the current objects.
-            distance = (float) Math.sqrt(Math.pow((tempCoordinates[0] - targetPosition[0]), 2) +
-                    Math.pow((tempCoordinates[1] - targetPosition[1]), 2) +
-                    Math.pow((tempCoordinates[2] - targetPosition[2]), 2));
+            distance = (float) Math.sqrt(Math.pow(tempCoordinates[0] - targetPosition[0], 2) +
+                    Math.pow(tempCoordinates[1] - targetPosition[1], 2) +
+                    Math.pow(tempCoordinates[2] - targetPosition[2], 2));
 
             // If the distance is <2.0, calculates a new random position and restarts the loop.
             if (distance < 2.0) {

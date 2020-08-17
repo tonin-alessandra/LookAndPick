@@ -89,7 +89,6 @@ public class Target {
         }
     }
 
-
     /**
      * @return Returns the score associated to this object.
      */

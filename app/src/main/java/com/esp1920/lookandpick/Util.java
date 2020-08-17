@@ -3,7 +3,6 @@ package com.esp1920.lookandpick;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.text.TextUtils;
-import android.util.Log;
 
 import static android.opengl.GLU.gluErrorString;
 
@@ -14,11 +13,17 @@ import static android.opengl.GLU.gluErrorString;
 /* package */ class Util {
     private static final String TAG = "Util";
     private final static String NEW_LINE = "\n";
+    private final static String GL_ERROR = "glError ";
+    private final static String START_COMPILE = "Start of compileProgram";
+    private final static String COMPILE_VERTEX = "Compile vertex shader";
+    private final static String COMPILE_FRAGMENT = "Compile fragment shader";
+    private final static String UNABLE_LINK = "Unable to link shader program: \n";
+    private final static String END = "End of compileProgram";
 
     /**
      * Debug builds should fail quickly. Release versions of the app should have this disabled.
      */
-    private static final boolean HALT_ON_GL_ERROR = true;
+    private static final boolean HALT_ON_GL_ERROR = false;
 
     /**
      * Class only contains static methods.
@@ -41,7 +46,7 @@ import static android.opengl.GLU.gluErrorString;
             } while (error != GLES20.GL_NO_ERROR);
 
             if (HALT_ON_GL_ERROR) {
-                throw new RuntimeException("glError " + gluErrorString(lastError));
+                throw new RuntimeException(GL_ERROR + gluErrorString(lastError));
             }
         }
     }
@@ -55,19 +60,19 @@ import static android.opengl.GLU.gluErrorString;
      * @return GLES20 program id.
      */
     public static int compileProgram(String[] vertexCode, String[] fragmentCode) {
-        checkGlError("Start of compileProgram");
+        checkGlError(START_COMPILE);
 
         // Prepares vertex shader.
         int vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vertexShader, TextUtils.join(NEW_LINE, vertexCode));
         GLES20.glCompileShader(vertexShader);
-        checkGlError("Compile vertex shader");
+        checkGlError(COMPILE_VERTEX);
 
         // Prepares fragment shader.
         int fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fragmentShader, TextUtils.join(NEW_LINE, fragmentCode));
         GLES20.glCompileShader(fragmentShader);
-        checkGlError("Compile fragment shader");
+        checkGlError(COMPILE_FRAGMENT);
 
         // Prepares program.
         int program = GLES20.glCreateProgram();
@@ -79,12 +84,12 @@ import static android.opengl.GLU.gluErrorString;
         int[] linkStatus = new int[1];
         GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0);
         if (linkStatus[0] != GLES20.GL_TRUE) {
-            String errorMsg = "Unable to link shader program: \n" + GLES20.glGetProgramInfoLog(program);
+            String errorMsg = UNABLE_LINK + GLES20.glGetProgramInfoLog(program);
             if (HALT_ON_GL_ERROR) {
                 throw new RuntimeException(errorMsg);
             }
         }
-        checkGlError("End of compileProgram");
+        checkGlError(END);
 
         return program;
     }
